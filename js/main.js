@@ -88,12 +88,12 @@ function loadLicenseInfo(roblox, licenses) {
 
     let docsHtml = '';
     let animDelay = 0;
-    let d = null;
+    let d = {};
     function generateDocHtml(id, type, title, status, infoText, docNumber, rawData) {
         const delayClass = `d${animDelay % 5}`;
         animDelay++;
         
-        d += docData[id] = {
+        docData[id] = {
             [id]: {
                 title,
                 type,
@@ -103,6 +103,7 @@ function loadLicenseInfo(roblox, licenses) {
                 }))
             }
         };
+        d[id] = docData[id];
         return `
         <div class="doc-item anim-flip ${delayClass}" onclick="openDocPage('${id}')">
             <div class="doc-deco">▌▌▌▐▌▌▐▌</div>
@@ -132,7 +133,7 @@ function loadLicenseInfo(roblox, licenses) {
         const d2 = new Date(issuedAt);
         issuedStr = d2.toLocaleDateString('uk-UA', { day:'2-digit', month:'2-digit', year:'numeric' });
     }
-    d += docData['passport'] = {
+    docData['passport'] = {
         passport: {
             title: 'Паспорт',
             type: 'Паспорт',
@@ -145,6 +146,7 @@ function loadLicenseInfo(roblox, licenses) {
             ]
         }
     };
+  d['passport'] = docData['passport'];
     docsHtml += `
     <div class="doc-item anim-flip d0" onclick="openDocPage('passport')">
         <div class="doc-deco">▌▌▌▐▌▌▐▌</div>
