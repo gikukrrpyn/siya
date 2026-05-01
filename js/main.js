@@ -93,7 +93,7 @@ function loadLicenseInfo(roblox, licenses) {
         const delayClass = `d${animDelay % 5}`;
         animDelay++;
         
-        d = docData[id] = {
+        d += docData[id] = {
             [id]: {
                 title,
                 type,
