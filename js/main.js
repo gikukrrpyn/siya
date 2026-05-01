@@ -233,8 +233,8 @@ function loadLicenseInfo(roblox, licenses) {
 }
 
 const checkRobloxData = setInterval(() => {
-    if (window.state && window.state.roblox && window.licenses) {
-        docData = loadLicenseInfo(window.state.roblox, window.licenses);
+    if (window.state && window.state.roblox && window.state.licenses) {
+        docData = loadLicenseInfo(window.state.roblox, window.state.licenses);
         clearInterval(checkRobloxData);
     }
 }, 500);
