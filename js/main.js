@@ -108,8 +108,22 @@ function getDocUrl(docId) {
   const base = window.location.origin + window.location.pathname;
   const params = new URLSearchParams();
   params.set('doc', docId);
+  // Username is the canonical Firebase key (passports/{username}); always prefer it.
+  const uname = (tgUser && tgUser.username)
+    || (window.state && window.state.telegram && window.state.telegram.username)
+    || null;
+  if (uname) params.set('u', uname);
   if (tgUser && tgUser.id) params.set('uid', tgUser.id);
   return `${base}?${params.toString()}`;
+}
+
+function formatExpiryDate(s) {
+  if (!s) return '';
+  const d = new Date(s);
+  if (!isNaN(d.getTime()) && /\d{4}/.test(String(s))) {
+    return d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+  return String(s);
 }
 function renderProfileLicenses() {
   const old = document.getElementById('profile-licenses-section');
@@ -129,8 +143,8 @@ function renderProfileLicenses() {
     if (key) {
       const d = L.weapon[key];
       const status = d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна');
-      const expiry = d.expiry ? `\nДійсна до: ${d.expiry}` : '';
-      items.push({ icon: '🔫', label: 'Ліцензія на зброю', extra: `${status}${expiry}`, code: d.telegram || null });
+      const expiry = d.expiry ? `\nДійсна до: ${formatExpiryDate(d.expiry)}` : '';
+      items.push({ icon: '🔫', label: 'Ліцензія на зброю', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
     }
   }
 
@@ -138,7 +152,9 @@ function renderProfileLicenses() {
     const key = Object.keys(L.taxi).find(k => k.toLowerCase() === lc);
     if (key) {
       const d = L.taxi[key];
-      items.push({ icon: '🚕', label: 'Таксистська ліцензія', extra: d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна'), code: d.code || d.telegram || null });
+      const status = d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна');
+      const expiry = d.expiry ? `\nДійсна до: ${formatExpiryDate(d.expiry)}` : '';
+      items.push({ icon: '🚕', label: 'Таксистська ліцензія', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
     }
   }
 
@@ -146,7 +162,9 @@ function renderProfileLicenses() {
     const key = Object.keys(L.advocat).find(k => k.toLowerCase() === lc);
     if (key) {
       const d = L.advocat[key];
-      items.push({ icon: '⚖️', label: 'Адвокатська ліцензія', extra: d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна'), code: d.code || d.telegram || null });
+      const status = d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна');
+      const expiry = d.expiry ? `\nДійсна до: ${formatExpiryDate(d.expiry)}` : '';
+      items.push({ icon: '⚖️', label: 'Адвокатська ліцензія', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
     }
   }
 
@@ -527,8 +545,99 @@ function setChip(el) {
 }
 
 setTimeout(() => {
-  document.getElementById('splash').classList.add('hidden');
-  setTimeout(() => document.getElementById('splash').remove(), 600);
+  const splash = document.getElementById('splash');
+  if (splash) {
+    splash.classList.add('hidden');
+    setTimeout(() => splash.remove(), 600);
+  }
 }, 1600);
 
-document.getElementById('screen-home').style.transform = 'translateX(0)';
+const homeScreenEl = document.getElementById('screen-home');
+if (homeScreenEl) homeScreenEl.style.transform = 'translateX(0)';
+
+function waitFor(predicate, timeoutMs = 6000, intervalMs = 80) {
+  return new Promise(resolve => {
+    const t0 = Date.now();
+    const tick = () => {
+      let v;
+      try { v = predicate(); } catch (e) { v = null; }
+      if (v) return resolve(v);
+      if (Date.now() - t0 > timeoutMs) return resolve(null);
+      setTimeout(tick, intervalMs);
+    };
+    tick();
+  });
+}
+
+function showViewerError(msg) {
+  document.body.classList.add('viewer-mode');
+  let el = document.getElementById('viewer-error');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'viewer-error';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `
+    <div class="viewer-error-card">
+      <div class="viewer-error-icon">📄</div>
+      <div class="viewer-error-title">${msg}</div>
+      <div class="viewer-error-sub">Відкрийте додаток СіЯ у Telegram, щоб переглянути документ.</div>
+    </div>`;
+}
+
+async function bootViewerMode() {
+  const params = new URLSearchParams(window.location.search);
+  const docId = params.get('doc');
+  if (!docId) return;
+  const username = params.get('u') || params.get('user') || null;
+
+  document.body.classList.add('viewer-mode');
+  const splash = document.getElementById('splash');
+  if (splash) splash.remove();
+
+  if (!username) {
+    showViewerError('Посилання неповне: відсутній власник документа.');
+    return;
+  }
+
+  const fetchProfile = await waitFor(() => window.fetchProfile, 6000);
+  if (!fetchProfile) {
+    showViewerError('Не вдалося завантажити Firebase.');
+    return;
+  }
+
+  let profile = null;
+  try { profile = await fetchProfile(username); } catch (e) { profile = null; }
+
+  if (!profile || !profile.roblox) {
+    showViewerError('Документ не знайдено для @' + username + '.');
+    return;
+  }
+
+  window.state = window.state || {};
+  window.state.telegram = { username };
+  window.state.roblox = profile.roblox;
+  window.state.issuedAt = profile.issuedAt || null;
+  window.state.isTgAuth = true;
+  window.state.isRbxAuth = true;
+  if (profile.idCode) {
+    try { localStorage.setItem('user_id_code', profile.idCode); } catch (e) {}
+  }
+
+  await waitFor(() => window.state && window.state.licenses, 8000);
+
+  if (window.state.licenses) {
+    try { docData = loadLicenseInfo(profile.roblox, window.state.licenses); } catch (e) { console.error(e); }
+  }
+
+  if (!docData || !docData[docId]) {
+    showViewerError('Документ "' + docId + '" недоступний для цього профілю.');
+    return;
+  }
+
+  openDocPage(docId);
+}
+
+window.addEventListener('load', () => {
+  bootViewerMode();
+});
