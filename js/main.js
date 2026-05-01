@@ -240,8 +240,9 @@ const checkRobloxData = setInterval(() => {
 }, 500);
 
 function openDocPage(docId) {
-  const data = docData[docId];
-  if (!data) return;
+  const raw = docData[docId];
+  if (!raw) return;
+  const data = raw[docId] ? raw[docId] : raw;
   currentDocId = docId;
   const content = document.getElementById('doc-page-content');
   content.innerHTML = `
