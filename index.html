@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>СіЯ</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="splash">
+  <img src="png/ciya.png" class="splash-logo" style="height:80px;object-fit:contain;">
+  <p class="splash-tagline">Сервер і Я</p>
+</div>
+<div id="app">
+  <div class="screen active" id="screen-home">
+    <div class="header">
+      <div class="header-logo"><img src="png/ciyablack.png" style="height:36px;object-fit:contain;filter:invert(0);"></div>
+    </div>
+    <div class="scroll-area">
+      <div class="home-greeting anim-down d0">
+        <div class="greeting-name">Привіт, itz_raose 👋</div>
+        <div class="greeting-sub">Ваші Документи, Ліцензії, та Сервіси.</div>
+      </div>
+
+      <div class="banner anim-flip d2">
+        <div class="banner-shimmer"></div>
+        <div class="banner-tag">Новини</div>
+        <div class="banner-title">Сія у Telegram</div>
+        <div class="banner-sub">Всі ваші документи, ліцензії<br>завжди під рукою</div>
+        <div class="banner-arrow float">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+
+      <div class="section-header anim-slide-right d3">
+        <span class="section-title">Документи</span>
+        <button class="section-link" onclick="switchScreen('docs')">Всі →</button>
+      </div>
+      <div class="docs-scroll anim-left d4">
+        <div class="doc-card" onclick="openDocPage('passport')">
+          <div class="doc-valid-dot"></div>
+          <div class="doc-card-icon">🪪</div>
+          <div>
+            <div class="doc-card-type">Паспорт</div>
+            <div class="doc-card-name">Паспорт</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="switchScreen('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Головна
+      </button>
+      <button class="nav-item" onclick="switchScreen('docs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Документи
+        
+      </button>
+      <button class="nav-item" onclick="switchScreen('services')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Фракції
+      </button>
+      <button class="nav-item" onclick="switchScreen('news')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+        Сервіси
+      </button>
+      <button class="nav-item" onclick="switchScreen('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Профіль
+      </button>
+    </nav>
+  </div>
+
+  <div class="screen" id="screen-docs">
+    <div class="header">
+      <div class="header-title">Документи</div>
+      <button class="header-action" onclick="openModal()">Поділитись</button>
+    </div>
+    <div class="scroll-area">
+      <div class="doc-list">
+        
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-item" onclick="switchScreen('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Головна
+      </button>
+      <button class="nav-item active" onclick="switchScreen('docs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Документи
+      </button>
+      <button class="nav-item" onclick="switchScreen('services')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Фракції
+      </button>
+      <button class="nav-item" onclick="switchScreen('news')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+        Сервіси
+      </button>
+      <button class="nav-item" onclick="switchScreen('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Профіль
+      </button>
+    </nav>
+  </div>
+  <div class="screen" id="screen-services">
+    <div class="header">
+      <div class="header-title">Фракції</div>
+    </div>
+    <div class="scroll-area">
+      <div class="services-search">
+        <span class="search-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input type="text" class="search-input" placeholder="Пошук...">
+      </div>
+      <div class="services-cats" style="display:flex !important; flex-wrap:nowrap !important; overflow-x:auto !important; -webkit-overflow-scrolling:touch;">
+        <button class="cat-chip active" onclick="setChip(this)">Всі</button>
+        <button class="cat-chip" onclick="setChip(this)">НПС</button>
+        <button class="cat-chip" onclick="setChip(this)">СБС</button>
+        <button class="cat-chip" onclick="setChip(this)">НАБС</button>
+        <button class="cat-chip" onclick="setChip(this)">Суд</button>
+        <button class="cat-chip" onclick="setChip(this)">Адм</button>
+        <button class="cat-chip" onclick="setChip(this)">ДБР</button>
+        <button class="cat-chip" onclick="setChip(this)">Зброя</button>
+        <button class="cat-chip" onclick="setChip(this)">Адвокат</button>
+        <button class="cat-chip" onclick="setChip(this)">Преса</button>
+        <button class="cat-chip" onclick="setChip(this)">ЗМІ</button>
+        <button class="cat-chip" onclick="setChip(this)">Бізнес</button>
+      </div>
+      <div class="services-list"></div>
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-item" onclick="switchScreen('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Головна
+      </button>
+      <button class="nav-item" onclick="switchScreen('docs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Документи
+      </button>
+      <button class="nav-item active" onclick="switchScreen('services')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Фракції
+      </button>
+      <button class="nav-item" onclick="switchScreen('news')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+        Сервіси
+      </button>
+      <button class="nav-item" onclick="switchScreen('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Профіль
+      </button>
+    </nav>
+  </div>
+  <div class="screen" id="screen-news">
+    <div class="header">
+      <div class="header-title">Сервіси</div>
+    </div>
+    <div class="scroll-area">
+      
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-item" onclick="switchScreen('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Головна
+      </button>
+      <button class="nav-item" onclick="switchScreen('docs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Документи
+      </button>
+      <button class="nav-item" onclick="switchScreen('services')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Фракції
+      </button>
+      <button class="nav-item active" onclick="switchScreen('news')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+        Сервіси
+      </button>
+      <button class="nav-item" onclick="switchScreen('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Профіль
+      </button>
+    </nav>
+  </div>
+  <div class="screen" id="screen-profile">
+    <div class="header">
+      <div class="header-title">Профіль</div>
+      <button class="header-action" onclick="showToast('⚙️ Налаштування')">Налашт.</button>
+    </div>
+    <div class="scroll-area">
+      <div class="profile-hero anim-scale d0">
+        <div class="profile-avatar"><img src="https://pic2.kidstaff.com.ua/pictures_user/823/2058559/33284625/2058559_20230214034934_2823_600x600.jpg" alt="Олексій Мороз"></div>
+        <div class="profile-info">
+          <div class="profile-name">Олексій Мороз</div>
+          <div class="profile-id">ID: 12345678</div>
+          <div class="profile-verified">
+            <div class="verified-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            Верифікований
+          </div>
+        </div>
+      </div>
+      <button class="profile-Oauth anim-pop d3" onclick="openRobloxOAuth()"><img src="https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/4X/0/e/e/0eeeb19633422b1241f4306419a0f15f39d58de9.png" alt="Roblox Logo">Логін через Roblox</button>
+      <div style="height:2px"></div>
+      <button class="profile-logout anim-pop d3" onclick="showToast('👋 Виходимо...')">Вийти з акаунту</button>
+      <div style="height:8px"></div>
+
+      
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-item" onclick="switchScreen('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Головна
+      </button>
+      <button class="nav-item" onclick="switchScreen('docs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Документи
+      </button>
+      <button class="nav-item" onclick="switchScreen('services')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Фракції
+      </button>
+      <button class="nav-item" onclick="switchScreen('news')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+        Сервіси
+      </button>
+      <button class="nav-item active" onclick="switchScreen('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Профіль
+      </button>
+    </nav>
+  </div>
+  <div class="screen" id="screen-docpage">
+    <div class="header">
+      <button class="header-back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Назад
+      </button>
+      <button class="header-action" onclick="openModal()">QR-код</button>
+    </div>
+    <div class="scroll-area">
+      <div class="doc-page-content" id="doc-page-content">
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal" onclick="closeModalBg(event)">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Поділитись документом</div>
+      <div class="modal-subtitle">Покажіть QR-код для верифікації</div>
+      <div class="qr-box">
+        <canvas id="qrCanvas" width="160" height="160" style="border-radius:8px;"></canvas>
+      </div>
+      <div class="modal-timer">Дійсний ще <span id="timer">03:00</span></div>
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="saveDocument()">Зберегти</button>
+        <button class="btn-secondary" onclick="closeModal()">Закрити</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script type="module" src="js/firebase.js?v=<?=time()?>"></script>
+<script src="js/gen.js?v=<?=time()?>"></script>
+<script src="js/main.js?v=<?=time()?>"></script>
+<script src="https://ukrainerpeh.xyz/players.js?v=<?=time()?>"></script>
+<script src="https://ukrainerpeh.xyz/licenses.js?v=<?=time()?>"></script>
+<script>
+(function() {
+
+  function tgUrl(raw) {
+    if (!raw) return null;
+    if (raw.startsWith('http')) return raw;
+    if (raw.startsWith('t.me')) return 'https://' + raw;
+    if (/^\d+$/.test(raw)) return 'tg://user?id=' + raw;
+    return 'https://t.me/' + raw;
+  }
+
+  function initials(str) { return (str || '?')[0].toUpperCase(); }
+
+  function buildItems() {
+    const items = [];
+    if (typeof players !== 'undefined') {
+      Object.entries(players).forEach(([nick, entries]) => {
+        entries.forEach(p => {
+          
+          items.push({
+            nick,
+            avatar: p.avatar || null,
+            label: p.role || '',
+            sublabel: p.category || '',
+            tag: p.category || '', 
+            source: 'players',
+            telegram: p.telegram || null,
+            extra: null,
+            cans: null,
+          });
+        });
+      });
+    }
+    if (typeof window.licenses !== 'undefined') {
+      const L = window.licenses;
+      if (L.weapon) Object.entries(L.weapon).forEach(([nick, d]) => {
+        if (nick === 'username') return;
+        items.push({ nick, avatar: null, label: d.status || '', sublabel: 'Ліцензія на зброю', tag: 'weapon',
+          source: 'licenses', telegram: d.telegram, extra: d.expiry || null, cans: null });
+      });
+      if (L.police) Object.entries(L.police).forEach(([nick, d]) => {
+        items.push({ nick, avatar: null, label: d.role || d.expiry || '', sublabel: 'НПС • ' + (d.status || ''), tag: 'police',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: null });
+      });
+      if (L.business) L.business.forEach(d => {
+        if (!d.username || d.username === 'roblox username') return;
+        items.push({ nick: d.username, avatar: null, label: d.role || '', sublabel: 'Бізнес • ' + (d.status || ''),
+          tag: 'business', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null });
+      });
+      if (L.advocat) Object.entries(L.advocat).forEach(([nick, d]) => {
+        items.push({ nick, avatar: null, label: 'Адвокат • ' + (d.status || ''), sublabel: d.cans ? '⛔ ' + d.cans : 'Дійсна',
+          tag: 'advocat', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null });
+      });
+
+      if (L.presslicense) Object.entries(L.presslicense).forEach(([nick, d]) => {
+        items.push({ nick, avatar: null, label: d.role || '', sublabel: 'Прес-карта • ' + (d.status || ''),
+          tag: 'presslicense', source: 'licenses', telegram: d.telegram, extra: null, cans: null });
+      });
+
+      if (L.press) Object.entries(L.press).forEach(([nick, d]) => {
+        if (nick === 'username') return;
+        items.push({ nick, avatar: null, label: d.status || '', sublabel: 'ЗМІ',
+          tag: 'press', source: 'licenses', telegram: d.telegram, extra: null, cans: null });
+      });
+
+      if (L.mafia) Object.entries(L.mafia).forEach(([nick, d]) => {
+        items.push({ nick, avatar: null, label: d.status || '', sublabel: (d.role || 'ОЗУ') + (d.cans ? ' • ⛔' : ''),
+          tag: 'mafia', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null });
+      });
+    }
+
+    return items;
+  }
+  const chipFilter = {
+    'Всі':     null,
+    'НПС':     ['Поліція', 'police'],
+    'СБС':     ['СБС'],
+    'НАБС':    ['НАБС'],
+    'Суд':     ['Суд'],
+    'Адм':     ['Адміністрація'],
+    'ДБР':     ['ДБР'],
+    'Зброя':   ['weapon'],
+    'Адвокат': ['advocat'],
+    'Преса':   ['presslicense'],
+    'ЗМІ':     ['press'],
+    'Бізнес':  ['business'],
+  };
+
+  let activeTags = null;
+  let searchQuery = '';
+  let allItems = [];
+
+  function statusColor(item) {
+    if (item.cans) return '#ff4d4d';
+    const s = (item.label + item.sublabel).toLowerCase();
+    if (s.includes('недійсна') || s.includes('скасов')) return '#ff9500';
+    if (s.includes('дійсна')) return '#30d158';
+    return null;
+  }
+
+  function renderList() {
+    const list = document.querySelector('.services-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const filtered = allItems.filter(item => {
+      if (activeTags && !activeTags.includes(item.tag)) return false;
+      if (searchQuery && !item.nick.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      return true;
+    });
+
+    filtered.forEach(item => {
+      const color = statusColor(item);
+      const dot = color ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:5px;flex-shrink:0;"></span>` : '';
+
+      const row = document.createElement('div');
+      row.className = 'service-row';
+      row.style.cursor = item.telegram ? 'pointer' : 'default';
+      row.innerHTML = `
+        <div class="service-row-icon" style="overflow:hidden;border-radius:50%;width:40px;height:40px;flex-shrink:0;background:var(--bg2,#222);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">
+          ${item.avatar
+            ? `<img src="${item.avatar}" alt="${item.nick}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.textContent='${initials(item.nick)}'">`
+            : initials(item.nick)}
+        </div>
+        <div class="service-row-content">
+          <div class="service-row-name">${item.nick}</div>
+          <div class="service-row-desc" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;">
+            ${dot}${item.sublabel}${item.label ? ' • ' + item.label : ''}${item.extra ? ' · ' + item.extra : ''}
+          </div>
+        </div>
+        ${item.telegram ? `<svg class="service-row-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>` : ''}
+      `;
+
+      if (item.telegram) {
+        row.addEventListener('click', () => {
+          const url = tgUrl(item.telegram);
+          if (url) window.open(url, '_blank');
+        });
+      }
+
+      list.appendChild(row);
+    });
+
+    if (!list.children.length) {
+      list.innerHTML = '<div style="text-align:center;padding:32px;opacity:.5;">Нічого не знайдено</div>';
+    }
+  }
+
+  function initChips() {
+    const chips = document.querySelectorAll('.cat-chip');
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeTags = chipFilter[chip.textContent.trim()] ?? null;
+        renderList();
+      });
+    });
+  }
+
+  function initSearch() {
+    const input = document.querySelector('.search-input');
+    if (!input) return;
+    input.addEventListener('input', e => {
+      searchQuery = e.target.value;
+      renderList();
+    });
+  }
+
+  function init() {
+    allItems = buildItems();
+    renderList();
+    initChips();
+    initSearch();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
