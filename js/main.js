@@ -132,7 +132,7 @@ function loadLicenseInfo(roblox, licenses) {
         const d2 = new Date(issuedAt);
         issuedStr = d2.toLocaleDateString('uk-UA', { day:'2-digit', month:'2-digit', year:'numeric' });
     }
-    d = d + docData['passport'] = {
+    d += docData['passport'] = {
         passport: {
             title: 'Паспорт',
             type: 'Паспорт',
