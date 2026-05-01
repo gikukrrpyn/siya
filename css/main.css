@@ -1215,3 +1215,53 @@ html, body {
   .greeting-wave { animation: waveIn 0.7s cubic-bezier(.22,1,.36,1) both; display: inline-block; }
   .verified-badge { transition: transform 0.4s cubic-bezier(.34,1.56,.64,1); }
   .profile-verified:hover .verified-badge { transform: rotate(360deg); }
+.doc-link-row {
+  margin: 0 16px 12px;
+  background: var(--bg2, #f5f5f7);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+ 
+.doc-link-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2, #888);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 4px;
+}
+ 
+.doc-link-value {
+  font-size: 12px;
+  color: var(--accent, #007aff);
+  word-break: break-all;
+  font-family: monospace;
+  line-height: 1.4;
+  cursor: text;
+  user-select: all;
+}
+ 
+.doc-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: 12px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--bg2, #f5f5f7);
+  color: var(--text1, #111);
+  transition: opacity .15s, transform .1s;
+}
+.doc-action-btn:active {
+  opacity: .7;
+  transform: scale(.97);
+}
+.doc-action-btn.primary {
+  background: var(--accent, #007aff);
+  color: white;
+}
