@@ -34,14 +34,16 @@ window.syncWithCloud = async (tgUsername, rbxData, idCode, forceIssueDate) => {
 window.fetchProfile = async (tgUsername) => {
     if (!tgUsername) return null;
     try {
-    const snap = await getDoc(doc(db, "passports", tgUsername));
-    return snap.exists() ? snap.data() : null;
+        const snap = await getDoc(doc(db, "passports", tgUsername));
+        return snap.exists() ? snap.data() : null;
     } catch (e) { return null; }
 };
 
-const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
-if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-    window.onTelegramAuth(tg.initDataUnsafe.user);
+const tg = (typeof window !== 'undefined' && window.Telegram) ? window.Telegram.WebApp : null;
+if (tg) {
+    try { tg.ready(); } catch (e) {}
+    try { tg.expand(); } catch (e) {}
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user && typeof window.onTelegramAuth === 'function') {
+        window.onTelegramAuth(tg.initDataUnsafe.user);
+    }
 }
