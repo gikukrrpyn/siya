@@ -22,8 +22,6 @@ window.syncWithCloud = async (tgUsername, rbxData, idCode, forceIssueDate) => {
     };
     if (idCode) payload.idCode = idCode;
     if (rbxData) payload.roblox = rbxData;
-
-    // Set issuedAt only on first creation (forceIssueDate = true means new passport)
     if (forceIssueDate) {
         payload.issuedAt = new Date().toISOString();
     }
