@@ -115,6 +115,66 @@ window.rejectPendingFine = async (pendingId) => {
     } catch (e) { console.error('rejectPendingFine', e); return false; }
 };
 
+window.submitPaymentRequest = async (item) => {
+    if (!item) return false;
+    try {
+        const ref = doc(db, "fines", "payments");
+        const snap = await getDoc(ref);
+        const list = snap.exists() && Array.isArray(snap.data().items) ? snap.data().items : [];
+        list.push(item);
+        await setDoc(ref, { items: list }, { merge: true });
+        return true;
+    } catch (e) { console.error('submitPaymentRequest', e); return false; }
+};
+
+window.fetchPaymentRequests = async () => {
+    try {
+        const snap = await getDoc(doc(db, "fines", "payments"));
+        return snap.exists() && Array.isArray(snap.data().items) ? snap.data().items : [];
+    } catch (e) { console.error('fetchPaymentRequests', e); return []; }
+};
+
+window.approvePaymentRequest = async (paymentId, approverUsername) => {
+    try {
+        const payRef = doc(db, "fines", "payments");
+        const paySnap = await getDoc(payRef);
+        const list = paySnap.exists() && Array.isArray(paySnap.data().items) ? paySnap.data().items.slice() : [];
+        const idx = list.findIndex(p => p && p._paymentId === paymentId);
+        if (idx < 0) return false;
+        const item = list.splice(idx, 1)[0];
+
+        const profRef = doc(db, "passports", item.username);
+        const profSnap = await getDoc(profRef);
+        const data = profSnap.exists() ? profSnap.data() : {};
+        const fines = Array.isArray(data.fines) ? data.fines.slice() : [];
+        const fineIdx = fines.findIndex(f => f && f.id === item.fineId);
+        if (fineIdx >= 0) {
+            fines[fineIdx] = Object.assign({}, fines[fineIdx], {
+                status: 'paid',
+                paidAt: new Date().toISOString(),
+                paidApprovedBy: approverUsername || null
+            });
+        }
+
+        await setDoc(profRef, { fines }, { merge: true });
+        await setDoc(payRef, { items: list }, { merge: true });
+        return true;
+    } catch (e) { console.error('approvePaymentRequest', e); return false; }
+};
+
+window.rejectPaymentRequest = async (paymentId) => {
+    try {
+        const payRef = doc(db, "fines", "payments");
+        const paySnap = await getDoc(payRef);
+        const list = paySnap.exists() && Array.isArray(paySnap.data().items) ? paySnap.data().items.slice() : [];
+        const idx = list.findIndex(p => p && p._paymentId === paymentId);
+        if (idx < 0) return false;
+        list.splice(idx, 1);
+        await setDoc(payRef, { items: list }, { merge: true });
+        return true;
+    } catch (e) { console.error('rejectPaymentRequest', e); return false; }
+};
+
 const tg = (typeof window !== 'undefined' && window.Telegram) ? window.Telegram.WebApp : null;
 if (tg) {
     try { tg.ready(); } catch (e) {}
