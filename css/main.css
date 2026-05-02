@@ -277,7 +277,7 @@ html, body {
   .docs-scroll {
     padding: 0 20px 24px;
     display: flex;
-    gap: 12px;
+    gap: 10px;
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -285,7 +285,7 @@ html, body {
 
   .doc-card {
     flex-shrink: 0;
-    width: 200px;
+    width: 190px;
     background: var(--black);
     border-radius: var(--radius);
     padding: 16px;
