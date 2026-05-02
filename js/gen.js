@@ -57,14 +57,50 @@ function determineFractionAndRole(nick, players, licenses) {
   let result = { fraction: 'Громадянин', role: 'Немає' };
 
   if (players) {
-    
     const pKey = Object.keys(players).find(k => k.toLowerCase() === lc);
     if (pKey && players[pKey] && players[pKey][0]) {
       const data = players[pKey][0];
       result.fraction = data.category;
       result.role = data.role || '—';
+      return result;
     }
   }
+
+  if (licenses) {
+    const factionDefs = [
+      { key: 'police', name: 'НПС' },
+      { key: 'nabs',   name: 'НАБС' },
+      { key: 'sbs',    name: 'СБС' },
+      { key: 'dbr',    name: 'ДБР' },
+    ];
+    for (const fd of factionDefs) {
+      const block = licenses[fd.key];
+      if (!block) continue;
+      const entryKey = Object.keys(block).find(k => k.toLowerCase() === lc);
+      if (!entryKey) continue;
+      const d = block[entryKey];
+      const rank = typeof window.getPoliceRank === 'function' && d.role
+        ? window.getPoliceRank(d.role)
+        : (d.role || fd.name);
+      result.fraction = fd.name;
+      result.role = rank;
+      return result;
+    }
+    const otherDefs = [
+      { key: 'advocat', name: 'Адвокат', role: 'Адвокат' },
+      { key: 'taxi',    name: 'Таксист', role: 'Таксист' },
+    ];
+    for (const od of otherDefs) {
+      const block = licenses[od.key];
+      if (!block) continue;
+      const entryKey = Object.keys(block).find(k => k.toLowerCase() === lc);
+      if (!entryKey) continue;
+      result.fraction = od.name;
+      result.role = od.role;
+      return result;
+    }
+  }
+
   return result;
 }
 
