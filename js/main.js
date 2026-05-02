@@ -753,7 +753,6 @@ function loadLicenseInfo(roblox, licenses) {
     d[id] = docData[id];
     return `
     <div class="doc-item anim-flip ${delayClass}" onclick="openDocPage('${id}')">
-        <div class="doc-deco">▌▌▌▐▌▌▐▌</div>
         <div class="doc-item-header">
             <div class="doc-item-type">${meta.type}</div>
             <div class="doc-item-status">
@@ -827,7 +826,6 @@ function loadLicenseInfo(roblox, licenses) {
 
   docsHtml += `
   <div class="doc-item anim-flip d0" onclick="openDocPage('passport')">
-      <div class="doc-deco">▌▌▌▐▌▌▐▌</div>
       <div class="doc-item-header">
           <div class="doc-item-type">Паспорт</div>
           <div class="doc-item-status">
