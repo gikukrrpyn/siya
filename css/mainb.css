@@ -492,3 +492,5 @@ body.viewer-mode #splash { display: none !important; }
     object-fit: contain;
     background: var(--gray-100);
   }
+  body.theme-dark .services-cats::-webkit-scrollbar-thumb { background: #444; }
+  body.theme-dark .services-cats::-webkit-scrollbar-track { background: #0e0e0e; }
