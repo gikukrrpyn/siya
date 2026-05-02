@@ -74,7 +74,7 @@ function determineFractionAndRole(nick, players, licenses) {
       { key: 'dbr',    name: 'ДБР' },
     ];
     for (const fd of factionDefs) {
-      const block = licenses[fd.key];
+      const block = licenses[fd.key]; 
       if (!block) continue;
       const entryKey = Object.keys(block).find(k => k.toLowerCase() === lc);
       if (!entryKey) continue;
