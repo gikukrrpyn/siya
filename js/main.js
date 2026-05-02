@@ -112,10 +112,7 @@ function getPoliceRank(xpString) {
   if (xp <= 21999) return "Старший сержант";
   if (xp <= 25999) return "Лейтенант";
   if (xp <= 29999) return "Капітан";
-  if (xp <= 34999) return "Ветеран";
-  if (xp <= 44999) return "Комісар";
-  if (xp <= 59999) return "Полковник";
-  return "Генерал";
+  return "Ветеран";
 }
 
 function isXpString(s) {
@@ -674,6 +671,17 @@ function applyTheme(name) {
   try { localStorage.setItem('theme', t); } catch (e) {}
   const tgl = document.getElementById('theme-toggle');
   if (tgl) tgl.checked = (t === 'dark');
+  // Switch header logo based on theme
+  const logoImg = document.getElementById('header-logo-img');
+  if (logoImg) {
+    logoImg.src = t === 'dark' ? 'png/ciya.png' : 'png/ciyablack.png';
+  }
+  // Update Telegram header/background color
+  if (window.Telegram && window.Telegram.WebApp) {
+    const color = t === 'dark' ? '#0e0e0e' : '#ffffff';
+    try { window.Telegram.WebApp.setHeaderColor(color); } catch(e) {}
+    try { window.Telegram.WebApp.setBackgroundColor(color); } catch(e) {}
+  }
 }
 
 function toggleTheme(checked) {
@@ -683,6 +691,13 @@ function toggleTheme(checked) {
 function bootTheme() {
   let t = 'light';
   try { t = localStorage.getItem('theme') || 'light'; } catch (e) {}
+  // Auto-detect Telegram dark mode if no saved preference
+  try {
+    const saved = localStorage.getItem('theme');
+    if (!saved && window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.colorScheme) {
+      t = window.Telegram.WebApp.colorScheme === 'dark' ? 'dark' : 'light';
+    }
+  } catch(e) {}
   applyTheme(t);
 }
 
