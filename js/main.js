@@ -52,9 +52,11 @@ function switchScreen(id) {
 
     if (id === 'fines') {
       renderFines();
+      updateIssueFineButtonVisibility();
+    }
+    if (id === 'admin-fines') {
       renderPendingApprovalSection();
       renderPaymentRequestsSection();
-      updateIssueFineButtonVisibility();
     }
     if (id === 'issue-fine') {
       renderIssueFineForm();
@@ -841,9 +843,59 @@ function loadLicenseInfo(roblox, licenses) {
 const checkRobloxData = setInterval(() => {
   if (window.state && window.state.roblox && window.state.licenses) {
     docData = loadLicenseInfo(window.state.roblox, window.state.licenses);
+    renderHomeDocCards();
     clearInterval(checkRobloxData);
   }
 }, 500);
+
+function renderHomeDocCards() {
+  const scroll = document.querySelector('.docs-scroll');
+  if (!scroll) return;
+
+  const docDefs = [
+    { id: 'passport', icon: '🪪', type: 'Паспорт', name: 'Паспорт' },
+    { id: 'weapon',   icon: '🔫', type: 'Ліцензія', name: 'Ліцензія на зброю' },
+    { id: 'police',   icon: '👮', type: 'Посвідчення', name: 'Посвідчення НПС' },
+    { id: 'nabs',     icon: '🕵️', type: 'Посвідчення', name: 'Посвідчення НАБС' },
+    { id: 'sbs',      icon: '🛡️', type: 'Посвідчення', name: 'Посвідчення СБС' },
+    { id: 'dbr',      icon: '🔍', type: 'Посвідчення', name: 'Посвідчення ДБР' },
+    { id: 'taxi',     icon: '🚕', type: 'Ліцензія', name: 'Таксистська ліцензія' },
+    { id: 'advocat',  icon: '⚖️', type: 'Ліцензія', name: 'Адвокатська ліцензія' },
+    { id: 'presslicense', icon: '📰', type: 'Прес-карта', name: 'Прес-карта' },
+    { id: 'press',    icon: '📡', type: 'ЗМІ', name: 'Реєстрація ЗМІ' },
+    { id: 'mafia',    icon: '🕶️', type: 'Реєстрація', name: 'ОЗУ' },
+  ];
+
+  const cards = docDefs
+    .filter(def => docData[def.id] || docData[def.id + '_0'])
+    .map(def => {
+      const resolvedId = docData[def.id] ? def.id : def.id + '_0';
+      return `
+        <div class="doc-card" onclick="openDocPage('${resolvedId}')">
+          <div class="doc-valid-dot"></div>
+          <div class="doc-card-icon">${def.icon}</div>
+          <div>
+            <div class="doc-card-type">${def.type}</div>
+            <div class="doc-card-name">${def.name}</div>
+          </div>
+        </div>`;
+    });
+
+  if (cards.length) {
+    scroll.innerHTML = cards.join('');
+  } else {
+    scroll.innerHTML = `
+      <div class="doc-card" onclick="openDocPage('passport')">
+        <div class="doc-valid-dot"></div>
+        <div class="doc-card-icon">🪪</div>
+        <div>
+          <div class="doc-card-type">Паспорт</div>
+          <div class="doc-card-name">Паспорт</div>
+        </div>
+      </div>`;
+  }
+}
+window.renderHomeDocCards = renderHomeDocCards;
 
 function openDocPage(docId) {
   const raw = docData[docId];
