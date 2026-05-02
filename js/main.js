@@ -134,14 +134,15 @@ function buildLicenseDoc(key, data, ctx) {
   switch (String(key).toLowerCase()) {
     case 'weapon': {
       const isCancelled = data.cans || /злочинн|скасов|недійсн/i.test(data.status || '') || data.expiry === '00.00.0000' || isExpired(data.expiry);
+      const computedStatus = isCancelled ? (isExpired(data.expiry) && !data.cans ? 'Прострочена' : 'Скасовано') : (data.status || 'Дійсна');
       return {
         title: 'Ліцензія на зброю',
         type: 'Ліцензія',
-        status: isCancelled ? (isExpired(data.expiry) && !data.cans ? 'Прострочена' : 'Скасовано') : (data.status || 'Дійсна'),
+        status: computedStatus,
         docNumber: data.expiry && data.expiry !== '00.00.0000' ? data.expiry : '—',
         fields: [
           f('Власник', owner),
-          f('Статус', data.status || '—'),
+          f('Статус', computedStatus),
           ...(data.expiry ? [f('Термін дії', data.expiry)] : []),
           ...cansField,
         ]
