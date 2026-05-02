@@ -5,7 +5,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyBuSUZN8d0yAcC_96VvvSnl9fhwDIj-4PY",
     authDomain: "ciya-4c11b.firebaseapp.com",
     projectId: "ciya-4c11b",
-    storageBucket: "ciya-4c11b.firebasestorage.app",
+    storageBucket: "ciya-4c11b.firebasestorage.app", 
     messagingSenderId: "593656122805",
     appId: "1:593656122805:web:9bf0f7ab44544a0b825dfc",
     measurementId: "G-3ZVQ86CG6V"
