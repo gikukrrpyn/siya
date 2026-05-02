@@ -4,7 +4,7 @@ const CONFIG = {
   SCOPES: 'openid profile',
   AUTH_URL: 'https://apis.roblox.com/oauth/v1/authorize',
   TOKEN_URL: 'https://apis.roblox.com/oauth/v1/token',
-  USERINFO_URL: 'https://apis.roblox.com/oauth/v1/userinfo',
+  USERINFO_URL: 'https://apis.roblox.com/oauth/v1/userinfo', 
 };
 
 window.state = {
