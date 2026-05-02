@@ -190,6 +190,7 @@ function renderIssueFineForm() {
   `;
 }
 window.renderIssueFineForm = renderIssueFineForm;
+
 let _rbxLookupTimer = null;
 let _resolvedTgUsername = null;
 
@@ -232,7 +233,7 @@ async function fineRbxLookup(val) {
       }
     }
     if (found) {
-      _resolvedTgUsername = '__rbx__' + rbxNick;
+      _resolvedTgUsername = '__rbx__' + rbxNick; 
       if (statusEl) statusEl.innerHTML = `<span style="color:#f0a000;">⚠️ Гравець є на сервері, але не в СіЯ — штраф збережеться по Roblox нікнейму</span>`;
     } else {
       _resolvedTgUsername = null;
@@ -361,7 +362,6 @@ function openIssueFineForm() {
 }
 window.openIssueFineForm = openIssueFineForm;
 
-/* ---- відображення власних штрафів ---- */
 async function renderFines() {
   const list = document.getElementById('fines-list');
   if (!list) return;
@@ -451,6 +451,7 @@ async function renderFines() {
   }).join('');
 }
 window.renderFines = renderFines;
+
 async function renderPendingApprovalSection() {
   const root = document.getElementById('fines-pending-list');
   if (!root) return;
@@ -510,6 +511,7 @@ async function renderPendingApprovalSection() {
     }).join('')}`;
 }
 window.renderPendingApprovalSection = renderPendingApprovalSection;
+
 
 async function renderPaymentRequestsSection() {
   const role = getUserIssuerRole();
