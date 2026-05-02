@@ -6,32 +6,7 @@
 <title>СіЯ</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="stylesheet" href="css/main.css">
-<style>
-  /* Browser viewer mode: opened via shareable doc link / QR scan */
-  body.viewer-mode #splash { display: none !important; }
-  body.viewer-mode .bottom-nav { display: none !important; }
-  body.viewer-mode .screen:not(#screen-docpage) { display: none !important; }
-  body.viewer-mode #screen-docpage .header-back { display: none !important; }
-  body.viewer-mode #screen-docpage { padding-bottom: 24px; }
-  #viewer-error {
-    position: fixed; inset: 0; display: flex; align-items: center;
-    justify-content: center; background: #fff; z-index: 9999;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    padding: 24px; text-align: center;
-  }
-  #viewer-error .viewer-error-card {
-    max-width: 320px;
-  }
-  #viewer-error .viewer-error-icon {
-    font-size: 56px; line-height: 1; margin-bottom: 16px;
-  }
-  #viewer-error .viewer-error-title {
-    font-size: 18px; font-weight: 700; color: #111; margin-bottom: 8px;
-  }
-  #viewer-error .viewer-error-sub {
-    font-size: 14px; color: #888;
-  }
-</style>
+<link rel="stylesheet" href="css/mainb.css">
 </head>
 <body>
 <div id="splash">
@@ -150,9 +125,11 @@
         <button class="cat-chip" onclick="setChip(this)">ДБР</button>
         <button class="cat-chip" onclick="setChip(this)">Зброя</button>
         <button class="cat-chip" onclick="setChip(this)">Адвокат</button>
+        <button class="cat-chip" onclick="setChip(this)">Таксі</button>
         <button class="cat-chip" onclick="setChip(this)">Преса</button>
         <button class="cat-chip" onclick="setChip(this)">ЗМІ</button>
         <button class="cat-chip" onclick="setChip(this)">Бізнес</button>
+        <button class="cat-chip" onclick="setChip(this)">ОЗУ</button>
       </div>
       <div class="services-list"></div>
     </div>
@@ -184,7 +161,16 @@
       <div class="header-title">Сервіси</div>
     </div>
     <div class="scroll-area">
-      
+      <div class="services-grid">
+        <div class="service-card" onclick="openTgLink('https://t.me/CompensationURBot')">
+          <div class="service-icon">💰</div>
+          <div class="service-name">Отримати компенсацію / виплату</div>
+        </div>
+        <div class="service-card" onclick="openTgLink('https://t.me/UkraineRPSupport')">
+          <div class="service-icon">🛟</div>
+          <div class="service-name">Центр підтримки гравців</div>
+        </div>
+      </div>
     </div>
     <nav class="bottom-nav">
       <button class="nav-item" onclick="switchScreen('home')">
@@ -230,7 +216,7 @@
       </div>
       <button class="profile-Oauth anim-pop d3" onclick="openRobloxOAuth()"><img src="https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/4X/0/e/e/0eeeb19633422b1241f4306419a0f15f39d58de9.png" alt="Roblox Logo">Логін через Roblox</button>
       <div style="height:2px"></div>
-      <button class="profile-logout anim-pop d3" onclick="showToast('👋 Виходимо...')">Вийти з акаунту</button>
+      <button class="profile-logout anim-pop d3" onclick="logout()">Вийти з акаунту</button>
       <div style="height:8px"></div>
 
       
@@ -272,6 +258,59 @@
     </div>
   </div>
 
+  <div class="screen" id="screen-fines">
+    <div class="header">
+      <button class="header-back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Назад
+      </button>
+      <div class="header-title">💸 Штрафи</div>
+      <button id="btn-issue-fine" class="header-action" style="display:none;" onclick="openIssueFineForm()">+ Виписати</button>
+    </div>
+    <div class="scroll-area">
+      <div id="fines-pending-list"></div>
+      <div id="fines-list"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-issue-fine">
+    <div class="header">
+      <button class="header-back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Назад
+      </button>
+      <div class="header-title">📝 Виписати штраф</div>
+    </div>
+    <div class="scroll-area">
+      <div id="issue-fine-body" class="ff-form"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-settings">
+    <div class="header">
+      <button class="header-back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Назад
+      </button>
+      <div class="header-title">⚙️ Налаштування</div>
+    </div>
+    <div class="scroll-area">
+      <div class="profile-section">
+        <div class="profile-section-title">Зовнішній вигляд</div>
+        <div class="profile-rows">
+          <label class="profile-row settings-row" for="theme-toggle">
+            <div class="profile-row-icon">🌙</div>
+            <div class="profile-row-label">Темна тема</div>
+            <span class="toggle-switch">
+              <input type="checkbox" id="theme-toggle" onchange="toggleTheme(this.checked)">
+              <span class="toggle-slider"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="modal" onclick="closeModalBg(event)">
     <div class="modal-sheet">
       <div class="modal-handle"></div>
@@ -290,11 +329,11 @@
   <div class="toast" id="toast"></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script type="module" src="js/firebase.js?v=<?=time()?>"></script>
-<script src="js/gen.js?v=<?=time()?>"></script>
-<script src="js/main.js?v=<?=time()?>"></script>
-<script src="https://ukrainerpeh.xyz/players.js?v=<?=time()?>"></script>
-<script src="https://ukrainerpeh.xyz/licenses.js?v=<?=time()?>"></script>
+<script type="module" src="js/firebase.js?v=2026050106"></script>
+<script src="js/gen.js?v=2026050106"></script>
+<script src="js/main.js?v=2026050106"></script>
+<script src="https://ukrainerpeh.xyz/players.js?v=2026050106"></script>
+<script src="https://ukrainerpeh.xyz/licenses.js?v=2026050106"></script>
 <script>
 (function() {
 
@@ -330,39 +369,135 @@
     }
     if (typeof window.licenses !== 'undefined') {
       const L = window.licenses;
+      const isXpRole = (s) => {
+        if (s == null) return false;
+        const t = String(s).replace(/[\s\u00A0]/g, '');
+        return /^\d+$/.test(t);
+      };
+      const policeRank = (role) => (typeof window.getPoliceRank === 'function')
+        ? window.getPoliceRank(role)
+        : (isXpRole(role) ? 'Рядовий' : (role || 'Рядовий'));
+
       if (L.weapon) Object.entries(L.weapon).forEach(([nick, d]) => {
         if (nick === 'username') return;
-        items.push({ nick, avatar: null, label: d.status || '', sublabel: 'Ліцензія на зброю', tag: 'weapon',
-          source: 'licenses', telegram: d.telegram, extra: d.expiry || null, cans: null });
+        const cancelled = !!d.cans || /злочинн|скасов|недійсн/i.test(d.status || '') || d.expiry === '00.00.0000';
+        items.push({
+          nick, avatar: null,
+          label: 'Ліцензія на зброю',
+          sublabel: (cancelled ? '⛔ Скасовано' : (d.status || 'Дійсна')) + (d.expiry && d.expiry !== '00.00.0000' ? ' · до ' + d.expiry : ''),
+          tag: 'weapon',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: cancelled ? (d.cans || d.status) : null
+        });
       });
+
       if (L.police) Object.entries(L.police).forEach(([nick, d]) => {
-        items.push({ nick, avatar: null, label: d.role || d.expiry || '', sublabel: 'НПС • ' + (d.status || ''), tag: 'police',
-          source: 'licenses', telegram: d.telegram, extra: null, cans: null });
+        if (nick === 'username') return;
+        const rank = policeRank(d.role);
+        const subdiv = d.expiry && d.expiry !== '00.00.0000' ? d.expiry : '';
+        items.push({
+          nick, avatar: null,
+          label: rank,
+          sublabel: 'НПС' + (d.status ? ' · #' + d.status : '') + (subdiv ? ' · ' + subdiv : ''),
+          tag: 'police',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null
+        });
+      });
+
+      if (L.nabs) Object.entries(L.nabs).forEach(([nick, d]) => {
+        if (nick === 'username') return;
+        const rank = isXpRole(d.role) ? 'Агент' : (d.role || 'Агент');
+        items.push({
+          nick, avatar: null,
+          label: rank,
+          sublabel: 'НАБС' + (d.status ? ' · #' + d.status : ''),
+          tag: 'nabs',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null
+        });
+      });
+      if (L.sbs) Object.entries(L.sbs).forEach(([nick, d]) => {
+        if (nick === 'username') return;
+        const rank = isXpRole(d.role) ? 'Рядовий' : (d.role || 'Рядовий');
+        items.push({
+          nick, avatar: null,
+          label: rank,
+          sublabel: 'СБС' + (d.status ? ' · #' + d.status : ''),
+          tag: 'sbs',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null
+        });
+      });
+
+      if (L.dbr) Object.entries(L.dbr).forEach(([nick, d]) => {
+        if (nick === 'username') return;
+        const rank = isXpRole(d.role) ? 'Рядовий' : (d.role || 'Рядовий');
+        items.push({
+          nick, avatar: null,
+          label: rank,
+          sublabel: 'ДБР' + (d.status ? ' · #' + d.status : ''),
+          tag: 'dbr',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null
+        });
+      });
+
+      if (L.taxi) Object.entries(L.taxi).forEach(([nick, d]) => {
+        if (nick === 'username') return;
+        items.push({
+          nick, avatar: null,
+          label: 'Таксі',
+          sublabel: 'ID: ' + (d.status || '—'),
+          tag: 'taxi',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null
+        });
       });
       if (L.business) L.business.forEach(d => {
         if (!d.username || d.username === 'roblox username') return;
-        items.push({ nick: d.username, avatar: null, label: d.role || '', sublabel: 'Бізнес • ' + (d.status || ''),
-          tag: 'business', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null });
+        items.push({
+          nick: d.username, avatar: null,
+          label: d.role || 'Бізнес',
+          sublabel: 'Бізнес' + (d.status ? ' · #' + d.status : ''),
+          tag: 'business',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null
+        });
       });
       if (L.advocat) Object.entries(L.advocat).forEach(([nick, d]) => {
-        items.push({ nick, avatar: null, label: 'Адвокат • ' + (d.status || ''), sublabel: d.cans ? '⛔ ' + d.cans : 'Дійсна',
-          tag: 'advocat', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null });
+        if (nick === 'username') return;
+        items.push({
+          nick, avatar: null,
+          label: 'Адвокат',
+          sublabel: (d.cans ? '⛔ Скасовано' : 'Дійсна') + (d.status ? ' · ' + d.status : ''),
+          tag: 'advocat',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null
+        });
       });
-
       if (L.presslicense) Object.entries(L.presslicense).forEach(([nick, d]) => {
-        items.push({ nick, avatar: null, label: d.role || '', sublabel: 'Прес-карта • ' + (d.status || ''),
-          tag: 'presslicense', source: 'licenses', telegram: d.telegram, extra: null, cans: null });
+        if (nick === 'username') return;
+        items.push({
+          nick, avatar: null,
+          label: 'Прес-карта',
+          sublabel: (d.role || 'ЗМІ') + (d.status ? ' · ' + d.status : ''),
+          tag: 'presslicense',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null
+        });
       });
-
       if (L.press) Object.entries(L.press).forEach(([nick, d]) => {
         if (nick === 'username') return;
-        items.push({ nick, avatar: null, label: d.status || '', sublabel: 'ЗМІ',
-          tag: 'press', source: 'licenses', telegram: d.telegram, extra: null, cans: null });
+        items.push({
+          nick, avatar: null,
+          label: d.status || 'ЗМІ',
+          sublabel: 'Зареєстроване ЗМІ',
+          tag: 'press',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null
+        });
       });
 
       if (L.mafia) Object.entries(L.mafia).forEach(([nick, d]) => {
-        items.push({ nick, avatar: null, label: d.status || '', sublabel: (d.role || 'ОЗУ') + (d.cans ? ' • ⛔' : ''),
-          tag: 'mafia', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null });
+        if (nick === 'username') return;
+        items.push({
+          nick, avatar: null,
+          label: d.status || 'ОЗУ',
+          sublabel: (d.role || 'ОЗУ') + (d.cans ? ' · ⛔ Скасовано' : ''),
+          tag: 'mafia',
+          source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null
+        });
       });
     }
 
@@ -371,16 +506,18 @@
   const chipFilter = {
     'Всі':     null,
     'НПС':     ['Поліція', 'police'],
-    'СБС':     ['СБС'],
-    'НАБС':    ['НАБС'],
+    'СБС':     ['СБС', 'sbs'],
+    'НАБС':    ['НАБС', 'nabs'],
     'Суд':     ['Суд'],
     'Адм':     ['Адміністрація'],
-    'ДБР':     ['ДБР'],
+    'ДБР':     ['ДБР', 'dbr'],
     'Зброя':   ['weapon'],
     'Адвокат': ['advocat'],
+    'Таксі':   ['taxi'],
     'Преса':   ['presslicense'],
     'ЗМІ':     ['press'],
     'Бізнес':  ['business'],
+    'ОЗУ':     ['mafia'],
   };
 
   let activeTags = null;
