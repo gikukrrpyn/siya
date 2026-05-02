@@ -285,7 +285,7 @@ html, body {
 
   .doc-card {
     flex-shrink: 0;
-    width: 160px;
+    width: 200px;
     background: var(--black);
     border-radius: var(--radius);
     padding: 16px;
