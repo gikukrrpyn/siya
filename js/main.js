@@ -467,6 +467,22 @@ function renderProfileExtras() {
   const section = document.createElement('div');
   section.id = 'profile-extras-section';
   section.className = 'profile-section anim-pop d4';
+  const _extraRole = getUserIssuerRole();
+  const _pendingRow = _extraRole.canApprove
+    ? `<div class="profile-row" onclick="openPendingFinesScreen()">
+        <div class="profile-row-icon">🕒</div>
+        <div class="profile-row-label">Штрафи на перевірку</div>
+        <div class="profile-row-arrow">›</div>
+      </div>`
+    : '';
+  const _issueRow = (_extraRole.canIssueDirectly || _extraRole.canSubmitPending)
+    ? `<div class="profile-row" onclick="openIssueFineForm()">
+        <div class="profile-row-icon">📝</div>
+        <div class="profile-row-label">Виписати штраф</div>
+        <div class="profile-row-arrow">›</div>
+      </div>`
+    : '';
+
   section.innerHTML = `
     <div class="profile-rows">
       <div class="profile-row" onclick="switchScreen('fines')">
@@ -474,6 +490,8 @@ function renderProfileExtras() {
         <div class="profile-row-label">Штрафи</div>
         <div class="profile-row-arrow">›</div>
       </div>
+      ${_pendingRow}
+      ${_issueRow}
       <div class="profile-row" onclick="switchScreen('settings')">
         <div class="profile-row-icon">⚙️</div>
         <div class="profile-row-label">Налаштування</div>
@@ -498,31 +516,58 @@ function getUserIssuerRole() {
     issuerType: ''
   };
 
-  const profile = window.state && window.state.profile;
-  const roles = (profile && Array.isArray(profile.roles)) ? profile.roles.map(r => String(r).toLowerCase()) : [];
-  if (roles.includes('admin') || roles.includes('admin_main')) {
-    return { canIssueDirectly: true, canSubmitPending: true, canApprove: true, label: 'Адміністрація', issuerType: 'admin' };
-  }
-  if (roles.includes('judge') || roles.includes('court')) {
-    return { canIssueDirectly: true, canSubmitPending: true, canApprove: true, label: 'Суд', issuerType: 'court' };
-  }
-
   const rbx = window.state && window.state.roblox;
   const robloxUsername = rbx && rbx.username;
   if (!robloxUsername) return out;
 
+  const lc = robloxUsername.toLowerCase();
+  const headWords = ['комісар', 'начальник', 'директор', 'голова', 'генерал', 'шеріф'];
+  const seniorWords = ['полковник', 'підполковник', 'капітан', 'майор'];
+
+  const P = window.state && window.state.players;
+  if (P) {
+    const pKey = Object.keys(P).find(k => k.toLowerCase() === lc);
+    if (pKey && Array.isArray(P[pKey]) && P[pKey][0]) {
+      const pd = P[pKey][0];
+      const cat = String(pd.category || '').toLowerCase();
+      const role = String(pd.role || '').toLowerCase();
+      if (cat.includes('адмін') || cat === 'адміністрація') {
+        return { canIssueDirectly: true, canSubmitPending: true, canApprove: true, label: pd.role || 'Адміністрація', issuerType: 'admin' };
+      }
+      if (cat.includes('суд')) {
+        return { canIssueDirectly: true, canSubmitPending: true, canApprove: true, label: pd.role || 'Суд', issuerType: 'court' };
+      }
+      const factionMap = [
+        { cats: ['поліція', 'нпс', 'police'], label: 'НПС', issuerType: 'police' },
+        { cats: ['набс', 'nabs'],             label: 'НАБС', issuerType: 'police' },
+        { cats: ['сбс', 'sbs'],               label: 'СБС',  issuerType: 'police' },
+        { cats: ['дбр', 'dbr'],               label: 'ДБР',  issuerType: 'police' },
+      ];
+      for (const fm of factionMap) {
+        if (fm.cats.some(c => cat.includes(c))) {
+          const isHead = headWords.some(w => role.includes(w));
+          const isSenior = seniorWords.some(w => role.includes(w));
+          return {
+            canIssueDirectly: isHead || isSenior,
+            canSubmitPending: true,
+            canApprove: isHead,
+            label: (pd.role || fm.label) + ' ' + fm.label,
+            issuerType: fm.issuerType
+          };
+        }
+      }
+    }
+  }
+
   const L = window.state && window.state.licenses;
   if (!L) return out;
 
-  const lc = robloxUsername.toLowerCase();
   const factions = [
     { key: 'police', label: 'НПС', issuerType: 'police' },
     { key: 'nabs',   label: 'НАБС', issuerType: 'police' },
     { key: 'sbs',    label: 'СБС',  issuerType: 'police' },
     { key: 'dbr',    label: 'ДБР',  issuerType: 'police' }
   ];
-  const headWords = ['комісар', 'начальник', 'директор', 'голова', 'генерал', 'шеріф'];
-  const seniorWords = ['полковник', 'підполковник', 'капітан', 'майор'];
 
   for (const f of factions) {
     const block = L[f.key];
@@ -535,15 +580,20 @@ function getUserIssuerRole() {
     const isHead = headWords.some(w => role.includes(w));
     const isSenior = seniorWords.some(w => role.includes(w));
     return {
-      canIssueDirectly: isHead || isSenior,  
-      canSubmitPending: true,           
-      canApprove: isHead,                 
+      canIssueDirectly: isHead || isSenior,
+      canSubmitPending: true,
+      canApprove: isHead,
       label: (r.role || f.label) + ' ' + f.label,
       issuerType: f.issuerType
     };
   }
 
   return out;
+}
+
+function openPendingFinesScreen() {
+  switchScreen('fines');
+  renderPendingApprovalSection();
 }
 
 function genPendingId() {
