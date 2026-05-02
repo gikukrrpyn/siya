@@ -1,4 +1,3 @@
-
 function finesFormatDate(s) {
   if (!s) return '—';
   const d = new Date(s);
@@ -446,6 +445,14 @@ async function renderFines() {
           <span class="fine-card-value">${due}</span>
         </div>
         ${reason}
+        ${f.evidence
+          ? `<div style="margin-top:8px;">
+               <div style="font-size:11px;color:var(--text2,#888);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Доказ</div>
+               <img class="fine-evidence-img" src="${f.evidence}" alt="доказ"
+                    onclick="openEvidenceFull('${f.id}')"
+                    style="max-width:100%;border-radius:10px;max-height:200px;object-fit:contain;cursor:zoom-in;">
+             </div>`
+          : ''}
         ${payBtn}
       </div>`;
   }).join('');
@@ -453,7 +460,7 @@ async function renderFines() {
 window.renderFines = renderFines;
 
 async function renderPendingApprovalSection() {
-  const root = document.getElementById('fines-pending-list');
+  const root = document.getElementById('admin-fines-pending-list');
   if (!root) return;
 
   const role = getUserIssuerRole();
@@ -517,14 +524,8 @@ async function renderPaymentRequestsSection() {
   const role = getUserIssuerRole();
   if (!role.canApprove) return;
 
-  let root = document.getElementById('fines-payments-list');
-  if (!root) {
-    const finesList = document.getElementById('fines-pending-list');
-    if (!finesList) return;
-    root = document.createElement('div');
-    root.id = 'fines-payments-list';
-    finesList.parentNode.insertBefore(root, finesList.nextSibling);
-  }
+  let root = document.getElementById('admin-fines-payments-list');
+  if (!root) return;
 
   root.innerHTML = `<div class="fines-loading">Перевірка оплат…</div>`;
 
@@ -632,7 +633,7 @@ function updateIssueFineButtonVisibility() {
 window.updateIssueFineButtonVisibility = updateIssueFineButtonVisibility;
 
 function openPendingFinesScreen() {
-  typeof switchScreen === 'function' && switchScreen('fines');
+  typeof switchScreen === 'function' && switchScreen('admin-fines');
   renderPendingApprovalSection();
   renderPaymentRequestsSection();
 }
