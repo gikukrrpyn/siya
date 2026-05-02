@@ -35,22 +35,18 @@
         <span class="section-title">Документи</span>
         <button class="section-link" onclick="switchScreen('docs')">Всі →</button>
       </div>
-      <div class="docs-scroll anim-left d4" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 8px;">
+      <div class="docs-scroll anim-left d4" style="display:flex;justify-content:flex-start;gap:12px;padding:0 20px 8px;">
         <div class="doc-card" onclick="openDocPage('passport')">
           <div class="doc-valid-dot"></div>
           <div class="doc-card-icon">🪪</div>
-          <div>
-            <div class="doc-card-type">Паспорт</div>
-            <div class="doc-card-name">Паспорт</div>
-          </div>
+          <div class="doc-card-type">Паспорт</div>
+          <div class="doc-card-name">Паспорт</div>
         </div>
         <div class="doc-card" onclick="openDocPage('nps')">
           <div class="doc-valid-dot"></div>
           <div class="doc-card-icon">👮</div>
-          <div>
-            <div class="doc-card-type">Посвідчення</div>
-            <div class="doc-card-name">Посвідчення НПС</div>
-          </div>
+          <div class="doc-card-type">Посвідчення</div>
+          <div class="doc-card-name">Посвідчення НПС</div>
         </div>
       </div>
     </div>
@@ -62,7 +58,7 @@
       <button class="nav-item" onclick="switchScreen('docs')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         Документи
-        <div class="nav-badge">3</div>
+        
       </button>
       <button class="nav-item" onclick="switchScreen('services')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
