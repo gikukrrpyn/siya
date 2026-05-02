@@ -1,6 +1,6 @@
 const CONFIG = {
   CLIENT_ID: '3526437072957618224',
-  REDIRECT_URI: 'https://hurler-reversion-crisped.ngrok-free.dev/index.html',
+  REDIRECT_URI: 'https://siya.ukrainerpeh.xyz/index.html',
   SCOPES: 'openid profile',
   AUTH_URL: 'https://apis.roblox.com/oauth/v1/authorize',
   TOKEN_URL: 'https://apis.roblox.com/oauth/v1/token',
