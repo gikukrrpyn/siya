@@ -39,6 +39,27 @@ window.fetchProfile = async (tgUsername) => {
     } catch (e) { return null; }
 };
 
+// Знайти паспорт по Roblox username (перебір усіх паспортів не потрібен —
+// зберігаємо окремий індекс roblox->telegram у колекції "rbx_index")
+window.findTgByRobloxUsername = async (rbxUsername) => {
+    if (!rbxUsername) return null;
+    try {
+        const snap = await getDoc(doc(db, "rbx_index", rbxUsername.toLowerCase()));
+        return snap.exists() ? snap.data().telegram : null;
+    } catch (e) { return null; }
+};
+
+// При синхронізації — також пишемо індекс
+const _origSync = window.syncWithCloud;
+window.syncWithCloud = async (tgUsername, rbxData, idCode, forceIssueDate) => {
+    if (rbxData && rbxData.username) {
+        try {
+            await setDoc(doc(db, "rbx_index", rbxData.username.toLowerCase()), { telegram: tgUsername }, { merge: true });
+        } catch (e) { /* не критично */ }
+    }
+    return _origSync(tgUsername, rbxData, idCode, forceIssueDate);
+};
+
 
 window.addFineDirect = async (targetUsername, fine) => {
     if (!targetUsername || !fine) return false;
