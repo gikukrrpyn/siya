@@ -53,6 +53,7 @@ function switchScreen(id) {
     if (id === 'fines') {
       renderFines();
       renderPendingApprovalSection();
+      renderPaymentRequestsSection();
       updateIssueFineButtonVisibility();
     }
     if (id === 'issue-fine') {
@@ -594,6 +595,168 @@ function getUserIssuerRole() {
 function openPendingFinesScreen() {
   switchScreen('fines');
   renderPendingApprovalSection();
+  renderPaymentRequestsSection();
+}
+
+function openPayFineModal(fineId, amount) {
+  const existing = document.getElementById('pay-fine-modal');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'pay-fine-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.6);display:flex;align-items:flex-end;justify-content:center;';
+
+  overlay.innerHTML = `
+    <div style="background:var(--bg1,#fff);border-radius:20px 20px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;box-shadow:0 -4px 32px rgba(0,0,0,0.15);">
+      <div style="width:36px;height:4px;background:var(--sep,#e0e0e0);border-radius:2px;margin:0 auto 18px;"></div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:4px;">💳 Оплата штрафу</div>
+      <div style="font-size:14px;color:var(--text2,#888);margin-bottom:18px;">Сума: <b>${amount} €</b> · Штраф №${fineId}</div>
+      <div style="font-size:13px;color:var(--text2,#888);margin-bottom:8px;">Прикріпіть скріншот підтвердження оплати:</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <label class="ff-file-button" id="pay-evidence-label" for="pay-evidence-file" style="flex-shrink:0;">Обрати фото</label>
+        <input id="pay-evidence-file" type="file" accept="image/png,image/jpeg" style="display:none;" onchange="handlePayEvidenceFile(this)">
+        <span id="pay-evidence-name" style="font-size:12px;color:var(--text2,#888);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      </div>
+      <div id="pay-evidence-preview" style="margin-bottom:14px;"></div>
+      <div id="pay-status-msg" class="ff-status" style="margin-bottom:10px;"></div>
+      <div style="display:flex;gap:10px;">
+        <button type="button" class="ff-submit" style="flex:1;" onclick="submitPayFineRequest('${fineId}')">Надіслати на перевірку</button>
+        <button type="button" class="btn-secondary" style="flex:0 0 auto;padding:0 18px;" onclick="document.getElementById('pay-fine-modal').remove()">Скасувати</button>
+      </div>
+    </div>`;
+
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+async function handlePayEvidenceFile(input) {
+  const preview = document.getElementById('pay-evidence-preview');
+  const label = document.getElementById('pay-evidence-label');
+  const nameEl = document.getElementById('pay-evidence-name');
+  if (!input || !input.files || !input.files[0]) {
+    window._payEvidence = null;
+    if (preview) preview.innerHTML = '';
+    if (label) label.textContent = 'Обрати фото';
+    if (nameEl) nameEl.textContent = '';
+    return;
+  }
+  const file = input.files[0];
+  if (file.size > 10 * 1024 * 1024) {
+    if (preview) preview.innerHTML = '<span class="ff-preview-info" style="color:#ff6b6b;">Файл завеликий (макс 10 МБ)</span>';
+    return;
+  }
+  if (preview) preview.innerHTML = '<span class="ff-preview-info">Обробляємо…</span>';
+  const dataUrl = await compressImageToDataUrl(file, 800, 0.8);
+  if (!dataUrl) {
+    if (preview) preview.innerHTML = '<span class="ff-preview-info" style="color:#ff6b6b;">Не вдалося прочитати файл</span>';
+    return;
+  }
+  window._payEvidence = dataUrl;
+  if (nameEl) nameEl.textContent = file.name;
+  if (label) label.textContent = 'Замінити';
+  if (preview) preview.innerHTML = `<img class="ff-preview-img" src="${dataUrl}" alt="оплата" style="max-width:100%;border-radius:10px;max-height:180px;object-fit:contain;">`;
+}
+
+async function submitPayFineRequest(fineId) {
+  const status = document.getElementById('pay-status-msg');
+  const username = (window.state && window.state.telegram && window.state.telegram.username)
+    || (tgUser && tgUser.username);
+
+  if (!window._payEvidence) {
+    if (status) status.textContent = '⚠️ Потрібен скріншот підтвердження оплати';
+    return;
+  }
+  if (status) status.textContent = 'Надсилаємо…';
+
+  const item = {
+    _paymentId: 'pay_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6),
+    fineId,
+    username,
+    evidence: window._payEvidence,
+    submittedAt: new Date().toISOString()
+  };
+
+  let ok = false;
+  if (typeof window.submitPaymentRequest === 'function') {
+    ok = await window.submitPaymentRequest(item);
+  }
+
+  if (ok) {
+    window._payEvidence = null;
+    if (status) status.textContent = '✅ Надіслано на перевірку адміністрації';
+    setTimeout(() => {
+      const modal = document.getElementById('pay-fine-modal');
+      if (modal) modal.remove();
+      renderFines();
+    }, 1500);
+  } else {
+    if (status) status.textContent = '❌ Не вдалося надіслати';
+  }
+}
+
+async function renderPaymentRequestsSection() {
+  const role = getUserIssuerRole();
+  if (!role.canApprove) return;
+
+  let root = document.getElementById('fines-payments-list');
+  if (!root) {
+    const finesList = document.getElementById('fines-pending-list');
+    if (!finesList) return;
+    root = document.createElement('div');
+    root.id = 'fines-payments-list';
+    finesList.parentNode.insertBefore(root, finesList.nextSibling);
+  }
+
+  root.innerHTML = `<div class="fines-loading">Перевірка оплат…</div>`;
+
+  let items = [];
+  if (typeof window.fetchPaymentRequests === 'function') {
+    try { items = await window.fetchPaymentRequests(); } catch(e) {}
+  }
+
+  if (!items.length) { root.innerHTML = ''; return; }
+
+  root.innerHTML = `
+    <div class="profile-section-title" style="padding:12px 4px 6px;">💳 Запити на оплату (${items.length})</div>
+    ${items.map(it => `
+      <div class="fine-card fine-card-pending">
+        <div class="fine-card-header">
+          <div class="fine-card-num">Штраф №${it.fineId || '—'}</div>
+          <div class="fine-card-status" style="color:#f0a000;"><span class="fine-status-dot" style="background:#f0a000;"></span>Очікує</div>
+        </div>
+        <div class="fine-card-row"><span class="fine-card-label">Гравець:</span><span class="fine-card-value">@${it.username || '—'}</span></div>
+        <div class="fine-card-row"><span class="fine-card-label">Дата:</span><span class="fine-card-value">${it.submittedAt ? formatExpiryDate(it.submittedAt.slice(0,10)) : '—'}</span></div>
+        ${it.evidence
+          ? `<img class="fine-evidence-img" src="${it.evidence}" alt="оплата" onclick="openEvidenceFull('${it._paymentId}')" style="max-width:100%;border-radius:10px;max-height:200px;object-fit:contain;margin-top:8px;cursor:zoom-in;">`
+          : '<div class="ff-preview-info">⚠️ Без скріншоту</div>'}
+        <div class="fine-actions" style="margin-top:10px;">
+          <button type="button" class="fine-btn fine-btn-approve" onclick="approvePaymentUI('${it._paymentId}')">✅ Підтвердити оплату</button>
+          <button type="button" class="fine-btn fine-btn-reject" onclick="rejectPaymentUI('${it._paymentId}')">❌ Відхилити</button>
+        </div>
+      </div>`).join('')}`;
+}
+
+async function approvePaymentUI(paymentId) {
+  if (typeof window.approvePaymentRequest !== 'function') return;
+  const approver = window.state && window.state.telegram && window.state.telegram.username;
+  const ok = await window.approvePaymentRequest(paymentId, approver);
+  if (ok) {
+    showToast && showToast('✅ Оплату підтверджено');
+    renderPaymentRequestsSection();
+  } else {
+    showToast && showToast('❌ Не вдалося підтвердити');
+  }
+}
+
+async function rejectPaymentUI(paymentId) {
+  if (typeof window.rejectPaymentRequest !== 'function') return;
+  const ok = await window.rejectPaymentRequest(paymentId);
+  if (ok) {
+    showToast && showToast('Запит відхилено');
+    renderPaymentRequestsSection();
+  } else {
+    showToast && showToast('❌ Не вдалося відхилити');
+  }
 }
 
 function genPendingId() {
@@ -974,6 +1137,16 @@ async function renderFines() {
   }
   if (window.state) window.state.fines = fines;
 
+  let pendingPaymentIds = [];
+  if (typeof window.fetchPaymentRequests === 'function') {
+    try {
+      const reqs = await window.fetchPaymentRequests();
+      pendingPaymentIds = reqs
+        .filter(r => r && r.username === username)
+        .map(r => r.fineId);
+    } catch(e) {}
+  }
+
   if (!fines.length) {
     list.innerHTML = `
       <div class="fines-empty">
@@ -990,9 +1163,15 @@ async function renderFines() {
     const amount = (f.amount != null && f.amount !== '') ? `${f.amount} €` : '—';
     const due = f.dueDate ? formatExpiryDate(f.dueDate) : (f.due || '—');
     const paid = isFinePaid(f);
-    const statusLabel = paid ? 'Сплачено' : 'Несплачено';
-    const statusColor = paid ? '#30d158' : '#ff4d4d';
+    const isPendingPayment = !paid && pendingPaymentIds.includes(f.id);
+    const statusLabel = paid ? 'Сплачено' : (isPendingPayment ? 'На перевірці' : 'Несплачено');
+    const statusColor = paid ? '#30d158' : (isPendingPayment ? '#f0a000' : '#ff4d4d');
     const reason = f.reason ? `<div class="fine-card-reason">${f.reason}</div>` : '';
+    const payBtn = (!paid && !isPendingPayment)
+      ? `<div class="fine-actions" style="margin-top:8px;">
+           <button type="button" class="fine-btn fine-btn-approve" style="width:100%;" onclick="openPayFineModal('${f.id}', ${f.amount || 0})">💳 Сплатити</button>
+         </div>`
+      : (isPendingPayment ? `<div class="ff-hint" style="margin-top:8px;font-size:12px;color:#f0a000;">⏳ Чекає підтвердження адміністрації</div>` : '');
     return `
       <div class="fine-card">
         <div class="fine-card-header">
@@ -1014,6 +1193,7 @@ async function renderFines() {
           <span class="fine-card-value">${due}</span>
         </div>
         ${reason}
+        ${payBtn}
       </div>`;
   }).join('');
 }
