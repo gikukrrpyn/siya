@@ -870,8 +870,15 @@ function renderHomeDocCards() {
     .filter(def => docData[def.id] || docData[def.id + '_0'])
     .map(def => {
       const resolvedId = docData[def.id] ? def.id : def.id + '_0';
+      return { resolvedId, def };
+    });
+
+  if (cards.length) {
+    const isOdd = cards.length % 2 !== 0;
+    scroll.innerHTML = cards.map(({ resolvedId, def }, i) => {
+      const fullWidth = isOdd && i === cards.length - 1 ? 'grid-column:1/-1;' : '';
       return `
-        <div class="doc-card" onclick="openDocPage('${resolvedId}')">
+        <div class="doc-card" onclick="openDocPage('${resolvedId}')" style="box-sizing:border-box;${fullWidth}">
           <div class="doc-valid-dot"></div>
           <div class="doc-card-icon">${def.icon}</div>
           <div>
@@ -879,13 +886,10 @@ function renderHomeDocCards() {
             <div class="doc-card-name">${def.name}</div>
           </div>
         </div>`;
-    });
-
-  if (cards.length) {
-    scroll.innerHTML = cards.join('');
+    }).join('');
   } else {
     scroll.innerHTML = `
-      <div class="doc-card" onclick="openDocPage('passport')">
+      <div class="doc-card" onclick="openDocPage('passport')" style="box-sizing:border-box;grid-column:1/-1;">
         <div class="doc-valid-dot"></div>
         <div class="doc-card-icon">🪪</div>
         <div>
