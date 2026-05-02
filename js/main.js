@@ -740,16 +740,48 @@ function loadLicenseInfo(roblox, licenses) {
     const d2 = new Date(issuedAt);
     issuedStr = d2.toLocaleDateString('uk-UA', { day:'2-digit', month:'2-digit', year:'numeric' });
   }
+
+  let passportFraction = '—';
+  let passportRole = '—';
+  const P = window.state && window.state.players;
+  if (P) {
+    const pKey = Object.keys(P).find(k => k.toLowerCase() === lc);
+    if (pKey && Array.isArray(P[pKey]) && P[pKey][0]) {
+      const pd = P[pKey][0];
+      passportFraction = pd.category || '—';
+      passportRole = pd.role || '—';
+    }
+  }
+  if (passportFraction === '—' && licenses) {
+    const factionDefs = [
+      { key: 'police', name: 'НПС' }, { key: 'nabs', name: 'НАБС' },
+      { key: 'sbs', name: 'СБС' }, { key: 'dbr', name: 'ДБР' },
+    ];
+    for (const fd of factionDefs) {
+      const block = licenses[fd.key];
+      if (!block) continue;
+      const eKey = Object.keys(block).find(k => k.toLowerCase() === lc);
+      if (!eKey) continue;
+      const d2 = block[eKey];
+      passportFraction = fd.name;
+      passportRole = typeof window.getPoliceRank === 'function' && d2.role
+        ? window.getPoliceRank(d2.role) : (d2.role || fd.name);
+      break;
+    }
+  }
+
   docData['passport'] = {
     passport: {
       title: 'Паспорт',
       type: 'Паспорт',
       fields: [
-        { label: 'ROBLOX NICK', value: roblox.username },
-        { label: 'ROBLOX ID', value: roblox.id || '—' },
+        { label: 'ROBLOX NICK',  value: roblox.username },
+        { label: 'ROBLOX ID',    value: roblox.id || '—' },
         { label: 'DISPLAY NAME', value: roblox.display || roblox.username },
-        { label: 'ВИДАНО', value: issuedStr },
-        { label: 'ID КОД', value: idCode },
+        { label: 'ФРАКЦІЯ',      value: passportFraction },
+        { label: 'ПОСАДА',       value: passportRole },
+        { label: 'ВИДАНО',       value: issuedStr },
+        { label: 'ID КОД',       value: idCode },
       ]
     }
   };
