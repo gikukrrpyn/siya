@@ -133,11 +133,11 @@ function buildLicenseDoc(key, data, ctx) {
 
   switch (String(key).toLowerCase()) {
     case 'weapon': {
-      const isCancelled = data.cans || /злочинн|скасов|недійсн/i.test(data.status || '') || data.expiry === '00.00.0000';
+      const isCancelled = data.cans || /злочинн|скасов|недійсн/i.test(data.status || '') || data.expiry === '00.00.0000' || isExpired(data.expiry);
       return {
         title: 'Ліцензія на зброю',
         type: 'Ліцензія',
-        status: isCancelled ? 'Скасовано' : (data.status || 'Дійсна'),
+        status: isCancelled ? (isExpired(data.expiry) && !data.cans ? 'Прострочена' : 'Скасовано') : (data.status || 'Дійсна'),
         docNumber: data.expiry && data.expiry !== '00.00.0000' ? data.expiry : '—',
         fields: [
           f('Власник', owner),
@@ -314,6 +314,26 @@ function formatExpiryDate(s) {
   return String(s);
 }
 
+function isExpired(expiryStr) {
+  if (!expiryStr || expiryStr === '00.00.0000') return false;
+  // формат ДД.ММ.РРРР
+  const m = String(expiryStr).match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  if (m) {
+    const exp = new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return exp < today;
+  }
+  // ISO або інший формат
+  const d = new Date(expiryStr);
+  if (!isNaN(d.getTime())) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return d < today;
+  }
+  return false;
+}
+
 function openTgLink(url) {
   if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.openTelegramLink === 'function') {
     try { window.Telegram.WebApp.openTelegramLink(url); return; } catch (e) {}
@@ -355,7 +375,7 @@ function renderProfileLicenses() {
     const key = Object.keys(L.weapon).find(k => k.toLowerCase() === lc);
     if (key) {
       const d = L.weapon[key];
-      const status = d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна');
+      const status = d.cans ? '⛔ Скасовано' : (isExpired(d.expiry) ? '⛔ Прострочена' : (d.status || 'Дійсна'));
       const expiry = d.expiry ? `\nДійсна до: ${formatExpiryDate(d.expiry)}` : '';
       items.push({ icon: '🔫', label: 'Ліцензія на зброю', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
     }
@@ -365,7 +385,7 @@ function renderProfileLicenses() {
     const key = Object.keys(L.taxi).find(k => k.toLowerCase() === lc);
     if (key) {
       const d = L.taxi[key];
-      const status = d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна');
+      const status = d.cans ? '⛔ Скасовано' : (isExpired(d.expiry) ? '⛔ Прострочена' : (d.status || 'Дійсна'));
       const expiry = d.expiry ? `\nДійсна до: ${formatExpiryDate(d.expiry)}` : '';
       items.push({ icon: '🚕', label: 'Таксистська ліцензія', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
     }
@@ -375,7 +395,7 @@ function renderProfileLicenses() {
     const key = Object.keys(L.advocat).find(k => k.toLowerCase() === lc);
     if (key) {
       const d = L.advocat[key];
-      const status = d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна');
+      const status = d.cans ? '⛔ Скасовано' : (isExpired(d.expiry) ? '⛔ Прострочена' : (d.status || 'Дійсна'));
       const expiry = d.expiry ? `\nДійсна до: ${formatExpiryDate(d.expiry)}` : '';
       items.push({ icon: '⚖️', label: 'Адвокатська ліцензія', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
     }
