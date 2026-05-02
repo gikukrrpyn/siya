@@ -157,14 +157,14 @@ function renderIssueFineForm() {
     <label class="ff-field">
       <span class="ff-label">Roblox username гравця *</span>
       <div style="position:relative;">
-        <input id="fine-target-rbx" class="ff-input" type="text" placeholder="RobloxNick" autocomplete="off"
+        <input id="fine-target-rbx" class="ff-input" type="text" placeholder="Роблокс юзернейм" autocomplete="off"
                oninput="fineRbxLookup(this.value)">
         <div id="fine-rbx-status" style="font-size:12px;margin-top:4px;min-height:18px;color:var(--text2,#888);"></div>
       </div>
     </label>
     <label class="ff-field">
       <span class="ff-label">Сума, € *</span>
-      <input id="fine-amount" class="ff-input" type="number" min="1" step="1" placeholder="100">
+      <input id="fine-amount" class="ff-input" type="number" min="1000" step="100" placeholder="1000">
     </label>
     <label class="ff-field">
       <span class="ff-label">Оплатити до *</span>
@@ -172,7 +172,7 @@ function renderIssueFineForm() {
     </label>
     <label class="ff-field">
       <span class="ff-label">Причина *</span>
-      <textarea id="fine-reason" class="ff-input" rows="3" placeholder="ст. 124 ПДР — перевищення швидкості"></textarea>
+      <textarea id="fine-reason" class="ff-input" rows="3" placeholder="пункт 2 стаття 1 (приклад)"></textarea>
     </label>
     <div class="ff-field">
       <span class="ff-label">${evidenceLabel}</span>
@@ -434,7 +434,7 @@ async function renderFines() {
           <span class="fine-card-value">${issuer.icon} ${issuer.label}</span>
         </div>
         ${f.issuedByRbx ? `<div class="fine-card-row">
-          <span class="fine-card-label">Офіцер:</span>
+          <span class="fine-card-label">Від:</span>
           <span class="fine-card-value">${f.issuedByRbx}</span>
         </div>` : ''}
         <div class="fine-card-row">
