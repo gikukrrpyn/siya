@@ -39,6 +39,82 @@ window.fetchProfile = async (tgUsername) => {
     } catch (e) { return null; }
 };
 
+
+window.addFineDirect = async (targetUsername, fine) => {
+    if (!targetUsername || !fine) return false;
+    try {
+        const profSnap = await getDoc(doc(db, "passports", targetUsername));
+        const data = profSnap.exists() ? profSnap.data() : {};
+        const fines = Array.isArray(data.fines) ? data.fines.slice() : [];
+        fines.push(fine);
+        await setDoc(doc(db, "passports", targetUsername), { fines }, { merge: true });
+        return true;
+    } catch (e) { console.error('addFineDirect', e); return false; }
+};
+
+window.submitPendingFine = async (item) => {
+    if (!item) return false;
+    try {
+        const ref = doc(db, "fines", "pending");
+        const snap = await getDoc(ref);
+        const list = snap.exists() && Array.isArray(snap.data().items) ? snap.data().items : [];
+        list.push(item);
+        await setDoc(ref, { items: list }, { merge: true });
+        return true;
+    } catch (e) { console.error('submitPendingFine', e); return false; }
+};
+
+
+window.fetchPendingFines = async () => {
+    try {
+        const snap = await getDoc(doc(db, "fines", "pending"));
+        return snap.exists() && Array.isArray(snap.data().items) ? snap.data().items : [];
+    } catch (e) { console.error('fetchPendingFines', e); return []; }
+};
+
+window.approvePendingFine = async (pendingId, approverUsername) => {
+    try {
+        const pendRef = doc(db, "fines", "pending");
+        const pendSnap = await getDoc(pendRef);
+        const list = pendSnap.exists() && Array.isArray(pendSnap.data().items) ? pendSnap.data().items.slice() : [];
+        const idx = list.findIndex(f => f && f._pendingId === pendingId);
+        if (idx < 0) return false;
+
+        const item = list.splice(idx, 1)[0];
+        const target = item.target;
+        if (!target) return false;
+
+        const fine = Object.assign({}, item);
+        delete fine._pendingId;
+        delete fine.target;
+        fine.status = 'unpaid';
+        fine.approvedBy = approverUsername || null;
+        fine.approvedAt = new Date().toISOString();
+
+        const profSnap = await getDoc(doc(db, "passports", target));
+        const data = profSnap.exists() ? profSnap.data() : {};
+        const fines = Array.isArray(data.fines) ? data.fines.slice() : [];
+        fines.push(fine);
+
+        await setDoc(doc(db, "passports", target), { fines }, { merge: true });
+        await setDoc(pendRef, { items: list }, { merge: true });
+        return true;
+    } catch (e) { console.error('approvePendingFine', e); return false; }
+};
+
+window.rejectPendingFine = async (pendingId) => {
+    try {
+        const pendRef = doc(db, "fines", "pending");
+        const pendSnap = await getDoc(pendRef);
+        const list = pendSnap.exists() && Array.isArray(pendSnap.data().items) ? pendSnap.data().items.slice() : [];
+        const idx = list.findIndex(f => f && f._pendingId === pendingId);
+        if (idx < 0) return false;
+        list.splice(idx, 1);
+        await setDoc(pendRef, { items: list }, { merge: true });
+        return true;
+    } catch (e) { console.error('rejectPendingFine', e); return false; }
+};
+
 const tg = (typeof window !== 'undefined' && window.Telegram) ? window.Telegram.WebApp : null;
 if (tg) {
     try { tg.ready(); } catch (e) {}
