@@ -895,7 +895,7 @@ html, body {
   #splash {
     position: fixed;
     inset: 0;
-    background: var(--black);
+    background: #0e0e0e;
     z-index: 200;
     display: flex;
     flex-direction: column;
@@ -914,7 +914,7 @@ html, body {
   }
   .splash-tagline {
     font-size: 13px;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.6);
     margin-top: 16px;
     font-weight: 500;
     letter-spacing: 0.5px;
