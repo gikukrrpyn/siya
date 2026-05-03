@@ -19,6 +19,7 @@
     font-family: 'Raleway', sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow-y: auto;
+    overflow: hidden;
   }
   #onboarding-overlay.hidden { display: none; }
   #ob-splash {
@@ -40,6 +41,7 @@
     flex: 1; display: flex; flex-direction: column;
     opacity: 0; animation: obFadeUp 0.4s 2s cubic-bezier(.22,1,.36,1) both;
     animation-fill-mode: both;
+    min-height: 0;
   }
   .ob-logo-bar {
     height: 56px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -56,6 +58,7 @@
     -webkit-overflow-scrolling: touch;
     max-height: 100%;
     overscroll-behavior: contain;
+    min-height: 0;
   }
   .ob-terms-tag {
     display: inline-block; background: #F5F5F5; border-radius: 20px;
