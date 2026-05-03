@@ -37,13 +37,13 @@
   }
   @keyframes obSplashOut { to { opacity: 0; pointer-events: none; visibility: hidden; } }
   @keyframes obBlurIn { from { opacity: 0; filter: blur(8px); transform: scale(.95); } to { opacity: 1; filter: none; transform: scale(1); } }
-  #ob-steps { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  #ob-steps { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   #ob-step-terms {
     flex: 1; display: flex; flex-direction: column;
     opacity: 0; animation: obFadeUp 0.4s 2s cubic-bezier(.22,1,.36,1) both;
     animation-fill-mode: both;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
   }
   .ob-logo-bar {
     height: 56px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -56,12 +56,11 @@
   }
 
   .ob-terms-body {
-    flex: 1; overflow-y: scroll; padding: 0 24px 16px;
+    flex: 1; overflow-y: auto; padding: 0 24px 16px;
     -webkit-overflow-scrolling: touch;
-    max-height: 100%;
-    overscroll-behavior: none;
+    overscroll-behavior: contain;
     min-height: 0;
-    scroll-behavior: smooth;
+    height: 0;
   }
   .ob-terms-tag {
     display: inline-block; background: #F5F5F5; border-radius: 20px;
