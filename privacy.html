@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Privacy Policy — CiЯ / СіЯ</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #000; --white: #fff;
+    --gray-100: #F5F5F5; --gray-200: #EBEBEB; --gray-400: #A3A3A3; --gray-500: #737373;
+    --font: 'Raleway', sans-serif; --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--white); font-family: var(--font); color: var(--black); -webkit-font-smoothing: antialiased; }
+
+  .page-wrap { max-width: 680px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
+  .logo-mark {
+    width: 44px; height: 44px; background: var(--black); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800; color: white; letter-spacing: -1px; font-family: var(--font);
+  }
+  .logo-text { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo-sub { font-size: 12px; font-weight: 500; color: var(--gray-400); margin-top: 1px; }
+
+  .doc-tag {
+    display: inline-block; background: var(--gray-100); border-radius: 20px;
+    padding: 5px 14px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--gray-500); margin-bottom: 16px;
+  }
+  h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.8px; line-height: 1.15; margin-bottom: 8px; }
+  .meta { font-size: 13px; color: var(--gray-400); font-weight: 500; margin-bottom: 40px; }
+  .divider { width: 40px; height: 3px; background: var(--black); border-radius: 2px; margin-bottom: 40px; }
+
+  h2 { font-size: 16px; font-weight: 800; letter-spacing: -0.2px; margin: 32px 0 10px; }
+  h2:first-of-type { margin-top: 0; }
+  p { font-size: 14px; font-weight: 400; color: var(--gray-500); line-height: 1.75; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  ul li { font-size: 14px; color: var(--gray-500); line-height: 1.75; margin-bottom: 4px; }
+  strong { color: var(--black); font-weight: 700; }
+
+  .data-table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; border-radius: 12px; overflow: hidden; }
+  .data-table th { background: var(--black); color: white; padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+  .data-table td { padding: 11px 16px; font-size: 13px; color: var(--gray-500); border-bottom: 1px solid var(--gray-200); }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:nth-child(even) td { background: var(--gray-100); }
+
+  .highlight-box {
+    background: var(--gray-100); border-radius: var(--radius); padding: 20px;
+    margin: 24px 0; border-left: 3px solid var(--black);
+  }
+  .highlight-box p { margin: 0; color: var(--black); font-weight: 600; font-size: 13px; }
+
+  .footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--gray-200); font-size: 12px; color: var(--gray-400); }
+  .footer a { color: var(--black); text-decoration: none; font-weight: 600; }
+  .footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <div class="logo-row">
+    <div class="logo-mark">CiЯ</div>
+    <div>
+      <div class="logo-text">СіЯ — Сервер і Я</div>
+      <div class="logo-sub">UkraineRP Community Platform</div>
+    </div>
+  </div>
+
+  <div class="doc-tag">Legal</div>
+  <h1>Privacy Policy</h1>
+  <div class="meta">Effective date: May 1, 2025 &nbsp;·&nbsp; Last updated: May 1, 2026</div>
+  <div class="divider"></div>
+
+  <h2>1. Who We Are</h2>
+  <p><strong>СіЯ ("Сервер і Я")</strong> is a community-operated web application for the UkraineRP Roblox roleplay server. This privacy policy explains what data we collect, how we use it, and your rights.</p>
+
+  <div class="highlight-box">
+    <p>🔒 Short version: We only collect what's needed to show you your in-game passport and documents. We don't sell data, we don't track you across the web, and you can ask us to delete your data at any time.</p>
+  </div>
+
+  <h2>2. Data We Collect</h2>
+  <table class="data-table">
+    <thead><tr><th>Data</th><th>Source</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Roblox username & display name</td><td>Roblox OAuth (public profile scope)</td><td>To identify you and display your passport</td></tr>
+      <tr><td>Roblox user ID</td><td>Roblox OAuth (openid scope)</td><td>Unique identifier for your account</td></tr>
+      <tr><td>Roblox avatar image URL</td><td>Roblox Thumbnails API (public)</td><td>Displayed on your passport card</td></tr>
+      <tr><td>Telegram username</td><td>Telegram WebApp SDK (if used)</td><td>Links your Telegram to your passport</td></tr>
+      <tr><td>In-app passport ID</td><td>Generated locally in your browser</td><td>Your unique CiЯ document number</td></tr>
+      <tr><td>In-game fines & records</td><td>Server administrators</td><td>Displayed on your passport document</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. What We Do NOT Collect</h2>
+  <ul>
+    <li>Your Roblox password (never shared via OAuth)</li>
+    <li>Your email address</li>
+    <li>Your Robux balance or inventory</li>
+    <li>Payment or billing information of any kind</li>
+    <li>Location data or device identifiers beyond standard browser info</li>
+    <li>Cookies for advertising or cross-site tracking</li>
+  </ul>
+
+  <h2>4. How We Use Your Data</h2>
+  <p>Your data is used exclusively to:</p>
+  <ul>
+    <li>Display your in-game passport, faction membership, and licenses within the СіЯ app</li>
+    <li>Link your Roblox identity to your Telegram for document sharing</li>
+    <li>Allow server administrators to attach in-game records (such as fines) to your profile</li>
+  </ul>
+  <p>We do <strong>not</strong> use your data for advertising, analytics resale, or any commercial purpose.</p>
+
+  <h2>5. Data Storage</h2>
+  <p>Your data is stored in <strong>Google Firebase Firestore</strong>, a cloud database operated by Google LLC. Data is stored in European and US-based Google data centers with industry-standard encryption at rest and in transit.</p>
+  <p>We retain your data as long as you are an active member of the community. You may request deletion at any time (see Section 7).</p>
+
+  <h2>6. Data Sharing</h2>
+  <p>We do not sell or share your personal data with third parties except:</p>
+  <ul>
+    <li><strong>Google Firebase</strong> — our database infrastructure provider (bound by Google's DPA)</li>
+    <li><strong>Roblox Corporation</strong> — only for the OAuth handshake; they do not receive your stored data</li>
+    <li>Server administrators within the UkraineRP community, who may view your linked Roblox username to manage in-game records</li>
+  </ul>
+
+  <h2>7. Your Rights & Data Deletion</h2>
+  <p>You have the right to:</p>
+  <ul>
+    <li><strong>Access</strong> the data we hold about you (visible in the СіЯ app)</li>
+    <li><strong>Request deletion</strong> of your passport record at any time</li>
+    <li><strong>Revoke Roblox access</strong> in your Roblox account settings → Connected Apps</li>
+  </ul>
+  <p>To request deletion, contact us via <strong>@UkraineRPSupport</strong> on Telegram with your Roblox username and we will remove your record within 7 days.</p>
+
+  <h2>8. Third-Party Services</h2>
+  <p>This app integrates with:</p>
+  <ul>
+    <li><strong>Roblox OAuth 2.0</strong> — <a href="https://en.help.roblox.com/hc/en-us/articles/115004647846" style="color:#000;font-weight:600;">Roblox Privacy Policy</a></li>
+    <li><strong>Telegram WebApp SDK</strong> — <a href="https://telegram.org/privacy" style="color:#000;font-weight:600;">Telegram Privacy Policy</a></li>
+    <li><strong>Google Firebase</strong> — <a href="https://firebase.google.com/support/privacy" style="color:#000;font-weight:600;">Firebase Privacy</a></li>
+  </ul>
+
+  <h2>9. Changes to This Policy</h2>
+  <p>We may update this policy as the application evolves. The "last updated" date at the top will always reflect the most recent revision. Continued use after changes constitutes acceptance.</p>
+
+  <h2>10. Contact</h2>
+  <p>Privacy questions or data deletion requests: <strong>@UkraineRPSupport</strong> on Telegram or <strong>@UkraineRPOfficial</strong> community channel.</p>
+
+  <div class="footer">
+    <p>© 2025–2026 СіЯ / UkraineRP Community &nbsp;·&nbsp; <a href="terms.html">Terms of Use</a> &nbsp;·&nbsp; <a href="index.html">Back to App</a></p>
+  </div>
+
+</div>
+</body>
+</html>
