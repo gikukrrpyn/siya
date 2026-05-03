@@ -122,13 +122,14 @@
   @keyframes obShimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
   #ob-step-login {
     flex: 1; display: none; flex-direction: column; align-items: center;
-    justify-content: flex-start; overflow: hidden;
+    justify-content: flex-start; overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
   #ob-step-login.active { display: flex; }
 
   .ob-login-hero {
     flex: 1; display: flex; flex-direction: column; align-items: center;
-    justify-content: center; padding: 0 28px; gap: 0; position: relative; overflow: hidden;
+    justify-content: center; padding: 0 28px; gap: 0; position: relative; overflow: visible;
   }
   .ob-login-hero::before {
     content: ''; position: absolute; width: 320px; height: 320px; border-radius: 50%;
