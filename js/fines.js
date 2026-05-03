@@ -1,158 +1,10 @@
-function finesFormatDate(s) {
-  if (!s) return '—';
-  const d = new Date(s);
-  if (!isNaN(d.getTime()) && /\d{4}/.test(String(s))) {
-    return d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  }
-  return String(s);
-}
-
-function genPendingId() {
-  return 'pf_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
-}
-
-function todayPlusDays(days) {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-}
-
-function classifyFineIssuer(f) {
-  const t = (f.issuerType || '').toLowerCase();
-  if (t === 'court' || t === 'judge') return { icon: '⚖️', label: 'Суд' };
-  if (t === 'admin' || t === 'administration') return { icon: '🛡️', label: 'Адміністрація' };
-  if (t === 'police' || t === 'nps') return { icon: '👮', label: 'НПС' };
-  const s = (f.issuer || f.issuedBy || '').toLowerCase();
-  if (s.includes('суд')) return { icon: '⚖️', label: f.issuer || 'Суд' };
-  if (s.includes('адмін')) return { icon: '🛡️', label: f.issuer || 'Адміністрація' };
-  if (s.includes('нпс') || s.includes('сержант') || s.includes('лейтенант') || s.includes('капітан')
-      || s.includes('патруль') || s.includes('кадет')) return { icon: '👮', label: f.issuer || 'НПС' };
-  return { icon: '📄', label: f.issuer || f.issuedBy || '—' };
-}
-
-function isFinePaid(f) {
-  const s = String(f.status || '').toLowerCase();
-  if (s === 'paid' || s === 'true' || s === '1') return true;
-  return s.includes('сплач') && !s.includes('неспл');
-}
-
-function getUserIssuerRole() {
-  const out = {
-    canIssueDirectly: false,
-    canSubmitPending: false,
-    canApprove: false,
-    label: '',
-    issuerType: ''
-  };
-
-  const rbx = window.state && window.state.roblox;
-  const robloxUsername = rbx && rbx.username;
-  if (!robloxUsername) return out;
-
-  const lc = robloxUsername.toLowerCase();
-  const headWords   = ['комісар', 'начальник', 'директор', 'голова', 'генерал', 'шеріф'];
-  const seniorWords = ['полковник', 'підполковник', 'капітан', 'майор'];
-
-  const P = window.state && window.state.players;
-  if (P) {
-    const pKey = Object.keys(P).find(k => k.toLowerCase() === lc);
-    if (pKey && Array.isArray(P[pKey]) && P[pKey][0]) {
-      const pd = P[pKey][0];
-      const cat  = String(pd.category || '').toLowerCase();
-      const role = String(pd.role     || '').toLowerCase();
-      if (cat.includes('адмін') || cat === 'адміністрація') {
-        return { canIssueDirectly: true, canSubmitPending: true, canApprove: true,
-                 label: pd.role || 'Адміністрація', issuerType: 'admin' };
-      }
-      if (cat.includes('суд')) {
-        return { canIssueDirectly: true, canSubmitPending: true, canApprove: true,
-                 label: pd.role || 'Суд', issuerType: 'court' };
-      }
-      const factionMap = [
-        { cats: ['поліція', 'нпс', 'police'], label: 'НПС',  issuerType: 'police' },
-        { cats: ['набс', 'nabs'],             label: 'НАБС', issuerType: 'police' },
-        { cats: ['сбс', 'sbs'],               label: 'СБС',  issuerType: 'police' },
-        { cats: ['дбр', 'dbr'],               label: 'ДБР',  issuerType: 'police' },
-      ];
-      for (const fm of factionMap) {
-        if (fm.cats.some(c => cat.includes(c))) {
-          const isHead   = headWords.some(w => role.includes(w));
-          const isSenior = seniorWords.some(w => role.includes(w));
-          return {
-            canIssueDirectly: isHead || isSenior,
-            canSubmitPending: true,
-            canApprove: isHead,
-            label: (pd.role || fm.label) + ' ' + fm.label,
-            issuerType: fm.issuerType
-          };
-        }
-      }
-    }
-  }
-
-  const L = window.state && window.state.licenses;
-  if (!L) return out;
-
-  const factions = [
-    { key: 'police', label: 'НПС',  issuerType: 'police' },
-    { key: 'nabs',   label: 'НАБС', issuerType: 'police' },
-    { key: 'sbs',    label: 'СБС',  issuerType: 'police' },
-    { key: 'dbr',    label: 'ДБР',  issuerType: 'police' }
-  ];
-
-  for (const f of factions) {
-    const block = L[f.key];
-    if (!block) continue;
-    const key = Object.keys(block).find(k => k.toLowerCase() === lc);
-    if (!key) continue;
-    const r = block[key];
-    if (!r) continue;
-    const role   = String(r.role || '').toLowerCase();
-    const isHead   = headWords.some(w => role.includes(w));
-    const isSenior = seniorWords.some(w => role.includes(w));
-    return {
-      canIssueDirectly: isHead || isSenior,
-      canSubmitPending: true,
-      canApprove: isHead,
-      label: (r.role || f.label) + ' ' + f.label,
-      issuerType: f.issuerType
-    };
-  }
-
-  return out;
-}
-window.getUserIssuerRole = getUserIssuerRole;
-
-function renderIssueFineForm() {
-  const role = getUserIssuerRole();
-  window._issueFineRole = role;
-
-  const root = document.getElementById('issue-fine-body');
-  if (!root) return;
-
-  if (!role.canIssueDirectly && !role.canSubmitPending) {
-    root.innerHTML = `
+function finesFormatDate(s,_0x5c123d){if(!s)return"\u2014";const d=new Date(s);_0x5c123d=155055^155046;if(!isNaN(d['\u0067\u0065\u0074\u0054\u0069\u006D\u0065']())&&new RegExp("}4{d\\".split("").reverse().join(""),"")['\u0074\u0065\u0073\u0074'](String(s))){return d['\u0074\u006F\u004C\u006F\u0063\u0061\u006C\u0065\u0044\u0061\u0074\u0065\u0053\u0074\u0072\u0069\u006E\u0067']("\u0075\u006B\u002D\u0055\u0041",{'\u0064\u0061\u0079':"\u0032\u002D\u0064\u0069\u0067\u0069\u0074",'\u006D\u006F\u006E\u0074\u0068':"\u0032\u002D\u0064\u0069\u0067\u0069\u0074",'\u0079\u0065\u0061\u0072':'numeric'});}return String(s);}function genPendingId(){return"_fp".split("").reverse().join("")+Date['\u006E\u006F\u0077']()['\u0074\u006F\u0053\u0074\u0072\u0069\u006E\u0067'](595360^595332)+"\u005F"+Math['\u0072\u0061\u006E\u0064\u006F\u006D']()['\u0074\u006F\u0053\u0074\u0072\u0069\u006E\u0067'](192235^192207)['\u0073\u006C\u0069\u0063\u0065'](930022^930020,361946^361938);}function todayPlusDays(days,_0xcde){const d=new Date();_0xcde=(754929^754932)+(152757^152756);d['\u0073\u0065\u0074\u0044\u0061\u0074\u0065'](d['\u0067\u0065\u0074\u0044\u0061\u0074\u0065']()+days);return d['\u0074\u006F\u0049\u0053\u004F\u0053\u0074\u0072\u0069\u006E\u0067']()['\u0073\u006C\u0069\u0063\u0065'](319395^319395,361812^361822);}function classifyFineIssuer(f){var _0xa5b=(135063^135060)+(764927^764926);const t=(f['\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065']||'')['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']();_0xa5b=870240^870246;if(t==="\u0063\u006F\u0075\u0072\u0074"||t==="\u006A\u0075\u0064\u0067\u0065")return{'\u0069\u0063\u006F\u006E':'⚖️',"label":'Суд'};if(t==="nimda".split("").reverse().join("")||t==="noitartsinimda".split("").reverse().join(""))return{'\u0069\u0063\u006F\u006E':"\uD83D\uDEE1\uFE0F",'\u006C\u0061\u0062\u0065\u006C':"\u0410\u0434\u043C\u0456\u043D\u0456\u0441\u0442\u0440\u0430\u0446\u0456\u044F"};if(t==="\u0070\u006F\u006C\u0069\u0063\u0065"||t==="\u006E\u0070\u0073")return{'\u0069\u0063\u006F\u006E':"\uD83D\uDC6E",'\u006C\u0061\u0062\u0065\u006C':"\u041D\u041F\u0421"};const s=(f['\u0069\u0073\u0073\u0075\u0065\u0072']||f['\u0069\u0073\u0073\u0075\u0065\u0064\u0042\u0079']||'')['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']();if(s['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u0441\u0443\u0434"))return{"icon":"\u2696\uFE0F","label":f['\u0069\u0073\u0073\u0075\u0065\u0072']||"\u0421\u0443\u0434"};if(s['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u0430\u0434\u043C\u0456\u043D"))return{'\u0069\u0063\u006F\u006E':"\uD83D\uDEE1\uFE0F","label":f['\u0069\u0073\u0073\u0075\u0065\u0072']||"\u044F\u0456\u0446\u0430\u0440\u0442\u0441\u0456\u043D\u0456\u043C\u0434\u0410".split("").reverse().join("")};if(s['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u043D\u043F\u0441")||s['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u0441\u0435\u0440\u0436\u0430\u043D\u0442")||s['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u043B\u0435\u0439\u0442\u0435\u043D\u0430\u043D\u0442")||s['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u043D\u0430\u0442\u0456\u043F\u0430\u043A".split("").reverse().join(""))||s['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u043F\u0430\u0442\u0440\u0443\u043B\u044C")||s['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u0442\u0435\u0434\u0430\u043A".split("").reverse().join("")))return{'\u0069\u0063\u006F\u006E':'👮',"label":f['\u0069\u0073\u0073\u0075\u0065\u0072']||"\u041D\u041F\u0421"};return{"icon":"\uD83D\uDCC4","label":f['\u0069\u0073\u0073\u0075\u0065\u0072']||f['\u0069\u0073\u0073\u0075\u0065\u0064\u0042\u0079']||"\u2014"};}function isFinePaid(f){const s=String(f['\u0073\u0074\u0061\u0074\u0075\u0073']||'')['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']();if(s==="\u0070\u0061\u0069\u0064"||s==="\u0074\u0072\u0075\u0065"||s==="\u0031")return!![];return s['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u0447\u0430\u043B\u043F\u0441".split("").reverse().join(""))&&!s['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u043B\u043F\u0441\u0435\u043D".split("").reverse().join(""));}function getUserIssuerRole(_0x8646gc,_0xcd727f,_0xdf187c){const _0x8368fb={'\u0063\u0061\u006E\u0049\u0073\u0073\u0075\u0065\u0044\u0069\u0072\u0065\u0063\u0074\u006C\u0079':false,"canSubmitPending":false,'\u0063\u0061\u006E\u0041\u0070\u0070\u0072\u006F\u0076\u0065':false,"label":'','\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065':''};var _0x_0x207=(935054^935049)+(991144^991136);const _0x7ced=window['\u0073\u0074\u0061\u0074\u0065']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0072\u006F\u0062\u006C\u006F\u0078'];_0x_0x207=(783187^783186)+(853351^853346);var _0xc677a=(416328^416321)+(112730^112723);const _0xe_0xg4d=_0x7ced&&_0x7ced['\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065'];_0xc677a=(451928^451929)+(415394^415403);if(!_0xe_0xg4d)return _0x8368fb;const _0xd80bdd=_0xe_0xg4d['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']();const _0x0ffa1b=["\u0440\u0430\u0441\u0456\u043C\u043E\u043A".split("").reverse().join(""),"\u043D\u0430\u0447\u0430\u043B\u044C\u043D\u0438\u043A","\u0440\u043E\u0442\u043A\u0435\u0440\u0438\u0434".split("").reverse().join(""),"\u0430\u0432\u043E\u043B\u043E\u0433".split("").reverse().join(""),"\u0433\u0435\u043D\u0435\u0440\u0430\u043B","\u0444\u0456\u0440\u0435\u0448".split("").reverse().join("")];_0x8646gc=(569862^569860)+(888282^888281);const _0xca_0xd5e=["\u043A\u0438\u043D\u0432\u043E\u043A\u043B\u043E\u043F".split("").reverse().join(""),"\u043A\u0438\u043D\u0432\u043E\u043A\u043B\u043E\u043F\u0434\u0456\u043F".split("").reverse().join(""),"\u043A\u0430\u043F\u0456\u0442\u0430\u043D","\u043C\u0430\u0439\u043E\u0440"];const P=window['\u0073\u0074\u0061\u0074\u0065']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0070\u006C\u0061\u0079\u0065\u0072\u0073'];_0xcd727f="lfbhim".split("").reverse().join("");if(P){var _0x4f166e=(111883^111880)+(856208^856217);const _0x786e1g=Object['\u006B\u0065\u0079\u0073'](P)['\u0066\u0069\u006E\u0064'](k=>k['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']()===_0xd80bdd);_0x4f166e=(399761^399760)+(129090^129088);if(_0x786e1g&&Array['\u0069\u0073\u0041\u0072\u0072\u0061\u0079'](P[_0x786e1g])&&P[_0x786e1g][719879^719879]){var _0x226f6e=(706414^706412)+(951651^951653);const _0xf26b=P[_0x786e1g][679130^679130];_0x226f6e=(630864^630866)+(269128^269130);const _0x2e67c=String(_0xf26b['\u0063\u0061\u0074\u0065\u0067\u006F\u0072\u0079']||'')['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']();var _0xd7dd=(552750^552744)+(836376^836368);const role=String(_0xf26b['\u0072\u006F\u006C\u0065']||'')['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']();_0xd7dd='\u006D\u0062\u0066\u0063\u0071\u0066';if(_0x2e67c['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u0430\u0434\u043C\u0456\u043D")||_0x2e67c==="\u044F\u0456\u0446\u0430\u0440\u0442\u0441\u0456\u043D\u0456\u043C\u0434\u0430".split("").reverse().join("")){return{'\u0063\u0061\u006E\u0049\u0073\u0073\u0075\u0065\u0044\u0069\u0072\u0065\u0063\u0074\u006C\u0079':!![],"canSubmitPending":!![],'\u0063\u0061\u006E\u0041\u0070\u0070\u0072\u006F\u0076\u0065':!![],'\u006C\u0061\u0062\u0065\u006C':_0xf26b['\u0072\u006F\u006C\u0065']||"\u0410\u0434\u043C\u0456\u043D\u0456\u0441\u0442\u0440\u0430\u0446\u0456\u044F","issuerType":'admin'};}if(_0x2e67c['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073']("\u0434\u0443\u0441".split("").reverse().join(""))){return{"canIssueDirectly":!![],"canSubmitPending":!![],"canApprove":!![],'\u006C\u0061\u0062\u0065\u006C':_0xf26b['\u0072\u006F\u006C\u0065']||"\u0421\u0443\u0434","issuerType":"\u0063\u006F\u0075\u0072\u0074"};}var _0xd226d=(930431^930424)+(350656^350660);const _0x284ed=[{'\u0063\u0061\u0074\u0073':["\u044F\u0456\u0446\u0456\u043B\u043E\u043F".split("").reverse().join(""),"\u043D\u043F\u0441","ecilop".split("").reverse().join("")],"label":"\u041D\u041F\u0421",'\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065':"\u0070\u006F\u006C\u0069\u0063\u0065"},{'\u0063\u0061\u0074\u0073':["\u043D\u0430\u0431\u0441","sban".split("").reverse().join("")],'\u006C\u0061\u0062\u0065\u006C':"\u041D\u0410\u0411\u0421",'\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065':'police'},{'\u0063\u0061\u0074\u0073':["\u0441\u0431\u0441","sbs".split("").reverse().join("")],'\u006C\u0061\u0062\u0065\u006C':"\u0421\u0411\u0421",'\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065':"\u0070\u006F\u006C\u0069\u0063\u0065"},{'\u0063\u0061\u0074\u0073':["\u0434\u0431\u0440","rbd".split("").reverse().join("")],"label":'ДБР','\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065':"\u0070\u006F\u006C\u0069\u0063\u0065"}];_0xd226d=(769609^769614)+(199197^199198);for(const _0x7d6fg of _0x284ed){if(_0x7d6fg['\u0063\u0061\u0074\u0073']['\u0073\u006F\u006D\u0065'](c=>_0x2e67c['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073'](c))){const isHead=_0x0ffa1b['\u0073\u006F\u006D\u0065'](w=>role['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073'](w));var _0x56ddaf=(718673^718677)+(195764^195773);const isSenior=_0xca_0xd5e['\u0073\u006F\u006D\u0065'](w=>role['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073'](w));_0x56ddaf=(881104^881106)+(732695^732692);return{"canIssueDirectly":isHead||isSenior,"canSubmitPending":!![],'\u0063\u0061\u006E\u0041\u0070\u0070\u0072\u006F\u0076\u0065':isHead,'\u006C\u0061\u0062\u0065\u006C':(_0xf26b['\u0072\u006F\u006C\u0065']||_0x7d6fg['\u006C\u0061\u0062\u0065\u006C'])+"\u0020"+_0x7d6fg['\u006C\u0061\u0062\u0065\u006C'],'\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065':_0x7d6fg['\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065']};}}}}const L=window['\u0073\u0074\u0061\u0074\u0065']&&window['\u0073\u0074\u0061\u0074\u0065']['\u006C\u0069\u0063\u0065\u006E\u0073\u0065\u0073'];_0xdf187c=(562608^562611)+(429501^429500);if(!L)return _0x8368fb;const _0x3gfg=[{"key":"\u0070\u006F\u006C\u0069\u0063\u0065",'\u006C\u0061\u0062\u0065\u006C':'НПС','\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065':"\u0070\u006F\u006C\u0069\u0063\u0065"},{'\u006B\u0065\u0079':'nabs','\u006C\u0061\u0062\u0065\u006C':"\u041D\u0410\u0411\u0421",'\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065':"\u0070\u006F\u006C\u0069\u0063\u0065"},{'\u006B\u0065\u0079':"\u0073\u0062\u0073",'\u006C\u0061\u0062\u0065\u006C':'СБС','\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065':"\u0070\u006F\u006C\u0069\u0063\u0065"},{'\u006B\u0065\u0079':"\u0064\u0062\u0072",'\u006C\u0061\u0062\u0065\u006C':'ДБР','\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065':"\u0070\u006F\u006C\u0069\u0063\u0065"}];for(const f of _0x3gfg){let _0x8c7c;const _0xc43a0a=L[f['\u006B\u0065\u0079']];_0x8c7c=(997225^997225)+(785076^785075);if(!_0xc43a0a)continue;const _0x1f_0x8f5=Object['\u006B\u0065\u0079\u0073'](_0xc43a0a)['\u0066\u0069\u006E\u0064'](k=>k['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']()===_0xd80bdd);if(!_0x1f_0x8f5)continue;const r=_0xc43a0a[_0x1f_0x8f5];if(!r)continue;const role=String(r['\u0072\u006F\u006C\u0065']||'')['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']();var _0x7c1e5a=(485862^485870)+(889314^889319);const isHead=_0x0ffa1b['\u0073\u006F\u006D\u0065'](w=>role['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073'](w));_0x7c1e5a=(906364^906367)+(548436^548439);let _0x6dfeae;const isSenior=_0xca_0xd5e['\u0073\u006F\u006D\u0065'](w=>role['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073'](w));_0x6dfeae=927474^927475;return{"canIssueDirectly":isHead||isSenior,"canSubmitPending":!![],'\u0063\u0061\u006E\u0041\u0070\u0070\u0072\u006F\u0076\u0065':isHead,'\u006C\u0061\u0062\u0065\u006C':(r['\u0072\u006F\u006C\u0065']||f['\u006C\u0061\u0062\u0065\u006C'])+"\u0020"+f['\u006C\u0061\u0062\u0065\u006C'],'\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065':f['\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065']};}return _0x8368fb;}window['\u0067\u0065\u0074\u0055\u0073\u0065\u0072\u0049\u0073\u0073\u0075\u0065\u0072\u0052\u006F\u006C\u0065']=getUserIssuerRole;function renderIssueFineForm(_0x31g,_0x7ae){var _0xe9aeca=(864570^864573)+(802291^802293);const _0xabgfe=getUserIssuerRole();_0xe9aeca=(452241^452243)+(889804^889806);window['\u005F\u0069\u0073\u0073\u0075\u0065\u0046\u0069\u006E\u0065\u0052\u006F\u006C\u0065']=_0xabgfe;var _0x6165e=(165465^165469)+(636742^636738);const _0x09g=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0069\u0073\u0073\u0075\u0065\u002D\u0066\u0069\u006E\u0065\u002D\u0062\u006F\u0064\u0079");_0x6165e=(487419^487420)+(879601^879607);if(!_0x09g)return;if(!_0xabgfe['\u0063\u0061\u006E\u0049\u0073\u0073\u0075\u0065\u0044\u0069\u0072\u0065\u0063\u0074\u006C\u0079']&&!_0xabgfe['\u0063\u0061\u006E\u0053\u0075\u0062\u006D\u0069\u0074\u0050\u0065\u006E\u0064\u0069\u006E\u0067']){_0x09g['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`
       <div class="fines-empty">
         <div class="fines-empty-icon">🚫</div>
         <div class="fines-empty-title">Немає прав</div>
         <div class="fines-empty-sub">Виписувати штрафи можуть лише голови фракцій, судді, адміністрація, агенти НПС/СБС/ДБР/НАБС.</div>
-      </div>`;
-    return;
-  }
-
-  const evidenceLabel = role.canIssueDirectly
-    ? 'Доказ (PNG/JPG, опційно)'
-    : 'Доказ (PNG/JPG) *';
-
-  const note = role.canIssueDirectly
-    ? `<div class="ff-hint">Ви виписуєте напряму як <b>${role.label}</b>. Штраф з'явиться у профілі гравця одразу.</div>`
-    : `<div class="ff-hint">Ви <b>${role.label}</b>. Штраф піде на <b>затвердження адміністрації</b>. Без скріну доказів штраф не приймуть.</div>`;
-
-  const today      = todayPlusDays(0);
-  const default30  = todayPlusDays(30);
-
-  root.innerHTML = `
-    ${note}
+      </div>`;return;}const _0xf4228c=_0xabgfe['\u0063\u0061\u006E\u0049\u0073\u0073\u0075\u0065\u0044\u0069\u0072\u0065\u0063\u0074\u006C\u0079']?"\u0414\u043E\u043A\u0430\u0437\u0020\u0028\u0050\u004E\u0047\u002F\u004A\u0050\u0047\u002C\u0020\u043E\u043F\u0446\u0456\u0439\u043D\u043E\u0029":"* )GPJ/GNP( \u0437\u0430\u043A\u043E\u0414".split("").reverse().join("");const _0x6d9a2=_0xabgfe['\u0063\u0061\u006E\u0049\u0073\u0073\u0075\u0065\u0044\u0069\u0072\u0065\u0063\u0074\u006C\u0079']?`<div class="ff-hint">Ви виписуєте напряму як <b>${_0xabgfe['\u006C\u0061\u0062\u0065\u006C']}</b>. Штраф з'явиться у профілі гравця одразу.</div>`:`<div class="ff-hint">Ви <b>${_0xabgfe['\u006C\u0061\u0062\u0065\u006C']}</b>. Штраф піде на <b>затвердження адміністрації</b>. Без скріну доказів штраф не приймуть.</div>`;const _0x82acf=todayPlusDays(657121^657121);_0x31g=(170427^170430)+(649083^649075);const _0x5_0x21c=todayPlusDays(464262^464280);_0x7ae=146356^146359;_0x09g['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`
+    ${_0x6d9a2}
     <label class="ff-field">
       <span class="ff-label">Roblox username гравця *</span>
       <div style="position:relative;">
@@ -167,14 +19,14 @@ function renderIssueFineForm() {
     </label>
     <label class="ff-field">
       <span class="ff-label">Оплатити до *</span>
-      <input id="fine-due" class="ff-input" type="date" min="${today}" value="${default30}">
+      <input id="fine-due" class="ff-input" type="date" min="${_0x82acf}" value="${_0x5_0x21c}">
     </label>
     <label class="ff-field">
       <span class="ff-label">Причина *</span>
       <textarea id="fine-reason" class="ff-input" rows="3" placeholder="пункт 2 стаття 1 (приклад)"></textarea>
     </label>
     <div class="ff-field">
-      <span class="ff-label">${evidenceLabel}</span>
+      <span class="ff-label">${_0xf4228c}</span>
       <div class="ff-file-row">
         <label class="ff-file-button" id="fine-evidence-label" for="fine-evidence-file">Обрати фото</label>
         <input id="fine-evidence-file" type="file" accept="image/png,image/jpeg"
@@ -183,458 +35,93 @@ function renderIssueFineForm() {
       <div id="fine-evidence-preview"></div>
     </div>
     <button type="button" class="ff-submit" onclick="submitFineForm()">
-      ${role.canIssueDirectly ? 'Виписати штраф' : 'Надіслати на затвердження'}
+      ${_0xabgfe['\u0063\u0061\u006E\u0049\u0073\u0073\u0075\u0065\u0044\u0069\u0072\u0065\u0063\u0074\u006C\u0079']?"\u0412\u0438\u043F\u0438\u0441\u0430\u0442\u0438\u0020\u0448\u0442\u0440\u0430\u0444":"\u041D\u0430\u0434\u0456\u0441\u043B\u0430\u0442\u0438\u0020\u043D\u0430\u0020\u0437\u0430\u0442\u0432\u0435\u0440\u0434\u0436\u0435\u043D\u043D\u044F"}
     </button>
     <div id="fine-status-msg" class="ff-status"></div>
-  `;
-}
-window.renderIssueFineForm = renderIssueFineForm;
-
-let _rbxLookupTimer = null;
-let _resolvedTgUsername = null;
-
-async function fineRbxLookup(val) {
-  const statusEl = document.getElementById('fine-rbx-status');
-  _resolvedTgUsername = null;
-  clearTimeout(_rbxLookupTimer);
-  if (!val || val.trim().length < 3) {
-    if (statusEl) statusEl.textContent = '';
-    return;
-  }
-  if (statusEl) statusEl.textContent = '🔍 Шукаємо...';
-
-  _rbxLookupTimer = setTimeout(async () => {
-    const rbxNick = val.trim();
-    if (typeof window.findTgByRobloxUsername === 'function') {
-      const tg = await window.findTgByRobloxUsername(rbxNick);
-      if (tg) {
-        _resolvedTgUsername = tg;
-        if (statusEl) statusEl.innerHTML = `<span style="color:#30d158;">✅ Знайдено: @${tg}</span>`;
-        return;
-      }
-    }
-    const L = window.state && window.state.licenses;
-    const P = window.state && window.state.players;
-    const lc = rbxNick.toLowerCase();
-    let found = false;
-    if (P) {
-      const pKey = Object.keys(P).find(k => k.toLowerCase() === lc);
-      if (pKey) { found = true; }
-    }
-    if (!found && L) {
-      for (const section of Object.values(L)) {
-        if (!section || typeof section !== 'object') continue;
-        if (Array.isArray(section)) {
-          if (section.some(i => i && i.username && i.username.toLowerCase() === lc)) { found = true; break; }
-        } else {
-          if (Object.keys(section).some(k => k.toLowerCase() === lc)) { found = true; break; }
-        }
-      }
-    }
-    if (found) {
-      _resolvedTgUsername = '__rbx__' + rbxNick; 
-      if (statusEl) statusEl.innerHTML = `<span style="color:#f0a000;">⚠️ Гравець є на сервері, але не в СіЯ — штраф збережеться по Roblox нікнейму</span>`;
-    } else {
-      _resolvedTgUsername = null;
-      if (statusEl) statusEl.innerHTML = `<span style="color:#ff4d4d;">❌ Гравця не знайдено</span>`;
-    }
-  }, 600);
-}
-window.fineRbxLookup = fineRbxLookup;
-
-async function submitFineForm() {
-  const role = window._issueFineRole || getUserIssuerRole();
-  const rbxNickEl  = document.getElementById('fine-target-rbx');
-  const amount     = (document.getElementById('fine-amount') || {}).value;
-  const dueDate    = (document.getElementById('fine-due')    || {}).value;
-  const reason     = (document.getElementById('fine-reason') || {}).value;
-  const evidenceData = window._fineEvidence || null;
-  const status     = document.getElementById('fine-status-msg');
-
-  const rbxNick = (rbxNickEl && rbxNickEl.value) ? rbxNickEl.value.trim() : '';
-
-  if (!rbxNick)         { if (status) status.textContent = 'Вкажіть Roblox username гравця'; return; }
-  if (!_resolvedTgUsername) { if (status) status.textContent = 'Гравця не знайдено — зачекайте перевірки або введіть ніку знову'; return; }
-  if (!amount || isNaN(Number(amount))) { if (status) status.textContent = 'Сума має бути числом'; return; }
-  if (!dueDate)         { if (status) status.textContent = 'Вкажіть дату оплати'; return; }
-  if (!reason || !reason.trim()) { if (status) status.textContent = 'Вкажіть причину штрафу'; return; }
-  if (!role.canIssueDirectly && !evidenceData) {
-    if (status) status.textContent = 'Для штрафу на затвердження потрібен скрін доказу (PNG/JPG)';
-    return;
-  }
-
-  const proposerTg = window.state && window.state.telegram && window.state.telegram.username;
-  const fine = {
-    id: 'F-' + Date.now().toString(36).toUpperCase(),
-    issuer: role.label || 'Невідомо',
-    issuerType: role.issuerType || 'admin',
-    issuedBy: proposerTg || null,
-    issuedByRbx: (window.state && window.state.roblox && window.state.roblox.username) || null,
-    targetRbx: rbxNick,
-    amount: Number(amount),
-    dueDate: dueDate,
-    reason: reason.trim(),
-    issuedAt: new Date().toISOString()
-  };
-
-  if (status) status.textContent = 'Зберігаємо…';
-
-  let ok = false;
-
-  const isRbxOnly = _resolvedTgUsername.startsWith('__rbx__');
-  const targetTg  = isRbxOnly ? null : _resolvedTgUsername;
-  const targetRbx = isRbxOnly ? _resolvedTgUsername.slice(7) : rbxNick;
-
-  if (role.canIssueDirectly) {
-    fine.status = 'unpaid';
-    if (evidenceData) fine.evidence = evidenceData;
-
-    if (targetTg && typeof window.addFineDirect === 'function') {
-      ok = await window.addFineDirect(targetTg, fine);
-    } else if (!targetTg) {
-      const pending = Object.assign({}, fine, {
-        target: null,
-        targetRbx,
-        evidence: evidenceData || null,
-        status: 'pending_rbx',
-        _pendingId: genPendingId(),
-        proposedBy: proposerTg || null,
-        proposedAt: new Date().toISOString(),
-        rbxOnly: true
-      });
-      if (typeof window.submitPendingFine === 'function') {
-        ok = await window.submitPendingFine(pending);
-      }
-    }
-  } else {
-    const pending = Object.assign({}, fine, {
-      target: targetTg || null,
-      targetRbx,
-      evidence: evidenceData || null,
-      status: 'pending',
-      _pendingId: genPendingId(),
-      proposedBy: proposerTg || null,
-      proposedAt: new Date().toISOString()
-    });
-    if (typeof window.submitPendingFine === 'function') {
-      ok = await window.submitPendingFine(pending);
-    }
-  }
-
-  if (status) {
-    if (ok) {
-      const msgDirect  = isRbxOnly
-        ? '🕒 Гравець ще не в СіЯ — штраф збережено, буде видно після реєстрації'
-        : '✅ Штраф виписано';
-      status.textContent = role.canIssueDirectly
-        ? msgDirect
-        : '🕒 Штраф надіслано на затвердження';
-      ['fine-target-rbx','fine-amount','fine-due','fine-reason']
-        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-      const rbxSt = document.getElementById('fine-rbx-status');
-      if (rbxSt) rbxSt.textContent = '';
-      _resolvedTgUsername = null;
-      window._fineEvidence = null;
-      const preview = document.getElementById('fine-evidence-preview');
-      if (preview) preview.innerHTML = '';
-      const fileLabel = document.getElementById('fine-evidence-label');
-      if (fileLabel) fileLabel.textContent = 'Обрати фото';
-      const fileInput = document.getElementById('fine-evidence-file');
-      if (fileInput) fileInput.value = '';
-    } else {
-      status.textContent = '❌ Не вдалося зберегти штраф';
-    }
-  }
-}
-window.submitFineForm = submitFineForm;
-
-function openIssueFineForm() {
-  const role = getUserIssuerRole();
-  if (!role.canIssueDirectly && !role.canSubmitPending) {
-    typeof showToast === 'function' && showToast('У вас немає прав виписувати штрафи');
-    return;
-  }
-  window._issueFineRole = role;
-  window._fineEvidence  = null;
-  _resolvedTgUsername   = null;
-  typeof switchScreen === 'function' && switchScreen('issue-fine');
-}
-window.openIssueFineForm = openIssueFineForm;
-
-async function renderFines() {
-  const list = document.getElementById('fines-list');
-  if (!list) return;
-
-  list.innerHTML = `<div class="fines-loading">Завантаження…</div>`;
-
-  const username = (window.state && window.state.telegram && window.state.telegram.username)
-    || (typeof tgUser !== 'undefined' && tgUser && tgUser.username);
-
-  let fines = [];
-  if (username && typeof window.fetchProfile === 'function') {
-    try {
-      const profile = await window.fetchProfile(username);
-      if (profile && Array.isArray(profile.fines)) fines = profile.fines;
-    } catch (e) { console.error(e); }
-  }
-  if (!fines.length && window.state && Array.isArray(window.state.fines)) {
-    fines = window.state.fines;
-  }
-  if (window.state) window.state.fines = fines;
-
-  let pendingPaymentIds = [];
-  if (typeof window.fetchPaymentRequests === 'function') {
-    try {
-      const reqs = await window.fetchPaymentRequests();
-      pendingPaymentIds = reqs
-        .filter(r => r && r.username === username)
-        .map(r => r.fineId);
-    } catch(e) {}
-  }
-
-  if (!fines.length) {
-    list.innerHTML = `
+  `;}window['\u0072\u0065\u006E\u0064\u0065\u0072\u0049\u0073\u0073\u0075\u0065\u0046\u0069\u006E\u0065\u0046\u006F\u0072\u006D']=renderIssueFineForm;let _rbxLookupTimer=null;let _resolvedTgUsername=null;async function fineRbxLookup(val,_0x1ae6g){const _0x89df3b=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("sutats-xbr-enif".split("").reverse().join(""));_0x1ae6g=(119854^119851)+(154416^154425);_resolvedTgUsername=null;clearTimeout(_rbxLookupTimer);if(!val||val['\u0074\u0072\u0069\u006D']()['\u006C\u0065\u006E\u0067\u0074\u0068']<(708876^708879)){if(_0x89df3b)_0x89df3b['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']='';return;}if(_0x89df3b)_0x89df3b['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']="\uD83D\uDD0D\u0020\u0428\u0443\u043A\u0430\u0454\u043C\u043E\u002E\u002E\u002E";_rbxLookupTimer=setTimeout(async()=>{const _0x3b3c9d=val['\u0074\u0072\u0069\u006D']();if(typeof window['\u0066\u0069\u006E\u0064\u0054\u0067\u0042\u0079\u0052\u006F\u0062\u006C\u006F\u0078\u0055\u0073\u0065\u0072\u006E\u0061\u006D\u0065']==="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E"){var _0x8afb1f=(442824^442830)+(149240^149245);const _0x84899b=await window['\u0066\u0069\u006E\u0064\u0054\u0067\u0042\u0079\u0052\u006F\u0062\u006C\u006F\u0078\u0055\u0073\u0065\u0072\u006E\u0061\u006D\u0065'](_0x3b3c9d);_0x8afb1f=115713^115718;if(_0x84899b){_resolvedTgUsername=_0x84899b;if(_0x89df3b)_0x89df3b['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`<span style="color:#30d158;">✅ Знайдено: @${_0x84899b}</span>`;return;}}const L=window['\u0073\u0074\u0061\u0074\u0065']&&window['\u0073\u0074\u0061\u0074\u0065']['\u006C\u0069\u0063\u0065\u006E\u0073\u0065\u0073'];const P=window['\u0073\u0074\u0061\u0074\u0065']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0070\u006C\u0061\u0079\u0065\u0072\u0073'];var _0x9251cf=(897502^897499)+(777227^777226);const _0x2f4cb=_0x3b3c9d['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']();_0x9251cf=532269^532261;let _0x95c;let _0xb5fbaf=false;_0x95c=(914671^914669)+(427096^427097);if(P){let _0x6d9a;const _0xc8a77d=Object['\u006B\u0065\u0079\u0073'](P)['\u0066\u0069\u006E\u0064'](k=>k['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']()===_0x2f4cb);_0x6d9a="pgkbqe".split("").reverse().join("");if(_0xc8a77d){_0xb5fbaf=!![];}}if(!_0xb5fbaf&&L){for(const _0x2ed of Object['\u0076\u0061\u006C\u0075\u0065\u0073'](L)){if(!_0x2ed||typeof _0x2ed!=="\u006F\u0062\u006A\u0065\u0063\u0074")continue;if(Array['\u0069\u0073\u0041\u0072\u0072\u0061\u0079'](_0x2ed)){if(_0x2ed['\u0073\u006F\u006D\u0065'](i=>i&&i['\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065']&&i['\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065']['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']()===_0x2f4cb)){_0xb5fbaf=!![];break;}}else{if(Object['\u006B\u0065\u0079\u0073'](_0x2ed)['\u0073\u006F\u006D\u0065'](k=>k['\u0074\u006F\u004C\u006F\u0077\u0065\u0072\u0043\u0061\u0073\u0065']()===_0x2f4cb)){_0xb5fbaf=!![];break;}}}}if(_0xb5fbaf){_resolvedTgUsername="\u005F\u005F\u0072\u0062\u0078\u005F\u005F"+_0x3b3c9d;if(_0x89df3b)_0x89df3b['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`<span style="color:#f0a000;">⚠️ Гравець є на сервері, але не в СіЯ — штраф збережеться по Roblox нікнейму</span>`;}else{_resolvedTgUsername=null;if(_0x89df3b)_0x89df3b['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`<span style="color:#ff4d4d;">❌ Гравця не знайдено</span>`;}},642159^642615);}window['\u0066\u0069\u006E\u0065\u0052\u0062\u0078\u004C\u006F\u006F\u006B\u0075\u0070']=fineRbxLookup;async function submitFineForm(_0xd4973b,_0x403ca,_0x51119a){const _0x63fb=window['\u005F\u0069\u0073\u0073\u0075\u0065\u0046\u0069\u006E\u0065\u0052\u006F\u006C\u0065']||getUserIssuerRole();const _0xaed29d=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0066\u0069\u006E\u0065\u002D\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u0072\u0062\u0078");const _0xc1427a=(document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("tnuoma-enif".split("").reverse().join(""))||{})['\u0076\u0061\u006C\u0075\u0065'];const _0xd9b9c=(document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0066\u0069\u006E\u0065\u002D\u0064\u0075\u0065")||{})['\u0076\u0061\u006C\u0075\u0065'];var _0xb5e=(398188^398190)+(378356^378354);const _0x4a_0xg6e=(document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("nosaer-enif".split("").reverse().join(""))||{})['\u0076\u0061\u006C\u0075\u0065'];_0xb5e=(959843^959843)+(816210^816210);const _0x99f2be=window['\u005F\u0066\u0069\u006E\u0065\u0045\u0076\u0069\u0064\u0065\u006E\u0063\u0065']||null;const _0x38a85g=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0066\u0069\u006E\u0065\u002D\u0073\u0074\u0061\u0074\u0075\u0073\u002D\u006D\u0073\u0067");_0xd4973b=344900^344903;const _0xafe60d=_0xaed29d&&_0xaed29d['\u0076\u0061\u006C\u0075\u0065']?_0xaed29d['\u0076\u0061\u006C\u0075\u0065']['\u0074\u0072\u0069\u006D']():'';_0x403ca="khkojc".split("").reverse().join("");if(!_0xafe60d){if(_0x38a85g)_0x38a85g['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']="\u0412\u043A\u0430\u0436\u0456\u0442\u044C\u0020\u0052\u006F\u0062\u006C\u006F\u0078\u0020\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065\u0020\u0433\u0440\u0430\u0432\u0446\u044F";return;}if(!_resolvedTgUsername){if(_0x38a85g)_0x38a85g['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']="\u0443\u0432\u043E\u043D\u0437 \u0443\u043A\u0456\u043D \u044C\u0442\u0456\u0434\u0435\u0432\u0432 \u043E\u0431\u0430 \u0438\u043A\u0440\u0456\u0432\u0435\u0440\u0435\u043F \u0435\u0442\u0439\u0430\u043A\u0435\u0447\u0430\u0437 \u2014 \u043E\u043D\u0435\u0434\u0439\u0430\u043D\u0437 \u0435\u043D \u044F\u0446\u0432\u0430\u0440\u0413".split("").reverse().join("");return;}if(!_0xc1427a||isNaN(Number(_0xc1427a))){if(_0x38a85g)_0x38a85g['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']="\u0421\u0443\u043C\u0430\u0020\u043C\u0430\u0454\u0020\u0431\u0443\u0442\u0438\u0020\u0447\u0438\u0441\u043B\u043E\u043C";return;}if(!_0xd9b9c){if(_0x38a85g)_0x38a85g['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']="\u0438\u0442\u0430\u043B\u043F\u043E \u0443\u0442\u0430\u0434 \u044C\u0442\u0456\u0436\u0430\u043A\u0412".split("").reverse().join("");return;}if(!_0x4a_0xg6e||!_0x4a_0xg6e['\u0074\u0072\u0069\u006D']()){if(_0x38a85g)_0x38a85g['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']="\u0412\u043A\u0430\u0436\u0456\u0442\u044C\u0020\u043F\u0440\u0438\u0447\u0438\u043D\u0443\u0020\u0448\u0442\u0440\u0430\u0444\u0443";return;}if(!_0x63fb['\u0063\u0061\u006E\u0049\u0073\u0073\u0075\u0065\u0044\u0069\u0072\u0065\u0063\u0074\u006C\u0079']&&!_0x99f2be){if(_0x38a85g)_0x38a85g['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']=")GPJ/GNP( \u0443\u0437\u0430\u043A\u043E\u0434 \u043D\u0456\u0440\u043A\u0441 \u043D\u0435\u0431\u0456\u0440\u0442\u043E\u043F \u044F\u043D\u043D\u0435\u0436\u0434\u0440\u0435\u0432\u0442\u0430\u0437 \u0430\u043D \u0443\u0444\u0430\u0440\u0442\u0448 \u044F\u043B\u0414".split("").reverse().join("");return;}const _0x1bed=window['\u0073\u0074\u0061\u0074\u0065']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0074\u0065\u006C\u0065\u0067\u0072\u0061\u006D']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0074\u0065\u006C\u0065\u0067\u0072\u0061\u006D']['\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065'];const _0x77da6b={"id":"\u0046\u002D"+Date['\u006E\u006F\u0077']()['\u0074\u006F\u0053\u0074\u0072\u0069\u006E\u0067'](489085^489049)['\u0074\u006F\u0055\u0070\u0070\u0065\u0072\u0043\u0061\u0073\u0065'](),'\u0069\u0073\u0073\u0075\u0065\u0072':_0x63fb['\u006C\u0061\u0062\u0065\u006C']||"\u041D\u0435\u0432\u0456\u0434\u043E\u043C\u043E","issuerType":_0x63fb['\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065']||"\u0061\u0064\u006D\u0069\u006E",'\u0069\u0073\u0073\u0075\u0065\u0064\u0042\u0079':_0x1bed||null,'\u0069\u0073\u0073\u0075\u0065\u0064\u0042\u0079\u0052\u0062\u0078':window['\u0073\u0074\u0061\u0074\u0065']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0072\u006F\u0062\u006C\u006F\u0078']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0072\u006F\u0062\u006C\u006F\u0078']['\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065']||null,"targetRbx":_0xafe60d,'\u0061\u006D\u006F\u0075\u006E\u0074':Number(_0xc1427a),'\u0064\u0075\u0065\u0044\u0061\u0074\u0065':_0xd9b9c,"reason":_0x4a_0xg6e['\u0074\u0072\u0069\u006D'](),'\u0069\u0073\u0073\u0075\u0065\u0064\u0041\u0074':new Date()['\u0074\u006F\u0049\u0053\u004F\u0053\u0074\u0072\u0069\u006E\u0067']()};if(_0x38a85g)_0x38a85g['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']="\u0417\u0431\u0435\u0440\u0456\u0433\u0430\u0454\u043C\u043E\u2026";let _0xf8f4d=false;const _0x84fc=_resolvedTgUsername['\u0073\u0074\u0061\u0072\u0074\u0073\u0057\u0069\u0074\u0068']("\u005F\u005F\u0072\u0062\u0078\u005F\u005F");_0x51119a="epilan".split("").reverse().join("");const _0x9932ee=_0x84fc?null:_resolvedTgUsername;var _0x8830g=(376299^376300)+(585504^585512);const _0xd72dc=_0x84fc?_resolvedTgUsername['\u0073\u006C\u0069\u0063\u0065'](523749^523746):_0xafe60d;_0x8830g=481313^481321;if(_0x63fb['\u0063\u0061\u006E\u0049\u0073\u0073\u0075\u0065\u0044\u0069\u0072\u0065\u0063\u0074\u006C\u0079']){_0x77da6b['\u0073\u0074\u0061\u0074\u0075\u0073']="diapnu".split("").reverse().join("");if(_0x99f2be)_0x77da6b['\u0065\u0076\u0069\u0064\u0065\u006E\u0063\u0065']=_0x99f2be;if(_0x9932ee&&typeof window['\u0061\u0064\u0064\u0046\u0069\u006E\u0065\u0044\u0069\u0072\u0065\u0063\u0074']==="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E"){_0xf8f4d=await window['\u0061\u0064\u0064\u0046\u0069\u006E\u0065\u0044\u0069\u0072\u0065\u0063\u0074'](_0x9932ee,_0x77da6b);}else if(!_0x9932ee){const pending=Object['\u0061\u0073\u0073\u0069\u0067\u006E']({},_0x77da6b,{"target":null,"targetRbx":_0xd72dc,'\u0065\u0076\u0069\u0064\u0065\u006E\u0063\u0065':_0x99f2be||null,'\u0073\u0074\u0061\u0074\u0075\u0073':"\u0070\u0065\u006E\u0064\u0069\u006E\u0067\u005F\u0072\u0062\u0078",'\u005F\u0070\u0065\u006E\u0064\u0069\u006E\u0067\u0049\u0064':genPendingId(),'\u0070\u0072\u006F\u0070\u006F\u0073\u0065\u0064\u0042\u0079':_0x1bed||null,"proposedAt":new Date()['\u0074\u006F\u0049\u0053\u004F\u0053\u0074\u0072\u0069\u006E\u0067'](),"rbxOnly":!![]});if(typeof window['\u0073\u0075\u0062\u006D\u0069\u0074\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0046\u0069\u006E\u0065']==="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E"){_0xf8f4d=await window['\u0073\u0075\u0062\u006D\u0069\u0074\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0046\u0069\u006E\u0065'](pending);}}}else{const pending=Object['\u0061\u0073\u0073\u0069\u0067\u006E']({},_0x77da6b,{'\u0074\u0061\u0072\u0067\u0065\u0074':_0x9932ee||null,"targetRbx":_0xd72dc,'\u0065\u0076\u0069\u0064\u0065\u006E\u0063\u0065':_0x99f2be||null,'\u0073\u0074\u0061\u0074\u0075\u0073':"\u0070\u0065\u006E\u0064\u0069\u006E\u0067","_pendingId":genPendingId(),'\u0070\u0072\u006F\u0070\u006F\u0073\u0065\u0064\u0042\u0079':_0x1bed||null,'\u0070\u0072\u006F\u0070\u006F\u0073\u0065\u0064\u0041\u0074':new Date()['\u0074\u006F\u0049\u0053\u004F\u0053\u0074\u0072\u0069\u006E\u0067']()});if(typeof window['\u0073\u0075\u0062\u006D\u0069\u0074\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0046\u0069\u006E\u0065']==="noitcnuf".split("").reverse().join("")){_0xf8f4d=await window['\u0073\u0075\u0062\u006D\u0069\u0074\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0046\u0069\u006E\u0065'](pending);}}if(_0x38a85g){if(_0xf8f4d){const _0x6_0xd12=_0x84fc?"\uD83D\uDD52\u0020\u0413\u0440\u0430\u0432\u0435\u0446\u044C\u0020\u0449\u0435\u0020\u043D\u0435\u0020\u0432\u0020\u0421\u0456\u042F\u0020\u2014\u0020\u0448\u0442\u0440\u0430\u0444\u0020\u0437\u0431\u0435\u0440\u0435\u0436\u0435\u043D\u043E\u002C\u0020\u0431\u0443\u0434\u0435\u0020\u0432\u0438\u0434\u043D\u043E\u0020\u043F\u0456\u0441\u043B\u044F\u0020\u0440\u0435\u0454\u0441\u0442\u0440\u0430\u0446\u0456\u0457":"\u2705\u0020\u0428\u0442\u0440\u0430\u0444\u0020\u0432\u0438\u043F\u0438\u0441\u0430\u043D\u043E";_0x38a85g['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']=_0x63fb['\u0063\u0061\u006E\u0049\u0073\u0073\u0075\u0065\u0044\u0069\u0072\u0065\u0063\u0074\u006C\u0079']?_0x6_0xd12:"\uD83D\uDD52\u0020\u0428\u0442\u0440\u0430\u0444\u0020\u043D\u0430\u0434\u0456\u0441\u043B\u0430\u043D\u043E\u0020\u043D\u0430\u0020\u0437\u0430\u0442\u0432\u0435\u0440\u0434\u0436\u0435\u043D\u043D\u044F";["\u0066\u0069\u006E\u0065\u002D\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u0072\u0062\u0078","\u0066\u0069\u006E\u0065\u002D\u0061\u006D\u006F\u0075\u006E\u0074","\u0066\u0069\u006E\u0065\u002D\u0064\u0075\u0065","nosaer-enif".split("").reverse().join("")]['\u0066\u006F\u0072\u0045\u0061\u0063\u0068'](id=>{let _0xc63c;const _0x35cebg=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064'](id);_0xc63c=(573625^573616)+(676802^676805);if(_0x35cebg)_0x35cebg['\u0076\u0061\u006C\u0075\u0065']='';});const _0x9b5d3d=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("sutats-xbr-enif".split("").reverse().join(""));if(_0x9b5d3d)_0x9b5d3d['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']='';_resolvedTgUsername=null;window['\u005F\u0066\u0069\u006E\u0065\u0045\u0076\u0069\u0064\u0065\u006E\u0063\u0065']=null;const _0x9b0b0b=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0066\u0069\u006E\u0065\u002D\u0065\u0076\u0069\u0064\u0065\u006E\u0063\u0065\u002D\u0070\u0072\u0065\u0076\u0069\u0065\u0077");if(_0x9b0b0b)_0x9b0b0b['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']='';const _0xec_0xf9f=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0066\u0069\u006E\u0065\u002D\u0065\u0076\u0069\u0064\u0065\u006E\u0063\u0065\u002D\u006C\u0061\u0062\u0065\u006C");if(_0xec_0xf9f)_0xec_0xf9f['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']="\u041E\u0431\u0440\u0430\u0442\u0438\u0020\u0444\u043E\u0442\u043E";var _0xeffe8e=(888082^888090)+(276593^276596);const _0xe2_0x6bd=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("elif-ecnedive-enif".split("").reverse().join(""));_0xeffe8e=(439001^439000)+(671015^671023);if(_0xe2_0x6bd)_0xe2_0x6bd['\u0076\u0061\u006C\u0075\u0065']='';}else{_0x38a85g['\u0074\u0065\u0078\u0074\u0043\u006F\u006E\u0074\u0065\u006E\u0074']="\u274C\u0020\u041D\u0435\u0020\u0432\u0434\u0430\u043B\u043E\u0441\u044F\u0020\u0437\u0431\u0435\u0440\u0435\u0433\u0442\u0438\u0020\u0448\u0442\u0440\u0430\u0444";}}}window['\u0073\u0075\u0062\u006D\u0069\u0074\u0046\u0069\u006E\u0065\u0046\u006F\u0072\u006D']=submitFineForm;function openIssueFineForm(){const _0x177af=getUserIssuerRole();if(!_0x177af['\u0063\u0061\u006E\u0049\u0073\u0073\u0075\u0065\u0044\u0069\u0072\u0065\u0063\u0074\u006C\u0079']&&!_0x177af['\u0063\u0061\u006E\u0053\u0075\u0062\u006D\u0069\u0074\u0050\u0065\u006E\u0064\u0069\u006E\u0067']){typeof showToast==="noitcnuf".split("").reverse().join("")&&showToast("\u0423\u0020\u0432\u0430\u0441\u0020\u043D\u0435\u043C\u0430\u0454\u0020\u043F\u0440\u0430\u0432\u0020\u0432\u0438\u043F\u0438\u0441\u0443\u0432\u0430\u0442\u0438\u0020\u0448\u0442\u0440\u0430\u0444\u0438");return;}window['\u005F\u0069\u0073\u0073\u0075\u0065\u0046\u0069\u006E\u0065\u0052\u006F\u006C\u0065']=_0x177af;window['\u005F\u0066\u0069\u006E\u0065\u0045\u0076\u0069\u0064\u0065\u006E\u0063\u0065']=null;_resolvedTgUsername=null;typeof switchScreen==="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E"&&switchScreen("\u0069\u0073\u0073\u0075\u0065\u002D\u0066\u0069\u006E\u0065");}window['\u006F\u0070\u0065\u006E\u0049\u0073\u0073\u0075\u0065\u0046\u0069\u006E\u0065\u0046\u006F\u0072\u006D']=openIssueFineForm;async function renderFines(_0x19c3bf){const _0xda_0xcb7=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0066\u0069\u006E\u0065\u0073\u002D\u006C\u0069\u0073\u0074");if(!_0xda_0xcb7)return;_0xda_0xcb7['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`<div class="fines-loading">Завантаження…</div>`;const _0x478f=window['\u0073\u0074\u0061\u0074\u0065']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0074\u0065\u006C\u0065\u0067\u0072\u0061\u006D']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0074\u0065\u006C\u0065\u0067\u0072\u0061\u006D']['\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065']||typeof tgUser!=="denifednu".split("").reverse().join("")&&tgUser&&tgUser['\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065'];let _0xff6de=[];_0x19c3bf='\u006E\u006C\u006E\u006A\u0061\u0066';if(_0x478f&&typeof window['\u0066\u0065\u0074\u0063\u0068\u0050\u0072\u006F\u0066\u0069\u006C\u0065']==="noitcnuf".split("").reverse().join("")){try{let _0x2_0x87c;const _0x9bac=await window['\u0066\u0065\u0074\u0063\u0068\u0050\u0072\u006F\u0066\u0069\u006C\u0065'](_0x478f);_0x2_0x87c=(201057^201057)+(245484^245481);if(_0x9bac&&Array['\u0069\u0073\u0041\u0072\u0072\u0061\u0079'](_0x9bac['\u0066\u0069\u006E\u0065\u0073']))_0xff6de=_0x9bac['\u0066\u0069\u006E\u0065\u0073'];}catch(e){console['\u0065\u0072\u0072\u006F\u0072'](e);}}if(!_0xff6de['\u006C\u0065\u006E\u0067\u0074\u0068']&&window['\u0073\u0074\u0061\u0074\u0065']&&Array['\u0069\u0073\u0041\u0072\u0072\u0061\u0079'](window['\u0073\u0074\u0061\u0074\u0065']['\u0066\u0069\u006E\u0065\u0073'])){_0xff6de=window['\u0073\u0074\u0061\u0074\u0065']['\u0066\u0069\u006E\u0065\u0073'];}if(window['\u0073\u0074\u0061\u0074\u0065'])window['\u0073\u0074\u0061\u0074\u0065']['\u0066\u0069\u006E\u0065\u0073']=_0xff6de;let _0x8ab9d=[];if(typeof window['\u0066\u0065\u0074\u0063\u0068\u0050\u0061\u0079\u006D\u0065\u006E\u0074\u0052\u0065\u0071\u0075\u0065\u0073\u0074\u0073']==="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E"){try{var _0xe19f=(862029^862025)+(122286^122284);const _0xbf2aca=await window['\u0066\u0065\u0074\u0063\u0068\u0050\u0061\u0079\u006D\u0065\u006E\u0074\u0052\u0065\u0071\u0075\u0065\u0073\u0074\u0073']();_0xe19f=(859035^859026)+(307714^307716);_0x8ab9d=_0xbf2aca['\u0066\u0069\u006C\u0074\u0065\u0072'](r=>r&&r['\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065']===_0x478f)['\u006D\u0061\u0070'](r=>r['\u0066\u0069\u006E\u0065\u0049\u0064']);}catch(e){}}if(!_0xff6de['\u006C\u0065\u006E\u0067\u0074\u0068']){_0xda_0xcb7['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`
       <div class="fines-empty">
         <div class="fines-empty-icon">💸</div>
         <div class="fines-empty-title">Штрафів немає</div>
         <div class="fines-empty-sub">Тут з'являться штрафи від суду, адміністрації або НПС.</div>
-      </div>`;
-    return;
-  }
-
-  list.innerHTML = fines.map((f, i) => {
-    const num  = f.id != null ? String(f.id) : String(i + 1);
-    const issuer = classifyFineIssuer(f);
-    const amount = (f.amount != null && f.amount !== '') ? `${f.amount} €` : '—';
-    const due  = f.dueDate ? finesFormatDate(f.dueDate) : (f.due || '—');
-    const paid = isFinePaid(f);
-    const isPendingPayment = !paid && pendingPaymentIds.includes(f.id);
-    const statusLabel = paid ? 'Сплачено' : (isPendingPayment ? 'На перевірці' : 'Несплачено');
-    const statusColor = paid ? '#30d158' : (isPendingPayment ? '#f0a000' : '#ff4d4d');
-    const reason  = f.reason ? `<div class="fine-card-reason">${f.reason}</div>` : '';
-    const payBtn  = (!paid && !isPendingPayment)
-      ? `<div class="fine-actions" style="margin-top:8px;">
+      </div>`;return;}_0xda_0xcb7['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=_0xff6de['\u006D\u0061\u0070']((f,i)=>{const _0x39ccc=f['\u0069\u0064']!=null?String(f['\u0069\u0064']):String(i+(684473^684472));let _0xed36b;const _0x89ba=classifyFineIssuer(f);_0xed36b="bggmbn".split("").reverse().join("");const _0x57c3c=f['\u0061\u006D\u006F\u0075\u006E\u0074']!=null&&f['\u0061\u006D\u006F\u0075\u006E\u0074']!==''?`${f['\u0061\u006D\u006F\u0075\u006E\u0074']} €`:"\u2014";var _0x76d2b=(542714^542707)+(721647^721644);const _0x286eb=f['\u0064\u0075\u0065\u0044\u0061\u0074\u0065']?finesFormatDate(f['\u0064\u0075\u0065\u0044\u0061\u0074\u0065']):f['\u0064\u0075\u0065']||"\u2014";_0x76d2b='\u0067\u006A\u0066\u0062\u0064\u0069';const _0x112bbb=isFinePaid(f);var _0x6a_0xb06=(423933^423935)+(408539^408539);const _0xf_0xb31=!_0x112bbb&&_0x8ab9d['\u0069\u006E\u0063\u006C\u0075\u0064\u0065\u0073'](f['\u0069\u0064']);_0x6a_0xb06=(645567^645566)+(367858^367861);var _0x1e71f=(827426^827431)+(261616^261620);const _0x23702b=_0x112bbb?"\u0421\u043F\u043B\u0430\u0447\u0435\u043D\u043E":_0xf_0xb31?"\u041D\u0430\u0020\u043F\u0435\u0440\u0435\u0432\u0456\u0440\u0446\u0456":"\u041D\u0435\u0441\u043F\u043B\u0430\u0447\u0435\u043D\u043E";_0x1e71f=(794960^794963)+(426438^426446);var _0xg184c=(372762^372760)+(485713^485716);const _0xb97fbe=_0x112bbb?"\u0023\u0033\u0030\u0064\u0031\u0035\u0038":_0xf_0xb31?"\u0023\u0066\u0030\u0061\u0030\u0030\u0030":"\u0023\u0066\u0066\u0034\u0064\u0034\u0064";_0xg184c=(202829^202824)+(319292^319295);var _0x8271db=(591369^591374)+(173019^173023);const _0x0f0g6b=f['\u0072\u0065\u0061\u0073\u006F\u006E']?`<div class="fine-card-reason">${f['\u0072\u0065\u0061\u0073\u006F\u006E']}</div>`:'';_0x8271db='\u0067\u006E\u0070\u0069\u006B\u0064';var _0xb631g=(740919^740916)+(320259^320262);const _0x6195a=!_0x112bbb&&!_0xf_0xb31?`<div class="fine-actions" style="margin-top:8px;">
            <button type="button" class="fine-btn fine-btn-approve" style="width:100%;"
-                   onclick="openPayFineModal('${f.id}', ${f.amount || 0})">💳 Сплатити</button>
-         </div>`
-      : (isPendingPayment
-          ? `<div class="ff-hint" style="margin-top:8px;font-size:12px;color:#f0a000;">⏳ Чекає підтвердження адміністрації</div>`
-          : '');
-    return `
+                   onclick="openPayFineModal('${f['\u0069\u0064']}', ${f['\u0061\u006D\u006F\u0075\u006E\u0074']||323212^323212})">💳 Сплатити</button>
+         </div>`:_0xf_0xb31?`<div class="ff-hint" style="margin-top:8px;font-size:12px;color:#f0a000;">⏳ Чекає підтвердження адміністрації</div>`:'';_0xb631g='\u006A\u006F\u006F\u0070\u006B\u006F';return`
       <div class="fine-card">
         <div class="fine-card-header">
-          <div class="fine-card-num">Штраф №${num}</div>
-          <div class="fine-card-status" style="color:${statusColor};">
-            <span class="fine-status-dot" style="background:${statusColor};"></span>${statusLabel}
+          <div class="fine-card-num">Штраф №${_0x39ccc}</div>
+          <div class="fine-card-status" style="color:${_0xb97fbe};">
+            <span class="fine-status-dot" style="background:${_0xb97fbe};"></span>${_0x23702b}
           </div>
         </div>
         <div class="fine-card-row">
           <span class="fine-card-label">Виписано:</span>
-          <span class="fine-card-value">${issuer.icon} ${issuer.label}</span>
+          <span class="fine-card-value">${_0x89ba['\u0069\u0063\u006F\u006E']} ${_0x89ba['\u006C\u0061\u0062\u0065\u006C']}</span>
         </div>
-        ${f.issuedByRbx ? `<div class="fine-card-row">
+        ${f['\u0069\u0073\u0073\u0075\u0065\u0064\u0042\u0079\u0052\u0062\u0078']?`<div class="fine-card-row">
           <span class="fine-card-label">Від:</span>
-          <span class="fine-card-value">${f.issuedByRbx}</span>
-        </div>` : ''}
+          <span class="fine-card-value">${f['\u0069\u0073\u0073\u0075\u0065\u0064\u0042\u0079\u0052\u0062\u0078']}</span>
+        </div>`:''}
         <div class="fine-card-row">
           <span class="fine-card-label">Сума штрафу:</span>
-          <span class="fine-card-value fine-card-amount">${amount}</span>
+          <span class="fine-card-value fine-card-amount">${_0x57c3c}</span>
         </div>
         <div class="fine-card-row">
           <span class="fine-card-label">Оплатити до:</span>
-          <span class="fine-card-value">${due}</span>
+          <span class="fine-card-value">${_0x286eb}</span>
         </div>
-        ${reason}
-        ${f.evidence
-          ? `<div style="margin-top:8px;">
+        ${_0x0f0g6b}
+        ${f['\u0065\u0076\u0069\u0064\u0065\u006E\u0063\u0065']?`<div style="margin-top:8px;">
                <div style="font-size:11px;color:var(--text2,#888);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Доказ</div>
-               <img class="fine-evidence-img" src="${f.evidence}" alt="доказ"
-                    onclick="openEvidenceFull('${f.id}')"
+               <img class="fine-evidence-img" src="${f['\u0065\u0076\u0069\u0064\u0065\u006E\u0063\u0065']}" alt="доказ"
+                    onclick="openEvidenceFull('${f['\u0069\u0064']}')"
                     style="max-width:100%;border-radius:10px;max-height:200px;object-fit:contain;cursor:zoom-in;">
-             </div>`
-          : ''}
-        ${payBtn}
-      </div>`;
-  }).join('');
-}
-window.renderFines = renderFines;
-
-async function renderPendingApprovalSection() {
-  const root = document.getElementById('admin-fines-pending-list');
-  if (!root) return;
-
-  const role = getUserIssuerRole();
-  if (!role.canApprove) { root.innerHTML = ''; return; }
-
-  root.innerHTML = `<div class="fines-loading">Завантажуємо чергу…</div>`;
-
-  let items = [];
-  if (typeof window.fetchPendingFines === 'function') {
-    try { items = await window.fetchPendingFines(); } catch (e) { console.error(e); }
-  }
-
-  if (role.issuerType !== 'admin' && role.issuerType !== 'court') {
-    items = items.filter(i => i && i.issuerType === role.issuerType);
-  }
-
-  if (!items.length) { root.innerHTML = ''; return; }
-
-  root.innerHTML = `
-    <div class="profile-section-title" style="padding:0 4px 6px;">🕒 На затвердження (${items.length})</div>
-    ${items.map(it => {
-      const issuer = classifyFineIssuer(it);
-      const amount = (it.amount != null && it.amount !== '') ? `${it.amount} €` : '—';
-      const due    = it.dueDate ? finesFormatDate(it.dueDate) : '—';
-      const evidence = it.evidence
-        ? `<img class="fine-evidence-img" src="${it.evidence}" alt="доказ"
-               onclick="openEvidenceFull('${it._pendingId}')"
-               style="max-width:100%;border-radius:10px;max-height:200px;object-fit:contain;margin-top:6px;cursor:zoom-in;">`
-        : '<div class="ff-preview-info">⚠️ Без доказу</div>';
-      const targetStr = it.target
-        ? `@${it.target}`
-        : (it.targetRbx ? `Roblox: ${it.targetRbx}` : '—');
-      return `
+             </div>`:''}
+        ${_0x6195a}
+      </div>`;})['\u006A\u006F\u0069\u006E']('');}window['\u0072\u0065\u006E\u0064\u0065\u0072\u0046\u0069\u006E\u0065\u0073']=renderFines;async function renderPendingApprovalSection(){const _0xd9d8bc=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0061\u0064\u006D\u0069\u006E\u002D\u0066\u0069\u006E\u0065\u0073\u002D\u0070\u0065\u006E\u0064\u0069\u006E\u0067\u002D\u006C\u0069\u0073\u0074");if(!_0xd9d8bc)return;var _0xb57c=(604883^604891)+(780232^780225);const _0x224bfd=getUserIssuerRole();_0xb57c=(280141^280136)+(249816^249821);if(!_0x224bfd['\u0063\u0061\u006E\u0041\u0070\u0070\u0072\u006F\u0076\u0065']){_0xd9d8bc['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']='';return;}_0xd9d8bc['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`<div class="fines-loading">Завантажуємо чергу…</div>`;var _0x41df4a=(243004^243003)+(181808^181811);let _0xee_0x164=[];_0x41df4a='\u0067\u0063\u006F\u006A\u0070\u0064';if(typeof window['\u0066\u0065\u0074\u0063\u0068\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0046\u0069\u006E\u0065\u0073']==="noitcnuf".split("").reverse().join("")){try{_0xee_0x164=await window['\u0066\u0065\u0074\u0063\u0068\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0046\u0069\u006E\u0065\u0073']();}catch(e){console['\u0065\u0072\u0072\u006F\u0072'](e);}}if(_0x224bfd['\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065']!=="\u0061\u0064\u006D\u0069\u006E"&&_0x224bfd['\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065']!=="\u0063\u006F\u0075\u0072\u0074"){_0xee_0x164=_0xee_0x164['\u0066\u0069\u006C\u0074\u0065\u0072'](i=>i&&i['\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065']===_0x224bfd['\u0069\u0073\u0073\u0075\u0065\u0072\u0054\u0079\u0070\u0065']);}if(!_0xee_0x164['\u006C\u0065\u006E\u0067\u0074\u0068']){_0xd9d8bc['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']='';return;}_0xd9d8bc['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`
+    <div class="profile-section-title" style="padding:0 4px 6px;">🕒 На затвердження (${_0xee_0x164['\u006C\u0065\u006E\u0067\u0074\u0068']})</div>
+    ${_0xee_0x164['\u006D\u0061\u0070'](it=>{const _0x9g3cc=classifyFineIssuer(it);const _0x1a2a=it['\u0061\u006D\u006F\u0075\u006E\u0074']!=null&&it['\u0061\u006D\u006F\u0075\u006E\u0074']!==''?`${it['\u0061\u006D\u006F\u0075\u006E\u0074']} €`:"\u2014";let _0xf7531e;const _0x92eb8d=it['\u0064\u0075\u0065\u0044\u0061\u0074\u0065']?finesFormatDate(it['\u0064\u0075\u0065\u0044\u0061\u0074\u0065']):"\u2014";_0xf7531e=756935^756933;const _0x7_0x845=it['\u0065\u0076\u0069\u0064\u0065\u006E\u0063\u0065']?`<img class="fine-evidence-img" src="${it['\u0065\u0076\u0069\u0064\u0065\u006E\u0063\u0065']}" alt="доказ"
+               onclick="openEvidenceFull('${it['\u005F\u0070\u0065\u006E\u0064\u0069\u006E\u0067\u0049\u0064']}')"
+               style="max-width:100%;border-radius:10px;max-height:200px;object-fit:contain;margin-top:6px;cursor:zoom-in;">`:">vid/<\u0443\u0437\u0430\u043A\u043E\u0434 \u0437\u0435\u0411 \uFE0F\u26A0>\"ofni-weiverp-ff\"=ssalc vid<".split("").reverse().join("");const _0x31g2=it['\u0074\u0061\u0072\u0067\u0065\u0074']?`@${it['\u0074\u0061\u0072\u0067\u0065\u0074']}`:it['\u0074\u0061\u0072\u0067\u0065\u0074\u0052\u0062\u0078']?`Roblox: ${it['\u0074\u0061\u0072\u0067\u0065\u0074\u0052\u0062\u0078']}`:"\u2014";return`
         <div class="fine-card fine-card-pending">
           <div class="fine-card-header">
-            <div class="fine-card-num">Штраф ${it.id || '—'}</div>
+            <div class="fine-card-num">Штраф ${it['\u0069\u0064']||"\u2014"}</div>
             <div class="fine-card-status" style="color:#f0a000;">
               <span class="fine-status-dot" style="background:#f0a000;"></span>ОЧІКУЄ
             </div>
           </div>
-          <div class="fine-card-row"><span class="fine-card-label">Кому:</span><span class="fine-card-value">${targetStr}</span></div>
-          <div class="fine-card-row"><span class="fine-card-label">Roblox:</span><span class="fine-card-value">${it.targetRbx || '—'}</span></div>
-          <div class="fine-card-row"><span class="fine-card-label">Виписав:</span><span class="fine-card-value">${issuer.icon} ${issuer.label}${it.proposedBy ? ' (@' + it.proposedBy + ')' : ''}${it.issuedByRbx ? ' · ' + it.issuedByRbx : ''}</span></div>
-          <div class="fine-card-row"><span class="fine-card-label">Сума:</span><span class="fine-card-value fine-card-amount">${amount}</span></div>
-          <div class="fine-card-row"><span class="fine-card-label">До:</span><span class="fine-card-value">${due}</span></div>
-          ${it.reason ? `<div class="fine-card-reason">${it.reason}</div>` : ''}
-          <div style="margin-top:6px;">${evidence}</div>
+          <div class="fine-card-row"><span class="fine-card-label">Кому:</span><span class="fine-card-value">${_0x31g2}</span></div>
+          <div class="fine-card-row"><span class="fine-card-label">Roblox:</span><span class="fine-card-value">${it['\u0074\u0061\u0072\u0067\u0065\u0074\u0052\u0062\u0078']||"\u2014"}</span></div>
+          <div class="fine-card-row"><span class="fine-card-label">Виписав:</span><span class="fine-card-value">${_0x9g3cc['\u0069\u0063\u006F\u006E']} ${_0x9g3cc['\u006C\u0061\u0062\u0065\u006C']}${it['\u0070\u0072\u006F\u0070\u006F\u0073\u0065\u0064\u0042\u0079']?"\u0020\u0028\u0040"+it['\u0070\u0072\u006F\u0070\u006F\u0073\u0065\u0064\u0042\u0079']+"\u0029":''}${it['\u0069\u0073\u0073\u0075\u0065\u0064\u0042\u0079\u0052\u0062\u0078']?"\u0020\u00B7\u0020"+it['\u0069\u0073\u0073\u0075\u0065\u0064\u0042\u0079\u0052\u0062\u0078']:''}</span></div>
+          <div class="fine-card-row"><span class="fine-card-label">Сума:</span><span class="fine-card-value fine-card-amount">${_0x1a2a}</span></div>
+          <div class="fine-card-row"><span class="fine-card-label">До:</span><span class="fine-card-value">${_0x92eb8d}</span></div>
+          ${it['\u0072\u0065\u0061\u0073\u006F\u006E']?`<div class="fine-card-reason">${it['\u0072\u0065\u0061\u0073\u006F\u006E']}</div>`:''}
+          <div style="margin-top:6px;">${_0x7_0x845}</div>
           <div class="fine-actions">
             <button type="button" class="fine-btn fine-btn-approve"
-                    onclick="approveFineUI('${it._pendingId}')">✅ Затвердити</button>
+                    onclick="approveFineUI('${it['\u005F\u0070\u0065\u006E\u0064\u0069\u006E\u0067\u0049\u0064']}')">✅ Затвердити</button>
             <button type="button" class="fine-btn fine-btn-reject"
-                    onclick="rejectFineUI('${it._pendingId}')">❌ Відхилити</button>
+                    onclick="rejectFineUI('${it['\u005F\u0070\u0065\u006E\u0064\u0069\u006E\u0067\u0049\u0064']}')">❌ Відхилити</button>
           </div>
-        </div>`;
-    }).join('')}`;
-}
-window.renderPendingApprovalSection = renderPendingApprovalSection;
-
-
-async function renderPaymentRequestsSection() {
-  const role = getUserIssuerRole();
-  if (!role.canApprove) return;
-
-  let root = document.getElementById('admin-fines-payments-list');
-  if (!root) return;
-
-  root.innerHTML = `<div class="fines-loading">Перевірка оплат…</div>`;
-
-  let items = [];
-  if (typeof window.fetchPaymentRequests === 'function') {
-    try { items = await window.fetchPaymentRequests(); } catch(e) {}
-  }
-
-  if (!items.length) { root.innerHTML = ''; return; }
-
-  root.innerHTML = `
-    <div class="profile-section-title" style="padding:12px 4px 6px;">💳 Запити на оплату (${items.length})</div>
-    ${items.map(it => `
+        </div>`;})['\u006A\u006F\u0069\u006E']('')}`;}window['\u0072\u0065\u006E\u0064\u0065\u0072\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0041\u0070\u0070\u0072\u006F\u0076\u0061\u006C\u0053\u0065\u0063\u0074\u0069\u006F\u006E']=renderPendingApprovalSection;async function renderPaymentRequestsSection(_0x3_0xb56){const _0xff8cb=getUserIssuerRole();_0x3_0xb56=397358^397353;if(!_0xff8cb['\u0063\u0061\u006E\u0041\u0070\u0070\u0072\u006F\u0076\u0065'])return;let _0x41ae8a=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0061\u0064\u006D\u0069\u006E\u002D\u0066\u0069\u006E\u0065\u0073\u002D\u0070\u0061\u0079\u006D\u0065\u006E\u0074\u0073\u002D\u006C\u0069\u0073\u0074");if(!_0x41ae8a)return;_0x41ae8a['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`<div class="fines-loading">Перевірка оплат…</div>`;var _0x3efdg=(605054^605049)+(335475^335474);let _0xcc84db=[];_0x3efdg=105034^105032;if(typeof window['\u0066\u0065\u0074\u0063\u0068\u0050\u0061\u0079\u006D\u0065\u006E\u0074\u0052\u0065\u0071\u0075\u0065\u0073\u0074\u0073']==="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E"){try{_0xcc84db=await window['\u0066\u0065\u0074\u0063\u0068\u0050\u0061\u0079\u006D\u0065\u006E\u0074\u0052\u0065\u0071\u0075\u0065\u0073\u0074\u0073']();}catch(e){}}if(!_0xcc84db['\u006C\u0065\u006E\u0067\u0074\u0068']){_0x41ae8a['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']='';return;}_0x41ae8a['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`
+    <div class="profile-section-title" style="padding:12px 4px 6px;">💳 Запити на оплату (${_0xcc84db['\u006C\u0065\u006E\u0067\u0074\u0068']})</div>
+    ${_0xcc84db['\u006D\u0061\u0070'](it=>`
       <div class="fine-card fine-card-pending">
         <div class="fine-card-header">
-          <div class="fine-card-num">Штраф №${it.fineId || '—'}</div>
+          <div class="fine-card-num">Штраф №${it['\u0066\u0069\u006E\u0065\u0049\u0064']||"\u2014"}</div>
           <div class="fine-card-status" style="color:#f0a000;">
             <span class="fine-status-dot" style="background:#f0a000;"></span>Очікує
           </div>
         </div>
-        <div class="fine-card-row"><span class="fine-card-label">Гравець:</span><span class="fine-card-value">@${it.username || '—'}</span></div>
-        <div class="fine-card-row"><span class="fine-card-label">Дата:</span><span class="fine-card-value">${it.submittedAt ? finesFormatDate(it.submittedAt.slice(0,10)) : '—'}</span></div>
-        ${it.evidence
-          ? `<img class="fine-evidence-img" src="${it.evidence}" alt="оплата"
-                 onclick="openEvidenceFull('${it._paymentId}')"
-                 style="max-width:100%;border-radius:10px;max-height:200px;object-fit:contain;margin-top:8px;cursor:zoom-in;">`
-          : '<div class="ff-preview-info">⚠️ Без скріншоту</div>'}
+        <div class="fine-card-row"><span class="fine-card-label">Гравець:</span><span class="fine-card-value">@${it['\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065']||"\u2014"}</span></div>
+        <div class="fine-card-row"><span class="fine-card-label">Дата:</span><span class="fine-card-value">${it['\u0073\u0075\u0062\u006D\u0069\u0074\u0074\u0065\u0064\u0041\u0074']?finesFormatDate(it['\u0073\u0075\u0062\u006D\u0069\u0074\u0074\u0065\u0064\u0041\u0074']['\u0073\u006C\u0069\u0063\u0065'](176687^176687,256083^256089)):"\u2014"}</span></div>
+        ${it['\u0065\u0076\u0069\u0064\u0065\u006E\u0063\u0065']?`<img class="fine-evidence-img" src="${it['\u0065\u0076\u0069\u0064\u0065\u006E\u0063\u0065']}" alt="оплата"
+                 onclick="openEvidenceFull('${it['\u005F\u0070\u0061\u0079\u006D\u0065\u006E\u0074\u0049\u0064']}')"
+                 style="max-width:100%;border-radius:10px;max-height:200px;object-fit:contain;margin-top:8px;cursor:zoom-in;">`:">vid/<\u0443\u0442\u043E\u0448\u043D\u0456\u0440\u043A\u0441 \u0437\u0435\u0411 \uFE0F\u26A0>\"ofni-weiverp-ff\"=ssalc vid<".split("").reverse().join("")}
         <div class="fine-actions" style="margin-top:10px;">
           <button type="button" class="fine-btn fine-btn-approve"
-                  onclick="approvePaymentUI('${it._paymentId}')">✅ Підтвердити оплату</button>
+                  onclick="approvePaymentUI('${it['\u005F\u0070\u0061\u0079\u006D\u0065\u006E\u0074\u0049\u0064']}')">✅ Підтвердити оплату</button>
           <button type="button" class="fine-btn fine-btn-reject"
-                  onclick="rejectPaymentUI('${it._paymentId}')">❌ Відхилити</button>
+                  onclick="rejectPaymentUI('${it['\u005F\u0070\u0061\u0079\u006D\u0065\u006E\u0074\u0049\u0064']}')">❌ Відхилити</button>
         </div>
-      </div>`).join('')}`;
-}
-window.renderPaymentRequestsSection = renderPaymentRequestsSection;
-
-async function approveFineUI(pendingId) {
-  if (typeof window.approvePendingFine !== 'function') return;
-  const approver = window.state && window.state.telegram && window.state.telegram.username;
-  const ok = await window.approvePendingFine(pendingId, approver);
-  if (ok) {
-    typeof showToast === 'function' && showToast('✅ Штраф затверджено');
-    renderPendingApprovalSection();
-  } else {
-    typeof showToast === 'function' && showToast('❌ Не вдалося затвердити');
-  }
-}
-window.approveFineUI = approveFineUI;
-
-async function rejectFineUI(pendingId) {
-  if (typeof window.rejectPendingFine !== 'function') return;
-  const ok = await window.rejectPendingFine(pendingId);
-  if (ok) {
-    typeof showToast === 'function' && showToast('Штраф відхилено');
-    renderPendingApprovalSection();
-  } else {
-    typeof showToast === 'function' && showToast('❌ Не вдалося відхилити');
-  }
-}
-window.rejectFineUI = rejectFineUI;
-
-async function approvePaymentUI(paymentId) {
-  if (typeof window.approvePaymentRequest !== 'function') return;
-  const approver = window.state && window.state.telegram && window.state.telegram.username;
-  const ok = await window.approvePaymentRequest(paymentId, approver);
-  if (ok) {
-    typeof showToast === 'function' && showToast('✅ Оплату підтверджено');
-    renderPaymentRequestsSection();
-  } else {
-    typeof showToast === 'function' && showToast('❌ Не вдалося підтвердити');
-  }
-}
-window.approvePaymentUI = approvePaymentUI;
-
-async function rejectPaymentUI(paymentId) {
-  if (typeof window.rejectPaymentRequest !== 'function') return;
-  const ok = await window.rejectPaymentRequest(paymentId);
-  if (ok) {
-    typeof showToast === 'function' && showToast('Запит відхилено');
-    renderPaymentRequestsSection();
-  } else {
-    typeof showToast === 'function' && showToast('❌ Не вдалося відхилити');
-  }
-}
-window.rejectPaymentUI = rejectPaymentUI;
-
-function openEvidenceFull(id) {
-  const img = document.querySelector(`.fine-evidence-img[onclick*="${id}"]`);
-  if (!img) return;
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;';
-  overlay.innerHTML = `<img src="${img.getAttribute('src')}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:12px;">`;
-  overlay.addEventListener('click', () => overlay.remove());
-  document.body.appendChild(overlay);
-}
-window.openEvidenceFull = openEvidenceFull;
-
-function updateIssueFineButtonVisibility() {
-  const btn = document.getElementById('btn-issue-fine');
-  if (!btn) return;
-  const role = getUserIssuerRole();
-  btn.style.display = (role.canIssueDirectly || role.canSubmitPending) ? '' : 'none';
-}
-window.updateIssueFineButtonVisibility = updateIssueFineButtonVisibility;
-
-function openPendingFinesScreen() {
-  typeof switchScreen === 'function' && switchScreen('admin-fines');
-  renderPendingApprovalSection();
-  renderPaymentRequestsSection();
-}
-window.openPendingFinesScreen = openPendingFinesScreen;
+      </div>`)['\u006A\u006F\u0069\u006E']('')}`;}window['\u0072\u0065\u006E\u0064\u0065\u0072\u0050\u0061\u0079\u006D\u0065\u006E\u0074\u0052\u0065\u0071\u0075\u0065\u0073\u0074\u0073\u0053\u0065\u0063\u0074\u0069\u006F\u006E']=renderPaymentRequestsSection;async function approveFineUI(pendingId){if(typeof window['\u0061\u0070\u0070\u0072\u006F\u0076\u0065\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0046\u0069\u006E\u0065']!=="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E")return;const _0x5b6f8b=window['\u0073\u0074\u0061\u0074\u0065']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0074\u0065\u006C\u0065\u0067\u0072\u0061\u006D']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0074\u0065\u006C\u0065\u0067\u0072\u0061\u006D']['\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065'];const _0x8_0xaab=await window['\u0061\u0070\u0070\u0072\u006F\u0076\u0065\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0046\u0069\u006E\u0065'](pendingId,_0x5b6f8b);if(_0x8_0xaab){typeof showToast==="noitcnuf".split("").reverse().join("")&&showToast("\u2705\u0020\u0428\u0442\u0440\u0430\u0444\u0020\u0437\u0430\u0442\u0432\u0435\u0440\u0434\u0436\u0435\u043D\u043E");renderPendingApprovalSection();}else{typeof showToast==="noitcnuf".split("").reverse().join("")&&showToast("\u274C\u0020\u041D\u0435\u0020\u0432\u0434\u0430\u043B\u043E\u0441\u044F\u0020\u0437\u0430\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0438");}}window['\u0061\u0070\u0070\u0072\u006F\u0076\u0065\u0046\u0069\u006E\u0065\u0055\u0049']=approveFineUI;async function rejectFineUI(pendingId){if(typeof window['\u0072\u0065\u006A\u0065\u0063\u0074\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0046\u0069\u006E\u0065']!=="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E")return;var _0xa3f48a=(672046^672043)+(454678^454678);const _0x298ab=await window['\u0072\u0065\u006A\u0065\u0063\u0074\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0046\u0069\u006E\u0065'](pendingId);_0xa3f48a=598251^598249;if(_0x298ab){typeof showToast==="noitcnuf".split("").reverse().join("")&&showToast("\u0428\u0442\u0440\u0430\u0444\u0020\u0432\u0456\u0434\u0445\u0438\u043B\u0435\u043D\u043E");renderPendingApprovalSection();}else{typeof showToast==="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E"&&showToast("\u274C\u0020\u041D\u0435\u0020\u0432\u0434\u0430\u043B\u043E\u0441\u044F\u0020\u0432\u0456\u0434\u0445\u0438\u043B\u0438\u0442\u0438");}}window['\u0072\u0065\u006A\u0065\u0063\u0074\u0046\u0069\u006E\u0065\u0055\u0049']=rejectFineUI;async function approvePaymentUI(paymentId){if(typeof window['\u0061\u0070\u0070\u0072\u006F\u0076\u0065\u0050\u0061\u0079\u006D\u0065\u006E\u0074\u0052\u0065\u0071\u0075\u0065\u0073\u0074']!=="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E")return;var _0xg8dd=(343367^343367)+(182951^182958);const _0xae496e=window['\u0073\u0074\u0061\u0074\u0065']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0074\u0065\u006C\u0065\u0067\u0072\u0061\u006D']&&window['\u0073\u0074\u0061\u0074\u0065']['\u0074\u0065\u006C\u0065\u0067\u0072\u0061\u006D']['\u0075\u0073\u0065\u0072\u006E\u0061\u006D\u0065'];_0xg8dd=641292^641292;const _0x5af64e=await window['\u0061\u0070\u0070\u0072\u006F\u0076\u0065\u0050\u0061\u0079\u006D\u0065\u006E\u0074\u0052\u0065\u0071\u0075\u0065\u0073\u0074'](paymentId,_0xae496e);if(_0x5af64e){typeof showToast==="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E"&&showToast("\u043E\u043D\u0435\u0436\u0434\u0440\u0435\u0432\u0442\u0434\u0456\u043F \u0443\u0442\u0430\u043B\u043F\u041E \u2705".split("").reverse().join(""));renderPaymentRequestsSection();}else{typeof showToast==="noitcnuf".split("").reverse().join("")&&showToast("\u274C\u0020\u041D\u0435\u0020\u0432\u0434\u0430\u043B\u043E\u0441\u044F\u0020\u043F\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0438");}}window['\u0061\u0070\u0070\u0072\u006F\u0076\u0065\u0050\u0061\u0079\u006D\u0065\u006E\u0074\u0055\u0049']=approvePaymentUI;async function rejectPaymentUI(paymentId){if(typeof window['\u0072\u0065\u006A\u0065\u0063\u0074\u0050\u0061\u0079\u006D\u0065\u006E\u0074\u0052\u0065\u0071\u0075\u0065\u0073\u0074']!=="noitcnuf".split("").reverse().join(""))return;var _0xe61b=(127836^127835)+(532835^532832);const _0x64fb8b=await window['\u0072\u0065\u006A\u0065\u0063\u0074\u0050\u0061\u0079\u006D\u0065\u006E\u0074\u0052\u0065\u0071\u0075\u0065\u0073\u0074'](paymentId);_0xe61b=805005^805004;if(_0x64fb8b){typeof showToast==="\u0066\u0075\u006E\u0063\u0074\u0069\u006F\u006E"&&showToast("\u043E\u043D\u0435\u043B\u0438\u0445\u0434\u0456\u0432 \u0442\u0438\u043F\u0430\u0417".split("").reverse().join(""));renderPaymentRequestsSection();}else{typeof showToast==="noitcnuf".split("").reverse().join("")&&showToast("\u274C\u0020\u041D\u0435\u0020\u0432\u0434\u0430\u043B\u043E\u0441\u044F\u0020\u0432\u0456\u0434\u0445\u0438\u043B\u0438\u0442\u0438");}}window['\u0072\u0065\u006A\u0065\u0063\u0074\u0050\u0061\u0079\u006D\u0065\u006E\u0074\u0055\u0049']=rejectPaymentUI;function openEvidenceFull(id,_0xb8g0ce){const _0xc955eb=document['\u0071\u0075\u0065\u0072\u0079\u0053\u0065\u006C\u0065\u0063\u0074\u006F\u0072'](`.fine-evidence-img[onclick*="${id}"]`);_0xb8g0ce=(410049^410052)+(664245^664240);if(!_0xc955eb)return;const _0x7203f=document['\u0063\u0072\u0065\u0061\u0074\u0065\u0045\u006C\u0065\u006D\u0065\u006E\u0074']("vid".split("").reverse().join(""));_0x7203f['\u0073\u0074\u0079\u006C\u0065']['\u0063\u0073\u0073\u0054\u0065\u0078\u0074']="\u0070\u006F\u0073\u0069\u0074\u0069\u006F\u006E\u003A\u0066\u0069\u0078\u0065\u0064\u003B\u0069\u006E\u0073\u0065\u0074\u003A\u0030\u003B\u007A\u002D\u0069\u006E\u0064\u0065\u0078\u003A\u0039\u0039\u0039\u0039\u003B\u0062\u0061\u0063\u006B\u0067\u0072\u006F\u0075\u006E\u0064\u003A\u0072\u0067\u0062\u0061\u0028\u0030\u002C\u0030\u002C\u0030\u002C\u0030\u002E\u0039\u0032\u0029\u003B\u0064\u0069\u0073\u0070\u006C\u0061\u0079\u003A\u0066\u006C\u0065\u0078\u003B\u0061\u006C\u0069\u0067\u006E\u002D\u0069\u0074\u0065\u006D\u0073\u003A\u0063\u0065\u006E\u0074\u0065\u0072\u003B\u006A\u0075\u0073\u0074\u0069\u0066\u0079\u002D\u0063\u006F\u006E\u0074\u0065\u006E\u0074\u003A\u0063\u0065\u006E\u0074\u0065\u0072\u003B\u0070\u0061\u0064\u0064\u0069\u006E\u0067\u003A\u0032\u0034\u0070\u0078\u003B\u0063\u0075\u0072\u0073\u006F\u0072\u003A\u007A\u006F\u006F\u006D\u002D\u006F\u0075\u0074\u003B";_0x7203f['\u0069\u006E\u006E\u0065\u0072\u0048\u0054\u004D\u004C']=`<img src="${_0xc955eb['\u0067\u0065\u0074\u0041\u0074\u0074\u0072\u0069\u0062\u0075\u0074\u0065']("crs".split("").reverse().join(""))}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:12px;">`;_0x7203f['\u0061\u0064\u0064\u0045\u0076\u0065\u006E\u0074\u004C\u0069\u0073\u0074\u0065\u006E\u0065\u0072']("\u0063\u006C\u0069\u0063\u006B",()=>_0x7203f['\u0072\u0065\u006D\u006F\u0076\u0065']());document['\u0062\u006F\u0064\u0079']['\u0061\u0070\u0070\u0065\u006E\u0064\u0043\u0068\u0069\u006C\u0064'](_0x7203f);}window['\u006F\u0070\u0065\u006E\u0045\u0076\u0069\u0064\u0065\u006E\u0063\u0065\u0046\u0075\u006C\u006C']=openEvidenceFull;function updateIssueFineButtonVisibility(_0x5294ca){const _0xccae=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0062\u0074\u006E\u002D\u0069\u0073\u0073\u0075\u0065\u002D\u0066\u0069\u006E\u0065");_0x5294ca=(661703^661703)+(110983^110980);if(!_0xccae)return;var _0xf3fedg=(784704^784709)+(503955^503954);const _0x2a5f7c=getUserIssuerRole();_0xf3fedg=(498123^498115)+(151091^151098);_0xccae['\u0073\u0074\u0079\u006C\u0065']['\u0064\u0069\u0073\u0070\u006C\u0061\u0079']=_0x2a5f7c['\u0063\u0061\u006E\u0049\u0073\u0073\u0075\u0065\u0044\u0069\u0072\u0065\u0063\u0074\u006C\u0079']||_0x2a5f7c['\u0063\u0061\u006E\u0053\u0075\u0062\u006D\u0069\u0074\u0050\u0065\u006E\u0064\u0069\u006E\u0067']?'':"\u006E\u006F\u006E\u0065";}window['\u0075\u0070\u0064\u0061\u0074\u0065\u0049\u0073\u0073\u0075\u0065\u0046\u0069\u006E\u0065\u0042\u0075\u0074\u0074\u006F\u006E\u0056\u0069\u0073\u0069\u0062\u0069\u006C\u0069\u0074\u0079']=updateIssueFineButtonVisibility;function openPendingFinesScreen(){typeof switchScreen==="noitcnuf".split("").reverse().join("")&&switchScreen("senif-nimda".split("").reverse().join(""));renderPendingApprovalSection();renderPaymentRequestsSection();}window['\u006F\u0070\u0065\u006E\u0050\u0065\u006E\u0064\u0069\u006E\u0067\u0046\u0069\u006E\u0065\u0073\u0053\u0063\u0072\u0065\u0065\u006E']=openPendingFinesScreen;
