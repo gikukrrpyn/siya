@@ -11,12 +11,12 @@
 html, body {
   height: 100%;
   margin: 0;
-  overflow: hidden; /* убираем конфликт скролла */
+  overflow: auto !important;
 }
 
-/* === OVERLAY === */
 #onboarding-overlay {
-  position: fixed;
+  position: relative !important;
+  height: auto !important;
   inset: 0;
   z-index: 9999;
   background: #fff;
@@ -27,7 +27,7 @@ html, body {
   font-family: 'Raleway', sans-serif;
   -webkit-font-smoothing: antialiased;
 
-  overflow-y: auto;          /* один главный скролл */
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
 }
@@ -35,8 +35,6 @@ html, body {
 #onboarding-overlay.hidden {
   display: none;
 }
-
-/* === SPLASH === */
 #ob-splash {
   position: absolute;
   inset: 0;
@@ -63,7 +61,6 @@ html, body {
   font-weight: 800;
 }
 
-/* === LOGO BAR === */
 .ob-logo-bar {
   height: 56px;
   display: flex;
@@ -84,7 +81,6 @@ html, body {
   font-weight: 800;
 }
 
-/* === STEPS === */
 #ob-steps {
   flex: 1;
   display: flex;
@@ -99,13 +95,10 @@ html, body {
   opacity: 0;
   animation: obFadeUp 0.4s 2s cubic-bezier(.22,1,.36,1) both;
 }
-
-/* === TERMS CONTENT (БЕЗ ВНУТРЕННЕГО SCROLL) === */
 .ob-terms-body {
   padding: 0 24px 16px;
 }
 
-/* === TEXT === */
 .ob-terms-tag {
   display: inline-block;
   background: #F5F5F5;
@@ -161,14 +154,12 @@ html, body {
   padding-left: 18px;
 }
 
-/* === BOTTOM === */
 .ob-bottom {
   padding: 12px 20px 32px;
   background: #fff;
   border-top: 1px solid #EBEBEB;
 }
 
-/* === CHECKBOX === */
 .ob-agree-row {
   display: flex;
   align-items: center;
@@ -203,7 +194,6 @@ html, body {
   opacity: 1;
 }
 
-/* === BUTTON === */
 .ob-btn-primary {
   width: 100%;
   height: 54px;
@@ -221,8 +211,6 @@ html, body {
 .ob-btn-primary:disabled {
   opacity: .4;
 }
-
-/* === LOGIN STEP === */
 #ob-step-login {
   display: none;
   flex-direction: column;
@@ -240,7 +228,7 @@ html, body {
   text-align: center;
 }
 
-/* === ANIMATIONS === */
+
 @keyframes obFadeUp {
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
