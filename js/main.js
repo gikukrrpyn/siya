@@ -11,14 +11,26 @@ if (window.Telegram && window.Telegram.WebApp) {
 
   try {
     const initData = tg.initData;
-    if (initData) {
+    if (initData && typeof initData === 'string' && initData.trim().length > 0) {
       const params = new URLSearchParams(initData);
+      const hash = params.get('hash');
+      const authDate = params.get('auth_date');
       const userStr = params.get('user');
-      if (userStr) {
-        tgUser = JSON.parse(decodeURIComponent(userStr));
+      
+      if (hash && authDate && userStr) {
+        const authTime = parseInt(authDate, 10);
+        const now = Math.floor(Date.now() / 1000);
+        // Перевіряємо, чи дані не застаріли (наприклад, 24 години = 86400 секунд)
+        if (!isNaN(authTime) && (now - authTime <= 86400)) {
+          tgUser = JSON.parse(userStr);
+        }
       }
+    } else {
+      tgUser = null;
     }
-  } catch(e) {}
+  } catch(e) {
+    tgUser = null;
+  }
 
   if (tgUser) {
     const name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
@@ -1202,7 +1214,27 @@ function renderSettingsScreen() {
 
 window.toggleTheme = toggleTheme;
 window.renderSettingsScreen = renderSettingsScreen;
-window.addEventListener('load', () => {
+window.addEventListener('error', function(e) {
+  if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === 'img') {
+    e.target.style.display = 'none';
+    const parent = e.target.parentElement;
+    if (parent && parent.classList.contains('service-row-icon')) {
+      parent.textContent = e.target.alt ? e.target.alt.charAt(0).toUpperCase() : '?';
+    } else if (parent && parent.id === 'ob-splash') {
+      const fb = parent.querySelector('.ob-splash-fb');
+      if (fb) fb.style.display = 'block';
+    }
+  }
+}, true);
+
+function initMain() {
   bootTheme();
   bootViewerMode();
-});
+}
+
+if (document.readyState === 'complete') {
+  initMain();
+} else {
+  window.addEventListener('load', initMain);
+}
+
