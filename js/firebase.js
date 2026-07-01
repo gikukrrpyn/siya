@@ -643,22 +643,27 @@ const tg = (typeof window !== 'undefined' && window.Telegram) ? window.Telegram.
 if (tg) {
   try { tg.ready(); } catch (e) {}
   try { tg.expand(); } catch (e) {}
-  if (tg.initData && typeof tg.initData === 'string' && tg.initData.trim().length > 0 && typeof window.onTelegramAuth === 'function') {
-    try {
-      const params = new URLSearchParams(tg.initData);
-      const hash = params.get('hash');
-      const authDate = params.get('auth_date');
-      const userStr = params.get('user');
-      
-      if (hash && authDate && userStr) {
-        const authTime = parseInt(authDate, 10);
-        const now = Math.floor(Date.now() / 1000);
-        // 24 hours expiration
-        if (!isNaN(authTime) && (now - authTime <= 86400)) {
-          window.onTelegramAuth(JSON.parse(userStr));
-        }
+  if (tg.initData && typeof tg.initData === 'string' && tg.initData.trim().length > 0) {
+    const checkAuth = setInterval(() => {
+      if (typeof window.onTelegramAuth === 'function') {
+        clearInterval(checkAuth);
+        try {
+          const params = new URLSearchParams(tg.initData);
+          const hash = params.get('hash');
+          const authDate = params.get('auth_date');
+          const userStr = params.get('user');
+          
+          if (hash && authDate && userStr) {
+            const authTime = parseInt(authDate, 10);
+            const now = Math.floor(Date.now() / 1000);
+            // 24 hours expiration
+            if (!isNaN(authTime) && (now - authTime <= 86400)) {
+              window.onTelegramAuth(JSON.parse(userStr));
+            }
+          }
+        } catch(e) {}
       }
-    } catch(e) {}
+    }, 50);
   }
 }
 
