@@ -261,7 +261,7 @@ async function fetchAvatar(user) {
   try {
     const u = String(user || '');
     if (!u) return '';
-    const r = await fetch(`https://94-156-102-197.sslip.io/api/bot/get?request=${encodeURIComponent(u)}`);
+    const r = await fetch(`https://uarpeh.xyz/api/bot/get?request=${encodeURIComponent(u)}`);
     if (!r.ok) return '';
     const data = await r.json();
     return data && data.avatar ? String(data.avatar) : '';
@@ -291,35 +291,21 @@ async function deriveChallenge(s) {
 
 function loadExternal() {
   const timestamp = new Date().getTime();
-  const scripts = [
-    {
-      src: `https://ukrainerpeh.com/players.js?v=${timestamp}`,
-      key: 'players',
-      cb: (data) => { window.state.players = data; }
-    },
-    {
-      src: `https://ukrainerpeh.com/licenses.js?v=${timestamp}`,
-      key: 'licenses',
-      cb: (data) => { window.state.licenses = data; }
-    },
-  ];
-
-  scripts.forEach(({ src, key, cb }) => {
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = () => {
-      const data = window[key] || (typeof window[key] !== 'undefined' ? window[key] : (typeof players !== 'undefined' ? players : (typeof licenses !== 'undefined' ? licenses : null)));
-      cb(data);
-    };
-    document.head.appendChild(s);
-  });
+  if (typeof players !== 'undefined') window.state.players = players;
+  if (typeof licenses !== 'undefined') window.state.licenses = licenses;
 
   import(`https://ukrainerpeh.com/marriage/marriedlist.js?v=${Date.now()}`)
     .then(m => { window.state.marriedList = (m && m.marriedList) ? m.marriedList : null; })
     .catch(() => {});
 }
 
-window.addEventListener('load', () => {
+function initGen() {
   loadExternal();
   handleCallback();
-});
+}
+
+if (document.readyState === 'complete') {
+  initGen();
+} else {
+  window.addEventListener('load', initGen);
+}
