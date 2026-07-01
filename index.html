@@ -8,14 +8,15 @@ media-src 'self' https://res.cloudinary.com;
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com;
 font-src https://fonts.gstatic.com https://ukrainerpeh.com https://*.ukrainerpeh.com;
 script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net https://ukrainerpeh.com https://*.ukrainerpeh.com https://www.gstatic.com;
-connect-src 'self' https://apis.roblox.com https://firestore.googleapis.com https://firebase.googleapis.com https://*.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com https://www.gstatic.com https://api.imgbb.com https://api.cloudinary.com;
+connect-src 'self' https://apis.roblox.com https://firestore.googleapis.com https://firebase.googleapis.com https://*.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com https://uarpeh.xyz https://*.uarpeh.xyz https://www.gstatic.com https://api.imgbb.com https://api.cloudinary.com;
 object-src 'none';
-base-uri 'none';
-frame-ancestors https://web.telegram.org;">
+base-uri 'none';">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>СіЯ</title> 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://ukrainerpeh.com/players.js"></script>
+<script src="https://ukrainerpeh.com/licenses.js"></script>
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/mainb.css">
 <style>
@@ -423,8 +424,7 @@ frame-ancestors https://web.telegram.org;">
 </script>
 <div id="onboarding-overlay">
   <div id="ob-splash">
-    <img src="png/ciyablack.png" alt="CiЯ"
-         onerror="this.style.display='none';this.parentElement.querySelector('.ob-splash-fb').style.display='block'">
+    <img src="png/ciyablack.png" alt="CiЯ">
     <div class="ob-splash-fb">CiЯ</div>
   </div>
   <div id="ob-steps">
@@ -922,7 +922,7 @@ frame-ancestors https://web.telegram.org;">
   var v=Date.now();
   var a=[
     "js/gen.js","js/fines.js","js/main.js",
-    "https://ukrainerpeh.com/players.js","https://ukrainerpeh.com/licenses.js","js/chat.js"
+    "js/chat.js"
   ];
   a.forEach(function(s){
     var t=document.createElement("script");
@@ -1128,13 +1128,16 @@ frame-ancestors https://web.telegram.org;">
       if (searchQuery && !item.nick.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       return true;
     });
+    const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     filtered.forEach(item => {
       const color = statusColor(item);
       const dot = color ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:5px;flex-shrink:0;"></span>` : '';
       const row = document.createElement('div');
       row.className = 'service-row';
       row.style.cursor = item.telegram ? 'pointer' : 'default';
-      row.innerHTML = `<div class="service-row-icon" style="overflow:hidden;border-radius:50%;width:40px;height:40px;flex-shrink:0;background:var(--bg2,#222);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">${item.avatar ? `<img src="${item.avatar}" alt="${item.nick}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.textContent='${initials(item.nick)}'">` : initials(item.nick)}</div><div class="service-row-content"><div class="service-row-name">${item.nick}</div><div class="service-row-desc" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;">${dot}${item.sublabel}${item.label ? ' • ' + item.label : ''}${item.extra ? ' · ' + item.extra : ''}</div></div>${item.telegram ? `<svg class="service-row-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>` : ''}`;
+      const safeAvatar = esc(item.avatar);
+      const safeNick = esc(item.nick);
+      row.innerHTML = `<div class="service-row-icon" style="overflow:hidden;border-radius:50%;width:40px;height:40px;flex-shrink:0;background:var(--bg2,#222);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">${safeAvatar ? `<img src="${safeAvatar}" alt="${safeNick}" style="width:100%;height:100%;object-fit:cover;">` : (item.nick?item.nick.charAt(0).toUpperCase():'?')}</div><div class="service-row-content"><div class="service-row-name">${safeNick}</div><div class="service-row-desc" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;">${dot}${esc(item.sublabel)}${item.label ? ' • ' + esc(item.label) : ''}${item.extra ? ' · ' + esc(item.extra) : ''}</div></div>${item.telegram ? `<svg class="service-row-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>` : ''}`;
       if (item.telegram) { row.addEventListener('click', () => { const url = tgUrl(item.telegram); if (url) window.open(url, '_blank'); }); }
       list.appendChild(row);
     });
@@ -1150,6 +1153,7 @@ frame-ancestors https://web.telegram.org;">
     input.addEventListener('input', e => { searchQuery = e.target.value; renderList(); });
   }
   function init() { allItems = buildItems(); renderList(); initChips(); initSearch(); }
+  window.reinitServices = init;
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
 })();
 </script>
