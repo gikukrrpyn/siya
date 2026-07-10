@@ -283,7 +283,7 @@ function buildLicenseDoc(key, data, ctx) {
     case 'mafia':
       return {
         title: data.status || 'ОЗУ',
-        type: 'Реєстрація ОЗУ',
+        type: 'ОЗУ',
         status: data.cans ? 'Скасовано' : 'Дійсна',
         docNumber: data.status || '—',
         fields: [
