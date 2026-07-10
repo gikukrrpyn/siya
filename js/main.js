@@ -296,7 +296,7 @@ function buildLicenseDoc(key, data, ctx) {
     case 'business':
       return {
         title: data.role || 'Бізнес',
-        type: 'Бізнес-сертифікат',
+        type: 'Бізнес',
         status: data.cans ? 'Скасовано' : 'Активний',
         docNumber: data.status || '—',
         fields: [
