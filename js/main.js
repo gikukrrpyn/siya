@@ -1272,16 +1272,24 @@ function applyCustomBg() {
     setBgImage(url);
   } else {
     localStorage.removeItem('customBg');
-    document.body.style.backgroundImage = '';
+    document.getElementById('bg-layer').style.backgroundImage = '';
   }
 }
 
+
+
+
 function setBgImage(url) {
-  document.body.style.backgroundImage = `url('${url}')`;
-  document.body.style.backgroundSize = 'cover';
-  document.body.style.backgroundPosition = 'center';
-  document.body.style.backgroundRepeat = 'no-repeat';
-  document.body.style.backgroundAttachment = 'fixed';
+  const layer = document.getElementById('bg-layer');
+  if(layer) {
+    if(url) {
+      layer.style.backgroundImage = `url('${url}')`;
+      document.body.classList.add('has-custom-bg');
+    } else {
+      layer.style.backgroundImage = '';
+      document.body.classList.remove('has-custom-bg');
+    }
+  }
 }
 
 // Load background on start
