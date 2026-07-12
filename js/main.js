@@ -1263,3 +1263,33 @@ if (document.readyState === 'complete') {
   window.addEventListener('load', initMain);
 }
 
+
+
+function applyCustomBg() {
+  const url = document.getElementById('custom-bg-url').value.trim();
+  if (url) {
+    localStorage.setItem('customBg', url);
+    setBgImage(url);
+  } else {
+    localStorage.removeItem('customBg');
+    document.body.style.backgroundImage = '';
+  }
+}
+
+function setBgImage(url) {
+  document.body.style.backgroundImage = `url('${url}')`;
+  document.body.style.backgroundSize = 'cover';
+  document.body.style.backgroundPosition = 'center';
+  document.body.style.backgroundRepeat = 'no-repeat';
+  document.body.style.backgroundAttachment = 'fixed';
+}
+
+// Load background on start
+document.addEventListener('DOMContentLoaded', () => {
+  const savedBg = localStorage.getItem('customBg');
+  if (savedBg) {
+    setBgImage(savedBg);
+    const input = document.getElementById('custom-bg-url');
+    if (input) input.value = savedBg;
+  }
+});
