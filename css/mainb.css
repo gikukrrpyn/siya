@@ -1359,3 +1359,12 @@ body.theme-dark .cat-chip.active{
 
 body.theme-dark .bg-btn { background: #333 !important; color: #fff !important; }
 body.theme-dark .bg-input { background: rgba(255,255,255,0.1) !important; color: #fff !important; }
+
+
+/* Custom BG Overrides */
+body.has-custom-bg,
+body.has-custom-bg #app,
+body.has-custom-bg .screen,
+body.has-custom-bg .scroll-area {
+    background: transparent !important;
+}
