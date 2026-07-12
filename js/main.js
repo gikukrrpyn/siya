@@ -50,7 +50,7 @@ async function initTelegramAuth() {
     if (tgUser) {
       const name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
       const greet = document.querySelector('.greeting-name');
-      if (greet) greet.textContent = `Привіт, ${tgUser.first_name || 'гість'} 👋`;
+      if (greet) greet.textContent = `Привіт, ${tgUser.first_name || 'гість'} `;
       const pName = document.querySelector('.profile-name');
       if (pName) pName.textContent = name || 'Користувач';
       const pId = document.querySelector('.profile-id');
@@ -82,7 +82,7 @@ function _canAdmin() {
 function switchScreen(id) {
   if (currentScreen === id) return;
   if (id === 'admin-fines' && !_canAdmin()) {
-    typeof showToast === 'function' && showToast('🚫 Немає прав');
+    typeof showToast === 'function' && showToast('Немає прав');
     return;
   }
 
@@ -455,9 +455,9 @@ function renderProfileLicenses() {
     const key = Object.keys(L.weapon).find(k => k.toLowerCase() === lc);
     if (key) {
       const d = L.weapon[key];
-      const status = d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна');
+      const status = d.cans ? 'Скасовано' : (d.status || 'Дійсна');
       const expiry = d.expiry ? `\nДійсна до: ${formatExpiryDate(d.expiry)}` : '';
-      items.push({ icon: '🔫', label: 'Ліцензія на зброю', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
+      items.push({ icon: iconMap['weapon'], label: 'Ліцензія на зброю', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
     }
   }
 
@@ -465,9 +465,9 @@ function renderProfileLicenses() {
     const key = Object.keys(L.taxi).find(k => k.toLowerCase() === lc);
     if (key) {
       const d = L.taxi[key];
-      const status = d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна');
+      const status = d.cans ? 'Скасовано' : (d.status || 'Дійсна');
       const expiry = d.expiry ? `\nДійсна до: ${formatExpiryDate(d.expiry)}` : '';
-      items.push({ icon: '🚕', label: 'Таксистська ліцензія', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
+      items.push({ icon: iconMap['taxi'], label: 'Таксистська ліцензія', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
     }
   }
 
@@ -475,7 +475,7 @@ function renderProfileLicenses() {
     const key = Object.keys(L.advocat).find(k => k.toLowerCase() === lc);
     if (key) {
       const d = L.advocat[key];
-      const status = d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна');
+      const status = d.cans ? 'Скасовано' : (d.status || 'Дійсна');
       const expiry = d.expiry ? `\nДійсна до: ${formatExpiryDate(d.expiry)}` : '';
       items.push({ icon: '⚖️', label: 'Адвокатська ліцензія', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
     }
@@ -485,7 +485,7 @@ function renderProfileLicenses() {
     const key = Object.keys(L.presslicense).find(k => k.toLowerCase() === lc);
     if (key) {
       const d = L.presslicense[key];
-      items.push({ icon: '📰', label: 'Прес-карта', extra: d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна'), code: d.code || null });
+      items.push({ icon: iconMap['presslicense'], label: 'Прес-карта', extra: d.cans ? 'Скасовано' : (d.status || 'Дійсна'), code: d.code || null });
     }
   }
 
@@ -493,13 +493,13 @@ function renderProfileLicenses() {
     const key = Object.keys(L.press).find(k => k.toLowerCase() === lc);
     if (key && key !== 'username') {
       const d = L.press[key];
-      items.push({ icon: '📡', label: 'ЗМІ', extra: d.cans ? '⛔ Скасовано' : (d.status || 'Дійсна'), code: null });
+      items.push({ icon: iconMap['press'], label: 'ЗМІ', extra: d.cans ? 'Скасовано' : (d.status || 'Дійсна'), code: null });
     }
   }
 
   if (L.business && Array.isArray(L.business)) {
     L.business.filter(b => b.username && b.username.toLowerCase() === lc).forEach(b => {
-      items.push({ icon: '💼', label: `Бізнес: ${b.role || ''}`.trim(), extra: b.cans ? '⛔ Скасовано' : (b.status || 'Дійсна'), code: null });
+      items.push({ icon: iconMap['business'], label: `Бізнес: ${b.role || ''}`.trim(), extra: b.cans ? 'Скасовано' : (b.status || 'Дійсна'), code: null });
     });
   }
 
@@ -508,7 +508,7 @@ function renderProfileLicenses() {
     if (key) {
       const d = L.police[key];
       const rank = getPoliceRank(d.role);
-      items.push({ icon: '👮', label: 'НПС', extra: rank, code: null });
+      items.push({ icon: iconMap['police'], label: 'НПС', extra: rank, code: null });
     }
   }
 
@@ -521,7 +521,7 @@ function renderProfileLicenses() {
         const partner = u1 === lc ? entry.username2 : entry.username1;
         const parts = (entry.date || '').split('-');
         const dateStr = parts.length === 3 ? `${parts[1]}.${parts[2]}.${parts[0]}` : entry.date;
-        items.push({ icon: '💍', label: 'Свідоцтво про шлюб', extra: `${partner} · ${dateStr}`, code: null });
+        items.push({ icon: iconMap['marriage'], label: 'Свідоцтво про шлюб', extra: `${partner} · ${dateStr}`, code: null });
       }
     });
   }
@@ -535,10 +535,10 @@ function renderProfileLicenses() {
 
   if (!items.length) {
     section.innerHTML = `
-      <div class="profile-section-title">📄 Мої ліцензії</div>
+      <div class="profile-section-title">Мої ліцензії</div>
       <div class="profile-rows">
         <div class="profile-row" style="cursor:default;">
-          <div class="profile-row-icon">📄</div>
+          <div class="profile-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
           <div class="profile-row-label">Ліцензій не знайдено</div>
         </div>
       </div>`;
@@ -559,7 +559,7 @@ function renderProfileLicenses() {
     }).join('');
 
     section.innerHTML = `
-      <div class="profile-section-title">📄 Мої ліцензії</div>
+      <div class="profile-section-title">Мої ліцензії</div>
       <div class="profile-rows">${rows}</div>`;
   }
 
@@ -584,14 +584,14 @@ function renderProfileExtras() {
   const _extraRole = getUserIssuerRole();
   const _pendingRow = _extraRole.canApprove
     ? `<div class="profile-row" onclick="openPendingFinesScreen()">
-        <div class="profile-row-icon">🕒</div>
+        <div class="profile-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div class="profile-row-label">Штрафи на перевірку</div>
         <div class="profile-row-arrow">›</div>
       </div>`
     : '';
   const _issueRow = (_extraRole.canIssueDirectly || _extraRole.canSubmitPending)
     ? `<div class="profile-row" onclick="openIssueFineForm()">
-        <div class="profile-row-icon">📝</div>
+        <div class="profile-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
         <div class="profile-row-label">Виписати штраф</div>
         <div class="profile-row-arrow">›</div>
       </div>`
@@ -632,7 +632,7 @@ const iconMap = {
   'advocat': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h18"/><path d="M12 5l-7 2"/><path d="M12 5l7 2"/></svg>',
   'presslicense': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>',
   'press': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>',
-  'mafia': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 14.5a4 4 0 0 0-4 0"/><path d="M2 15h2"/><path d="M20 15h2"/></svg>',
+  'mafia': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8.5 22 1-3"/><path d="m15.5 22-1-3"/><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M12 19V12"/><path d="M12 19c-3.31 0-6-2.69-6-6v-1a6 6 0 0 1 12 0v1c0 3.31-2.69 6-6 6Z"/></svg>',
   'business': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
   'marriage': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
 };
@@ -892,7 +892,7 @@ async function openDocPage(docId) {
     ${data.photo1 || data.photo2 ? `
     <div class="doc-marriage-photos animate-in">
       ${data.photo1 ? `<div class="doc-marriage-photo-wrap"><img src="${data.photo1}" class="doc-marriage-photo" onerror="this.style.display='none'"/><div class="doc-marriage-photo-name">${data.fields[0] ? data.fields[0].value : ''}</div></div>` : ''}
-      <div class="doc-marriage-heart">💍</div>
+      <div class="doc-marriage-heart"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
       ${data.photo2 ? `<div class="doc-marriage-photo-wrap"><img src="${data.photo2}" class="doc-marriage-photo" onerror="this.style.display='none'"/><div class="doc-marriage-photo-name">${data.fields[1] ? data.fields[1].value : ''}</div></div>` : ''}
     </div>` : ''}
 
@@ -916,7 +916,7 @@ async function copyDocLink() {
   const url = await getDocUrl(currentDocId);
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(() => {
-      showToast('🔗 Посилання скопійовано');
+      showToast('Посилання скопійовано');
       const btn = document.getElementById('copy-link-btn');
       if (btn) {
         btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Скопійовано`;
@@ -934,7 +934,7 @@ async function copyDocLink() {
     el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
-    showToast('🔗 Посилання скопійовано');
+    showToast('Посилання скопійовано');
   }
 }
 
@@ -1027,7 +1027,7 @@ function showViewerError(msg) {
   }
   el.innerHTML = `
     <div class="viewer-error-card">
-      <div class="viewer-error-icon">📄</div>
+      <div class="viewer-error-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
       <div class="viewer-error-title">${msg}</div>
       <div class="viewer-error-sub">Відкрийте додаток СіЯ у Telegram, щоб переглянути документ.</div>
     </div>`;
