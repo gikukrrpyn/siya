@@ -262,7 +262,7 @@ async function fetchAvatar(userId) {
     const id = String(userId || '');
     if (!id) return '';
     const targetUrl = `https://thumbnails.roblox.com/v1/users/avatar?userIds=${encodeURIComponent(id)}&size=420x420&format=png`;
-    const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+    const r = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
     if (!r.ok) return '';
     const data = await r.json();
     if (data && Array.isArray(data.data) && data.data.length > 0) {
