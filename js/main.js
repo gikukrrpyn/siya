@@ -1304,7 +1304,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+
 let isViewingOther = false;
+window.promptSearchDocs = function() {
+  const btn = document.getElementById('search-docs-btn');
+  if (isViewingOther) {
+    if (window.state && window.state.roblox && window.state.licenses) {
+      window.docData = loadLicenseInfo(window.state.roblox, window.state.licenses);
+    }
+    isViewingOther = false;
+    if(btn) btn.innerText = 'Шукати';
+    return;
+  }
+  
+  const modal = document.getElementById('search-modal');
+  if (modal) {
+    modal.classList.add('open');
+    const input = document.getElementById('search-modal-input');
+    if (input) {
+      input.value = '';
+      setTimeout(() => input.focus(), 100);
+    }
+  }
+}
 
 window.closeSearchModal = function() {
   const modal = document.getElementById('search-modal');
@@ -1339,4 +1361,3 @@ window.submitSearchModal = async function() {
     if (typeof showToast === 'function') showToast("Помилка пошуку.");
   }
 }
-
