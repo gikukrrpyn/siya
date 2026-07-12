@@ -457,7 +457,7 @@ function renderProfileLicenses() {
       const d = L.weapon[key];
       const status = d.cans ? 'Скасовано' : (d.status || 'Дійсна');
       const expiry = d.expiry ? `\nДійсна до: ${formatExpiryDate(d.expiry)}` : '';
-      items.push({ icon: iconMap['weapon'], label: 'Ліцензія на зброю', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
+      items.push({ icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>', label: 'Ліцензія на зброю', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
     }
   }
 
@@ -467,7 +467,7 @@ function renderProfileLicenses() {
       const d = L.taxi[key];
       const status = d.cans ? 'Скасовано' : (d.status || 'Дійсна');
       const expiry = d.expiry ? `\nДійсна до: ${formatExpiryDate(d.expiry)}` : '';
-      items.push({ icon: iconMap['taxi'], label: 'Таксистська ліцензія', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
+      items.push({ icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>', label: 'Таксистська ліцензія', extra: `${status}${expiry}`, code: d.code || d.telegram || null });
     }
   }
 
@@ -485,7 +485,7 @@ function renderProfileLicenses() {
     const key = Object.keys(L.presslicense).find(k => k.toLowerCase() === lc);
     if (key) {
       const d = L.presslicense[key];
-      items.push({ icon: iconMap['presslicense'], label: 'Прес-карта', extra: d.cans ? 'Скасовано' : (d.status || 'Дійсна'), code: d.code || null });
+      items.push({ icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>', label: 'Прес-карта', extra: d.cans ? 'Скасовано' : (d.status || 'Дійсна'), code: d.code || null });
     }
   }
 
@@ -493,13 +493,13 @@ function renderProfileLicenses() {
     const key = Object.keys(L.press).find(k => k.toLowerCase() === lc);
     if (key && key !== 'username') {
       const d = L.press[key];
-      items.push({ icon: iconMap['press'], label: 'ЗМІ', extra: d.cans ? 'Скасовано' : (d.status || 'Дійсна'), code: null });
+      items.push({ icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>', label: 'ЗМІ', extra: d.cans ? 'Скасовано' : (d.status || 'Дійсна'), code: null });
     }
   }
 
   if (L.business && Array.isArray(L.business)) {
     L.business.filter(b => b.username && b.username.toLowerCase() === lc).forEach(b => {
-      items.push({ icon: iconMap['business'], label: `Бізнес: ${b.role || ''}`.trim(), extra: b.cans ? 'Скасовано' : (b.status || 'Дійсна'), code: null });
+      items.push({ icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>', label: `Бізнес: ${b.role || ''}`.trim(), extra: b.cans ? 'Скасовано' : (b.status || 'Дійсна'), code: null });
     });
   }
 
@@ -508,7 +508,7 @@ function renderProfileLicenses() {
     if (key) {
       const d = L.police[key];
       const rank = getPoliceRank(d.role);
-      items.push({ icon: iconMap['police'], label: 'НПС', extra: rank, code: null });
+      items.push({ icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 6 .5-4.5 4.5 1.5 6.5-6-3.5-6 3.5 1.5-6.5L4 8.5l6-.5z"/></svg>', label: 'НПС', extra: rank, code: null });
     }
   }
 
@@ -521,7 +521,7 @@ function renderProfileLicenses() {
         const partner = u1 === lc ? entry.username2 : entry.username1;
         const parts = (entry.date || '').split('-');
         const dateStr = parts.length === 3 ? `${parts[1]}.${parts[2]}.${parts[0]}` : entry.date;
-        items.push({ icon: iconMap['marriage'], label: 'Свідоцтво про шлюб', extra: `${partner} · ${dateStr}`, code: null });
+        items.push({ icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>', label: 'Свідоцтво про шлюб', extra: `${partner} · ${dateStr}`, code: null });
       }
     });
   }
@@ -622,18 +622,18 @@ function renderProfileExtras() {
 }
 
 const iconMap = {
-  'weapon': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>',
-  'police': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
-  'nps': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
-  'nabs': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
-  'sbs': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
-  'dbr': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
-  'taxi': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a2 2 0 0 0-1.6-.8H9.3a2 2 0 0 0-1.6.8L5 11l-5.16.86a1 1 0 0 0-.84.99V16h3m10 0a2 2 0 1 1-4 0m-6 0a2 2 0 1 1-4 0"/></svg>',
-  'advocat': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h18"/><path d="M12 5l-7 2"/><path d="M12 5l7 2"/></svg>',
+  'weapon': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>',
+  'police': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 6 .5-4.5 4.5 1.5 6.5-6-3.5-6 3.5 1.5-6.5L4 8.5l6-.5z"/></svg>',
+  'nps': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 6 .5-4.5 4.5 1.5 6.5-6-3.5-6 3.5 1.5-6.5L4 8.5l6-.5z"/></svg>',
+  'nabs': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 6 .5-4.5 4.5 1.5 6.5-6-3.5-6 3.5 1.5-6.5L4 8.5l6-.5z"/></svg>',
+  'sbs': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 6 .5-4.5 4.5 1.5 6.5-6-3.5-6 3.5 1.5-6.5L4 8.5l6-.5z"/></svg>',
+  'dbr': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  'taxi': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>',
+  'advocat': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="4" height="18" x="10" y="3" rx="1"/><path d="M4 8h16"/><path d="M4 8l-2 6c0 1.1.9 2 2 2s2-.9 2-2l-2-6Z"/><path d="M20 8l-2 6c0 1.1.9 2 2 2s2-.9 2-2l-2-6Z"/></svg>',
   'presslicense': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>',
   'press': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>',
-  'mafia': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8.5 22 1-3"/><path d="m15.5 22-1-3"/><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M12 19V12"/><path d="M12 19c-3.31 0-6-2.69-6-6v-1a6 6 0 0 1 12 0v1c0 3.31-2.69 6-6 6Z"/></svg>',
-  'business': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
+  'mafia': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M8.5 6.5 21 19v3h-3L6.5 10.5"/><path d="M11 5l-6 6"/><path d="M8 8l-4-4"/><path d="M5 3L3 5"/></svg>',
+  'business': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
   'marriage': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
 };
 
@@ -680,7 +680,7 @@ function loadLicenseInfo(roblox, licenses) {
 
   function renderHomeCard(id, meta) {
     const typeKey = id.split('_')[0].toLowerCase();
-    const icon = iconMap[typeKey] || '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
+    const icon = iconMap[typeKey] || '📄';
     const dotColor = meta.status.includes('Скасовано') ? '#ff4d4d' : '';
     const dotStyle = dotColor ? `style="background:${dotColor};"` : '';
     return `<div class="doc-card" onclick="openDocPage('${id}')">
