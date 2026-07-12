@@ -237,7 +237,7 @@ async function handleCallback() {
     const info = await userRes.json();
     if (!info || !info.sub || !info.preferred_username) throw new Error('bad_userinfo');
 
-    const avatar = await fetchAvatar(info.preferred_username);
+    const avatar = await fetchAvatar(info.sub);
 
     window.state.roblox = {
       id: String(info.sub),
@@ -257,14 +257,17 @@ async function handleCallback() {
   if (typeof window.updateProfileAuthUI === 'function') window.updateProfileAuthUI();
 }
 
-async function fetchAvatar(user) {
+async function fetchAvatar(userId) {
   try {
-    const u = String(user || '');
-    if (!u) return '';
-    const r = await fetch(`https://uarpeh.xyz/api/bot/get?request=${encodeURIComponent(u)}`);
+    const id = String(userId || '');
+    if (!id) return '';
+    const r = await fetch(`https://thumbnails.roblox.com/v1/users/avatar?userIds=${encodeURIComponent(id)}&size=420x420&format=png`);
     if (!r.ok) return '';
     const data = await r.json();
-    return data && data.avatar ? String(data.avatar) : '';
+    if (data && Array.isArray(data.data) && data.data.length > 0) {
+      return data.data[0].imageUrl || '';
+    }
+    return '';
   } catch {
     return '';
   }
