@@ -1301,3 +1301,37 @@ document.addEventListener('DOMContentLoaded', () => {
     if (input) input.value = savedBg;
   }
 });
+
+
+let isViewingOther = false;
+async function promptSearchDocs() {
+  const btn = document.getElementById('search-docs-btn');
+  if (isViewingOther) {
+    // Reset to my docs
+    if (window.state && window.state.roblox && window.state.licenses) {
+      window.docData = loadLicenseInfo(window.state.roblox, window.state.licenses);
+    }
+    isViewingOther = false;
+    if(btn) btn.innerText = 'Шукати';
+    return;
+  }
+
+  const tgId = prompt("Введіть ID паспорта для пошуку:");
+  if (!tgId) return;
+  
+  if (typeof showToast === 'function') showToast("Пошук...");
+  
+  try {
+    const profile = await window.fetchProfile(tgId);
+    if (profile && profile.roblox) {
+      window.docData = loadLicenseInfo(profile.roblox, window.state.licenses || {});
+      if (typeof showToast === 'function') showToast("Знайдено!");
+      isViewingOther = true;
+      if(btn) btn.innerText = 'Скинути';
+    } else {
+      if (typeof showToast === 'function') showToast("Паспорт не знайдено.");
+    }
+  } catch (err) {
+    if (typeof showToast === 'function') showToast("Помилка пошуку.");
+  }
+}
