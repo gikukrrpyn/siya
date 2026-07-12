@@ -36,6 +36,19 @@ function isFinePaid(f) {
   return s.includes('сплач') && !s.includes('неспл');
 }
 
+function formatRoleName(role, fractionName) {
+  let r = String(role || '').trim();
+  if (typeof window.getPoliceRank === 'function') {
+    r = window.getPoliceRank(r);
+  } else {
+    const t = r.replace(/[\s\u00A0]/g, '');
+    if (/^\d+$/.test(t)) r = 'Рядовий';
+  }
+  if (!r) return fractionName;
+  if (r.toLowerCase().includes(fractionName.toLowerCase())) return r;
+  return r + ' ' + fractionName;
+}
+
 function getUserIssuerRole() {
   const out = {
     canIssueDirectly: false,
@@ -86,7 +99,7 @@ function getUserIssuerRole() {
             canIssueDirectly: isHead || isSenior,
             canSubmitPending: true,
             canApprove: isHead,
-            label: (pd.role || fm.label) + ' ' + fm.label,
+            label: formatRoleName(pd.role, fm.label),
             issuerType: fm.issuerType
           };
         }
@@ -118,7 +131,7 @@ function getUserIssuerRole() {
       canIssueDirectly: isHead || isSenior,
       canSubmitPending: true,
       canApprove: isHead,
-      label: (r.role || f.label) + ' ' + f.label,
+      label: formatRoleName(r.role, f.label),
       issuerType: f.issuerType
     };
   }
