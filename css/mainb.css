@@ -582,7 +582,7 @@ body.theme-dark .btn-danger { background: rgba(255, 69, 58, 0.12); color: #ff453
 .chat-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--gray-200,#ececec);min-height:60px}
 .chat-back{background:none;border:none;color:inherit;cursor:pointer;padding:4px;display:flex;visibility:hidden}
 .chat-back svg{width:21px;height:21px}
-.chat-header-av{width:38px;height:38px;border-radius:50%;background:var(--gray-200,#e9e9e9);display:none;align-items:center;justify-content:center;font-size:13px;font-weight:700;overflow:hidden;flex:none}
+.chat-header-av{width:38px;height:38px;border-radius:50%;background:var(--gray-200,#e9e9e9);display:none;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
 .chat-header-av img{width:100%;height:100%;object-fit:cover}
 .chat-header-main{flex:1;min-width:0}
 .chat-header-title{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -603,8 +603,8 @@ body.theme-dark .btn-danger { background: rgba(255, 69, 58, 0.12); color: #ff453
 
 .chat-contact{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:13px;cursor:pointer;transition:background .14s;animation:chatFade .25s both}
 .chat-contact:hover{background:var(--gray-100,#f4f4f4)}
-.chat-contact-av{position:relative;width:44px;height:44px;border-radius:50%;background:var(--gray-200,#e6e6e6);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;overflow:hidden;flex:none}
-.chat-contact-av img{width:100%;height:100%;object-fit:cover}
+.chat-contact-av{position:relative;width:44px;height:44px;border-radius:50%;background:var(--gray-200,#e6e6e6);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex:none}
+.chat-contact-av img{border-radius:50%;width:100%;height:100%;object-fit:cover}
 .chat-group-av{background:var(--accent,#111);color:#fff}
 .chat-online-dot{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border-radius:50%;background:#22a06b;border:2px solid var(--white,#fff)}
 .chat-contact-body{flex:1;min-width:0}
@@ -692,7 +692,7 @@ body.theme-dark .btn-danger { background: rgba(255, 69, 58, 0.12); color: #ff453
 .chat-modal-x{background:none;border:none;font-size:17px;cursor:pointer;color:inherit;opacity:.6}
 .chat-modal-body{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
 .chat-modal-avwrap{display:flex;flex-direction:column;align-items:center;gap:8px}
-.chat-modal-av{width:74px;height:74px;border-radius:50%;background:var(--accent,#111);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;overflow:hidden}
+.chat-modal-av{width:74px;height:74px;border-radius:50%;background:var(--accent,#111);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;}
 .chat-modal-av img{width:100%;height:100%;object-fit:cover}
 .chat-modal-avbtn{background:var(--gray-100,#f2f2f2);border:none;border-radius:9px;padding:6px 14px;font-size:13px;cursor:pointer;color:inherit;font-family:inherit}
 .chat-modal-input{width:100%;border:1px solid var(--gray-200,#e2e2e2);background:var(--gray-100,#f7f7f7);border-radius:11px;padding:11px 14px;font-size:14px;color:inherit;outline:none;font-family:inherit;box-sizing:border-box}
@@ -1368,3 +1368,5 @@ body.has-custom-bg .screen,
 body.has-custom-bg .scroll-area {
     background: transparent !important;
 }
+
+.chat-header-av img, .chat-modal-av img, .chat-avatar img, .chat-av img { border-radius: 50%; }
