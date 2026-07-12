@@ -8,7 +8,7 @@ media-src 'self' https://res.cloudinary.com;
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com;
 font-src https://fonts.gstatic.com https://ukrainerpeh.com https://*.ukrainerpeh.com;
 script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net https://ukrainerpeh.com https://*.ukrainerpeh.com https://www.gstatic.com;
-connect-src 'self' https://corsproxy.io https://apis.roblox.com https://thumbnails.roblox.com https://firestore.googleapis.com https://firebase.googleapis.com https://*.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com https://uarpeh.xyz https://*.uarpeh.xyz https://www.gstatic.com https://api.imgbb.com https://api.cloudinary.com;
+connect-src 'self' https://api.allorigins.win https://apis.roblox.com https://thumbnails.roblox.com https://firestore.googleapis.com https://firebase.googleapis.com https://*.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com https://uarpeh.xyz https://*.uarpeh.xyz https://www.gstatic.com https://api.imgbb.com https://api.cloudinary.com;
 object-src 'none';
 base-uri 'none';">
 <meta charset="UTF-8">
@@ -671,7 +671,6 @@ base-uri 'none';">
         <button class="cat-chip active" onclick="setChip(this)">Всі</button>
         <button class="cat-chip" onclick="setChip(this)">НПС</button>
         <button class="cat-chip" onclick="setChip(this)">СБС</button>
-        <button class="cat-chip" onclick="setChip(this)">НАБС</button>
         <button class="cat-chip" onclick="setChip(this)">Суд</button>
         <button class="cat-chip" onclick="setChip(this)">Адм</button>
         <button class="cat-chip" onclick="setChip(this)">ДБР</button>
@@ -1098,9 +1097,6 @@ base-uri 'none';">
         items.push({ nick, avatar: null, label: 'Ліцензія на зброю', sublabel: statusLabel + (d.expiry && d.expiry !== '00.00.0000' ? ' · до ' + d.expiry : ''), tag: 'weapon', source: 'licenses', telegram: d.telegram, extra: null, cans: cancelled ? (d.cans || d.status) : null });
       });
       if (L.police) Object.entries(L.police).forEach(([nick, d]) => { if (nick === 'username') return; const rank = policeRank(d.role); const subdiv = d.expiry && d.expiry !== '00.00.0000' ? d.expiry : ''; items.push({ nick, avatar: null, label: rank, sublabel: 'НПС' + (d.status ? ' · #' + d.status : '') + (subdiv ? ' · ' + subdiv : ''), tag: 'police', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null }); });
-      if (L.nabs) Object.entries(L.nabs).forEach(([nick, d]) => { if (nick === 'username') return; const rank = isXpRole(d.role) ? 'Агент' : (d.role || 'Агент'); items.push({ nick, avatar: null, label: rank, sublabel: 'НАБС' + (d.status ? ' · #' + d.status : ''), tag: 'nabs', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null }); });
-      if (L.sbs) Object.entries(L.sbs).forEach(([nick, d]) => { if (nick === 'username') return; const rank = isXpRole(d.role) ? 'Рядовий' : (d.role || 'Рядовий'); items.push({ nick, avatar: null, label: rank, sublabel: 'СБС' + (d.status ? ' · #' + d.status : ''), tag: 'sbs', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null }); });
-      if (L.dbr) Object.entries(L.dbr).forEach(([nick, d]) => { if (nick === 'username') return; const rank = isXpRole(d.role) ? 'Рядовий' : (d.role || 'Рядовий'); items.push({ nick, avatar: null, label: rank, sublabel: 'ДБР' + (d.status ? ' · #' + d.status : ''), tag: 'dbr', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null }); });
       if (L.taxi) Object.entries(L.taxi).forEach(([nick, d]) => { if (nick === 'username') return; items.push({ nick, avatar: null, label: 'Таксі', sublabel: 'ID: ' + (d.status || '—'), tag: 'taxi', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null }); });
       if (L.business) L.business.forEach(d => { if (!d.username || d.username === 'roblox username') return; items.push({ nick: d.username, avatar: null, label: d.role || 'Бізнес', sublabel: 'Бізнес' + (d.status ? ' · #' + d.status : ''), tag: 'business', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null }); });
       if (L.advocat) Object.entries(L.advocat).forEach(([nick, d]) => { if (nick === 'username') return; items.push({ nick, avatar: null, label: 'Адвокат', sublabel: (d.cans ? '⛔ Скасовано' : 'Дійсна') + (d.status ? ' · ' + d.status : ''), tag: 'advocat', source: 'licenses', telegram: d.telegram, extra: null, cans: d.cans || null }); });
@@ -1110,7 +1106,7 @@ base-uri 'none';">
     }
     return items;
   }
-  const chipFilter = { 'Всі': null, 'НПС': ['Поліція', 'police'], 'СБС': ['СБС', 'sbs'], 'НАБС': ['НАБС', 'nabs'], 'Суд': ['Суд'], 'Адм': ['Адміністрація'], 'ДБР': ['ДБР', 'dbr'], 'Зброя': ['weapon'], 'Адвокат': ['advocat'], 'Таксі': ['taxi'], 'Преса': ['presslicense'], 'ЗМІ': ['press'], 'Бізнес': ['business'], 'ОЗУ': ['mafia'] };
+  const chipFilter = { 'Всі': null, 'НПС': ['Поліція', 'police'], 'СБС': ['СБС', 'sbs'], 'Суд': ['Суд'], 'Адм': ['Адміністрація'], 'ДБР': ['ДБР', 'dbr'], 'Зброя': ['weapon'], 'Адвокат': ['advocat'], 'Таксі': ['taxi'], 'Преса': ['presslicense'], 'ЗМІ': ['press'], 'Бізнес': ['business'], 'ОЗУ': ['mafia'] };
   let activeTags = null, searchQuery = '', allItems = [];
   function statusColor(item) {
     if (item.cans) return '#ff4d4d';
