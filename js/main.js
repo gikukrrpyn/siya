@@ -1303,7 +1303,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-let isViewingOther = false;
 
 
 let isViewingOther = false;
