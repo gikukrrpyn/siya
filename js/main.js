@@ -746,6 +746,7 @@ function loadLicenseInfo(roblox, licenses) {
   const infoText = `${display} · ${username}`;
 
   for (const [key, section] of Object.entries(licenses)) {
+    if (['sbs', 'dbr', 'nabs'].includes(key.toLowerCase())) continue;
     if (Array.isArray(section)) {
       section
         .filter(item => item.username && item.username.toLowerCase() === lc)
