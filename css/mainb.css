@@ -1356,3 +1356,6 @@ body.theme-dark .cat-chip.active{
   background:#ededed;
   color:#0e0e0e;
 }
+
+body.theme-dark .bg-btn { background: #333 !important; color: #fff !important; }
+body.theme-dark .bg-input { background: rgba(255,255,255,0.1) !important; color: #fff !important; }
