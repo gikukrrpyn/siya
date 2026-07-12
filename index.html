@@ -460,7 +460,7 @@ base-uri 'none';">
 
         <div class="ob-section-title">Зберігання даних</div>
         <p class="ob-terms-text">
-          Дані зберігаються у <strong>Google Firebase Firestore</strong> із шифруванням. Ви можете запросити видалення в будь-який час — напишіть <strong>@UkraineRPSupport</strong> у Telegram. Або напряму до @ob1zyan у Telegram.
+          Дані зберігаються у <strong>Google Firebase Firestore</strong> із шифруванням. Ви можете запросити видалення в будь-який час — напишіть <strong>@UkraineRPSupport</strong> у Telegram. Або напряму до @Na7atelega у Telegram.
         </p>
 
         <p class="ob-terms-text">
@@ -589,7 +589,7 @@ base-uri 'none';">
        <div class="update-card">
          <div class="update-top">
            <div class="update-badge">Інше</div>
-           <div class="update-date">13 Липня</div>
+           <div class="update-date">?? Червня</div>
          </div>
 
          <div class="update-title">Відкриття Сії</div>
@@ -1169,18 +1169,19 @@ base-uri 'none';">
 
 
 
+
+
 <div class="modal-overlay" id="search-modal" onclick="if(event.target===this) closeSearchModal()">
-  <div class="modal-sheet">
+  <div class="modal-sheet" style="padding-bottom: max(40px, env(safe-area-inset-bottom));">
     <div class="modal-handle"></div>
     <div class="modal-title">Пошук паспорта</div>
-    <div class="modal-subtitle" style="margin-bottom: 20px;">Введіть ID або нікнейм гравця</div>
-    <input type="text" id="search-modal-input" placeholder="ID паспорта або Нікнейм" class="bg-input" style="width:100%; padding:14px 16px; border-radius:12px; border:1px solid var(--gray-200,#eaeaea); background:var(--bg2,#f7f7f7); color:var(--text,#111); margin-bottom:24px; font-size:16px; outline:none; box-sizing: border-box;" onkeypress="if(event.key === 'Enter') submitSearchModal()">
+    <div class="modal-subtitle" style="margin-bottom: 24px;">Введіть ID або нікнейм гравця</div>
+    <input type="text" id="search-modal-input" placeholder="ID паспорта або Нікнейм" onkeypress="if(event.key === 'Enter') submitSearchModal()" style="width:100%; height: 52px; padding:0 16px; border-radius:16px; border:1px solid var(--gray-200); background:var(--gray-100); color:var(--black); margin-bottom:24px; font-size:16px; font-weight: 500; outline:none; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--black)'" onblur="this.style.borderColor='var(--gray-200)'">
     <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeSearchModal()" style="flex:1;">Скасувати</button>
-      <button class="btn-primary" onclick="submitSearchModal()" style="flex:1; background: var(--accent, #111); color: #fff; border: none; border-radius: 12px; padding: 14px; font-weight: 600; font-size: 15px;">Шукати</button>
+      <button class="btn-secondary" onclick="closeSearchModal()">Скасувати</button>
+      <button class="btn-primary" onclick="submitSearchModal()">Шукати</button>
     </div>
   </div>
 </div>
-
 </body>
 </html>
