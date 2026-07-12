@@ -1304,10 +1304,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 let isViewingOther = false;
-async function promptSearchDocs() {
+
+
+let isViewingOther = false;
+function promptSearchDocs() {
   const btn = document.getElementById('search-docs-btn');
   if (isViewingOther) {
-    // Reset to my docs
     if (window.state && window.state.roblox && window.state.licenses) {
       window.docData = loadLicenseInfo(window.state.roblox, window.state.licenses);
     }
@@ -1315,14 +1317,41 @@ async function promptSearchDocs() {
     if(btn) btn.innerText = 'Шукати';
     return;
   }
+  
+  const modal = document.getElementById('search-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    setTimeout(() => { modal.style.opacity = '1'; }, 10);
+    const input = document.getElementById('search-modal-input');
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  }
+}
 
-  const tgId = prompt("Введіть ID паспорта для пошуку:");
-  if (!tgId) return;
+window.closeSearchModal = function() {
+  const modal = document.getElementById('search-modal');
+  if (modal) {
+    modal.style.opacity = '0';
+    setTimeout(() => { modal.style.display = 'none'; }, 200);
+  }
+}
+
+window.submitSearchModal = async function() {
+  const input = document.getElementById('search-modal-input');
+  if (!input) return;
+  const rawId = input.value;
+  if (!rawId) return;
+  
+  const tgId = rawId.replace(/\s+/g, '');
+  closeSearchModal();
   
   if (typeof showToast === 'function') showToast("Пошук...");
   
   try {
     const profile = await window.fetchProfile(tgId);
+    const btn = document.getElementById('search-docs-btn');
     if (profile && profile.roblox) {
       window.docData = loadLicenseInfo(profile.roblox, window.state.licenses || {});
       if (typeof showToast === 'function') showToast("Знайдено!");
