@@ -2,48 +2,72 @@ let currentDocId = null;
 let tg = null;
 let tgUser = null;
 
-if (window.Telegram && window.Telegram.WebApp) {
-  tg = window.Telegram.WebApp;
-  tg.ready();
-  tg.expand();
-  tg.setHeaderColor('#ffffff');
-  tg.setBackgroundColor('#ffffff');
+async function computeHmacSha256(secret, dataStr) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(dataStr));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
-  try {
-    const initData = tg.initData;
-    if (initData && typeof initData === 'string' && initData.trim().length > 0) {
-      const params = new URLSearchParams(initData);
-      const hash = params.get('hash');
-      const authDate = params.get('auth_date');
-      const userStr = params.get('user');
-      
-      if (hash && authDate && userStr) {
-        const authTime = parseInt(authDate, 10);
-        const now = Math.floor(Date.now() / 1000);
-        // Перевіряємо, чи дані не застаріли (наприклад, 24 години = 86400 секунд)
-        if (!isNaN(authTime) && (now - authTime <= 86400)) {
-          tgUser = JSON.parse(userStr);
+async function initTelegramAuth() {
+  if (window.Telegram && window.Telegram.WebApp) {
+    tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    tg.setHeaderColor('#ffffff');
+    tg.setBackgroundColor('#ffffff');
+
+    try {
+      const initData = tg.initData;
+      if (initData && typeof initData === 'string' && initData.trim().length > 0) {
+        // Secure server-side validation
+        const res = await fetch('https://xqcgezcoywcnrmigjdyi.supabase.co/functions/v1/quick-handler', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad',
+            'apikey': 'sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad'
+          },
+          body: JSON.stringify({ initData })
+        });
+        const data = await res.json();
+        
+        if (data.success && data.user && data.verifyKey) {
+          // Client-side verification of the "special key" to ensure the response hasn't been tampered with locally
+          const expectedKey = await computeHmacSha256('siya_secure_client_secret', JSON.stringify(data.user));
+          if (data.verifyKey === expectedKey) {
+            tgUser = data.user;
+          } else {
+            console.error('Security Error: Invalid verification key from server');
+          }
         }
       }
-    } else {
+    } catch(e) {
+      console.error('Telegram Auth Error', e);
       tgUser = null;
     }
-  } catch(e) {
-    tgUser = null;
-  }
 
-  if (tgUser) {
-    const name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
-    document.querySelector('.greeting-name').textContent = `Привіт, ${tgUser.first_name || 'гість'} 👋`;
-    document.querySelector('.profile-name').textContent = name || 'Користувач';
-    document.querySelector('.profile-id').textContent = tgUser.id || 'None';
-    const initials = (name || 'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-    document.querySelector('.profile-avatar').innerHTML = tgUser.photo_url ? `<img src="${tgUser.photo_url}" alt="${name || 'Користувач'}">` : initials;
-    if (tg.BackButton) {
-      tg.BackButton.onClick(() => goBack());
+    if (tgUser) {
+      const name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
+      const greet = document.querySelector('.greeting-name');
+      if (greet) greet.textContent = `Привіт, ${tgUser.first_name || 'гість'} 👋`;
+      const pName = document.querySelector('.profile-name');
+      if (pName) pName.textContent = name || 'Користувач';
+      const pId = document.querySelector('.profile-id');
+      if (pId) pId.textContent = tgUser.id || 'None';
+      
+      const initials = (name || 'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+      const avatarEl = document.querySelector('.profile-avatar');
+      if (avatarEl) {
+        avatarEl.innerHTML = tgUser.photo_url ? `<img src="${tgUser.photo_url}" alt="${name || 'Користувач'}">` : initials;
+      }
+      if (tg.BackButton) {
+        tg.BackButton.onClick(() => goBack());
+      }
     }
   }
 }
+initTelegramAuth();
 
 let currentScreen = 'home';
 let screenHistory = ['home'];
