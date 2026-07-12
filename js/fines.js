@@ -150,7 +150,7 @@ function renderIssueFineForm() {
   if (!role.canIssueDirectly && !role.canSubmitPending) {
     root.innerHTML = `
       <div class="fines-empty">
-        <div class="fines-empty-icon">🚫</div>
+        <div class="fines-empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
         <div class="fines-empty-title">Немає прав</div>
         <div class="fines-empty-sub">Виписувати штрафи можуть лише голови фракцій, судді, адміністрація, агенти НПС/СБС/ДБР/НАБС.</div>
       </div>`;
@@ -217,7 +217,7 @@ async function fineRbxLookup(val) {
     return;
   }
 
-  if (statusEl) statusEl.textContent = '🔍 Шукаємо...';
+  if (statusEl) statusEl.textContent = 'Шукаємо...';
 
   _rbxLookupTimer = setTimeout(async () => {
     const rbxNick = val.trim();
@@ -226,7 +226,7 @@ async function fineRbxLookup(val) {
       const tg = await window.findTgByRobloxUsername(rbxNick);
       if (tg) {
         _resolvedTgUsername = tg;
-        if (statusEl) statusEl.innerHTML = `<span style="color:#30d158;">✅ Знайдено</span>`;
+        if (statusEl) statusEl.innerHTML = `<span style="color:#30d158;">Знайдено</span>`;
         return;
       }
     }
@@ -257,7 +257,7 @@ async function fineRbxLookup(val) {
       if (statusEl) statusEl.innerHTML = `<span style="color:#f0a000;">⚠️ Гравець є на сервері, але не в СіЯ — штраф збережеться по Roblox нікнейму</span>`;
     } else {
       _resolvedTgUsername = null;
-      if (statusEl) statusEl.innerHTML = `<span style="color:#ff4d4d;">❌ Гравця не знайдено</span>`;
+      if (statusEl) statusEl.innerHTML = `<span style="color:#ff4d4d;">Гравця не знайдено</span>`;
     }
   }, 600);
 }
@@ -268,7 +268,7 @@ async function submitFineForm() {
   const status = document.getElementById('fine-status-msg');
 
   if (!role || (!role.canIssueDirectly && !role.canSubmitPending)) {
-    if (status) status.textContent = '🚫 Немає прав';
+    if (status) status.textContent = 'Немає прав';
     return;
   }
 
@@ -345,9 +345,9 @@ async function submitFineForm() {
   if (status) {
     if (ok) {
       const msgDirect = isRbxOnly
-        ? '🕒 Гравець ще не в СіЯ — штраф збережено, буде видно після реєстрації'
-        : '✅ Штраф виписано';
-      status.textContent = role.canIssueDirectly ? msgDirect : '🕒 Штраф надіслано на затвердження';
+        ? 'Гравець ще не в СіЯ — штраф збережено, буде видно після реєстрації'
+        : 'Штраф виписано';
+      status.textContent = role.canIssueDirectly ? msgDirect : 'Штраф надіслано на затвердження';
 
       ['fine-target-rbx', 'fine-amount', 'fine-due', 'fine-reason'].forEach(id => {
         const el = document.getElementById(id);
@@ -369,7 +369,7 @@ async function submitFineForm() {
       const fileInput = document.getElementById('fine-evidence-file');
       if (fileInput) fileInput.value = '';
     } else {
-      status.textContent = '❌ Не вдалося зберегти штраф';
+      status.textContent = 'Не вдалося зберегти штраф';
     }
   }
 }
@@ -419,7 +419,7 @@ async function renderFines() {
   if (!fines.length) {
     list.innerHTML = `
       <div class="fines-empty">
-        <div class="fines-empty-icon">💸</div>
+        <div class="fines-empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></div>
         <div class="fines-empty-title">Штрафів немає</div>
         <div class="fines-empty-sub">Тут з'являться штрафи від суду, адміністрації або НПС.</div>
       </div>`;
@@ -439,10 +439,10 @@ async function renderFines() {
     const payBtn = (!paid && !isPendingPayment)
       ? `<div class="fine-actions" style="margin-top:8px;">
            <button type="button" class="fine-btn fine-btn-approve" style="width:100%;"
-                   onclick="openPayFineModal('${f.id}', ${f.amount || 0})">💳 Сплатити</button>
+                   onclick="openPayFineModal('${f.id}', ${f.amount || 0})">Сплатити</button>
          </div>`
       : (isPendingPayment
-        ? `<div class="ff-hint" style="margin-top:8px;font-size:12px;color:#f0a000;">⏳ Чекає підтвердження адміністрації</div>`
+        ? `<div class="ff-hint" style="margin-top:8px;font-size:12px;color:#f0a000;">Чекає підтвердження адміністрації</div>`
         : '');
 
     return `
@@ -505,7 +505,7 @@ async function renderPendingApprovalSection() {
   if (!items.length) { root.innerHTML = ''; return; }
 
   root.innerHTML = `
-    <div class="profile-section-title" style="padding:0 4px 6px;">🕒 На затвердження (${items.length})</div>
+    <div class="profile-section-title" style="padding:0 4px 6px;">На затвердження (${items.length})</div>
     ${items.map(it => {
     const issuer = classifyFineIssuer(it);
     const amount = (it.amount != null && it.amount !== '') ? `${it.amount} €` : '—';
@@ -534,9 +534,9 @@ async function renderPendingApprovalSection() {
           <div style="margin-top:6px;">${evidence}</div>
           <div class="fine-actions">
             <button type="button" class="fine-btn fine-btn-approve"
-                    onclick="approveFineUI('${it._pendingId}')">✅ Затвердити</button>
+                    onclick="approveFineUI('${it._pendingId}')">Затвердити</button>
             <button type="button" class="fine-btn fine-btn-reject"
-                    onclick="rejectFineUI('${it._pendingId}')">❌ Відхилити</button>
+                    onclick="rejectFineUI('${it._pendingId}')">Відхилити</button>
           </div>
         </div>`;
   }).join('')}`;
@@ -560,7 +560,7 @@ async function renderPaymentRequestsSection() {
   if (!items.length) { root.innerHTML = ''; return; }
 
   root.innerHTML = `
-    <div class="profile-section-title" style="padding:12px 4px 6px;">💳 Запити на оплату (${items.length})</div>
+    <div class="profile-section-title" style="padding:12px 4px 6px;">Запити на оплату (${items.length})</div>
     ${items.map(it => `
       <div class="fine-card fine-card-pending">
         <div class="fine-card-header">
@@ -578,9 +578,9 @@ async function renderPaymentRequestsSection() {
       : '<div class="ff-preview-info">⚠️ Без скріншоту</div>'}
         <div class="fine-actions" style="margin-top:10px;">
           <button type="button" class="fine-btn fine-btn-approve"
-                  onclick="approvePaymentUI('${it._paymentId}')">✅ Підтвердити оплату</button>
+                  onclick="approvePaymentUI('${it._paymentId}')">Підтвердити оплату</button>
           <button type="button" class="fine-btn fine-btn-reject"
-                  onclick="rejectPaymentUI('${it._paymentId}')">❌ Відхилити</button>
+                  onclick="rejectPaymentUI('${it._paymentId}')">Відхилити</button>
         </div>
       </div>`).join('')}`;
 }
@@ -588,42 +588,42 @@ window.renderPaymentRequestsSection = renderPaymentRequestsSection;
 
 async function approveFineUI(pendingId) {
   const role = getUserIssuerRole();
-  if (!role.canApprove) { typeof showToast === 'function' && showToast('🚫 Немає прав'); return; }
+  if (!role.canApprove) { typeof showToast === 'function' && showToast('Немає прав'); return; }
   if (typeof window.approvePendingFine !== 'function') return;
   const approver = (window.state && window.state.telegram && window.state.telegram.id) || (window.state && window.state.telegram && window.state.telegram.username);
   const ok = await window.approvePendingFine(pendingId, approver);
-  typeof showToast === 'function' && showToast(ok ? '✅ Штраф затверджено' : '❌ Не вдалося затвердити');
+  typeof showToast === 'function' && showToast(ok ? 'Штраф затверджено' : 'Не вдалося затвердити');
   renderPendingApprovalSection();
 }
 window.approveFineUI = approveFineUI;
 
 async function rejectFineUI(pendingId) {
   const role = getUserIssuerRole();
-  if (!role.canApprove) { typeof showToast === 'function' && showToast('🚫 Немає прав'); return; }
+  if (!role.canApprove) { typeof showToast === 'function' && showToast('Немає прав'); return; }
   if (typeof window.rejectPendingFine !== 'function') return;
   const ok = await window.rejectPendingFine(pendingId);
-  typeof showToast === 'function' && showToast(ok ? '✅ Штраф відхилено' : '❌ Не вдалося відхилити');
+  typeof showToast === 'function' && showToast(ok ? 'Штраф відхилено' : 'Не вдалося відхилити');
   renderPendingApprovalSection();
 }
 window.rejectFineUI = rejectFineUI;
 
 async function approvePaymentUI(paymentId) {
   const role = getUserIssuerRole();
-  if (!role.canApprove) { typeof showToast === 'function' && showToast('🚫 Немає прав'); return; }
+  if (!role.canApprove) { typeof showToast === 'function' && showToast('Немає прав'); return; }
   if (typeof window.approvePaymentRequest !== 'function') return;
   const approver = (window.state && window.state.telegram && window.state.telegram.id) || (window.state && window.state.telegram && window.state.telegram.username);
   const ok = await window.approvePaymentRequest(paymentId, approver);
-  typeof showToast === 'function' && showToast(ok ? '✅ Оплату підтверджено' : '❌ Не вдалося підтвердити');
+  typeof showToast === 'function' && showToast(ok ? 'Оплату підтверджено' : 'Не вдалося підтвердити');
   renderPaymentRequestsSection();
 }
 window.approvePaymentUI = approvePaymentUI;
 
 async function rejectPaymentUI(paymentId) {
   const role = getUserIssuerRole();
-  if (!role.canApprove) { typeof showToast === 'function' && showToast('🚫 Немає прав'); return; }
+  if (!role.canApprove) { typeof showToast === 'function' && showToast('Немає прав'); return; }
   if (typeof window.rejectPaymentRequest !== 'function') return;
   const ok = await window.rejectPaymentRequest(paymentId);
-  typeof showToast === 'function' && showToast(ok ? '✅ Запит відхилено' : '❌ Не вдалося відхилити');
+  typeof showToast === 'function' && showToast(ok ? 'Запит відхилено' : 'Не вдалося відхилити');
   renderPaymentRequestsSection();
 }
 window.rejectPaymentUI = rejectPaymentUI;
@@ -649,7 +649,7 @@ window.updateIssueFineButtonVisibility = updateIssueFineButtonVisibility;
 
 function openPendingFinesScreen() {
   const role = getUserIssuerRole();
-  if (!role.canApprove) { typeof showToast === 'function' && showToast('🚫 Немає прав'); return; }
+  if (!role.canApprove) { typeof showToast === 'function' && showToast('Немає прав'); return; }
   typeof switchScreen === 'function' && switchScreen('admin-fines');
   renderPendingApprovalSection();
   renderPaymentRequestsSection();
