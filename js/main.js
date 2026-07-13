@@ -1291,6 +1291,8 @@ function setBgImage(url) {
     }
   }
 }
+
+// Load background on start
 document.addEventListener('DOMContentLoaded', () => {
   const savedBg = localStorage.getItem('customBg');
   if (savedBg) {
@@ -1345,17 +1347,15 @@ window.submitSearchModal = async function() {
   
   try {
     let profile = null;
-
+    
+    // 1. Try as Passport IDCode
     if (window.findProfileByIdCode) {
       profile = await window.findProfileByIdCode(rawId);
     }
-
-    if (!profile && window.fetchProfile) {
-      profile = await window.fetchProfile(rawId.replace(/\s+/g, ''));
-    }
     
+    // 2. Try as Roblox Username
     if (!profile && window.findTgByRobloxUsername) {
-      const tgId = await window.findTgByRobloxUsername(rawId);
+      const tgId = await window.findTgByRobloxUsername(rawId.replace(/\s+/g, ''));
       if (tgId) {
         profile = await window.fetchProfile(tgId);
       }
