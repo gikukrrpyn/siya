@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
   initializeFirestore, doc, setDoc, getDoc, deleteDoc,
-  collection, getDocs, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp
+  collection, getDocs, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp, where
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = window.FIREBASE_CONFIG || {
@@ -387,6 +387,23 @@ window.syncWithCloud = async (tgUser, rbxData, idCode, forceIssueDate) => {
   if (tgId && tgName) {
     try { await setDoc(doc(db, "tg_username_index", String(tgName).toLowerCase()), { tgId }, { merge: true }); } catch (e) {}
   }
+};
+
+
+window.findProfileByIdCode = async (idCodeStr) => {
+  if (!idCodeStr) return null;
+  let normalized = String(idCodeStr).replace(/\s+/g, '').toUpperCase();
+  let spaced = normalized.split('').join(' ');
+  try {
+    const q1 = query(collection(db, "passports"), where("idCode", "==", spaced));
+    const snap1 = await getDocs(q1);
+    if (!snap1.empty) return snap1.docs[0].data();
+    
+    const q2 = query(collection(db, "passports"), where("idCode", "==", normalized));
+    const snap2 = await getDocs(q2);
+    if (!snap2.empty) return snap2.docs[0].data();
+  } catch (e) { console.error(e); }
+  return null;
 };
 
 window.fetchProfile = async (tgUserOrName) => {
