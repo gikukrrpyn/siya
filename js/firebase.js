@@ -392,9 +392,21 @@ window.syncWithCloud = async (tgUser, rbxData, idCode, forceIssueDate) => {
 
 window.findProfileByIdCode = async (idCodeStr) => {
   if (!idCodeStr) return null;
-  let normalized = String(idCodeStr).replace(/\s+/g, '').toUpperCase();
+  let raw = String(idCodeStr).trim();
+  let noSpaces = raw.replace(/\s+/g, '');
+  let normalized = noSpaces.toUpperCase();
   let spaced = normalized.split('').join(' ');
   try {
+    // Exact match of what user typed
+    const q0 = query(collection(db, "passports"), where("idCode", "==", raw));
+    const snap0 = await getDocs(q0);
+    if (!snap0.empty) return snap0.docs[0].data();
+    
+    // No spaces exact match
+    const q0_1 = query(collection(db, "passports"), where("idCode", "==", noSpaces));
+    const snap0_1 = await getDocs(q0_1);
+    if (!snap0_1.empty) return snap0_1.docs[0].data();
+
     const q1 = query(collection(db, "passports"), where("idCode", "==", spaced));
     const snap1 = await getDocs(q1);
     if (!snap1.empty) return snap1.docs[0].data();
