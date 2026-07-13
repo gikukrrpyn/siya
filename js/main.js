@@ -1291,8 +1291,6 @@ function setBgImage(url) {
     }
   }
 }
-
-// Load background on start
 document.addEventListener('DOMContentLoaded', () => {
   const savedBg = localStorage.getItem('customBg');
   if (savedBg) {
@@ -1338,16 +1336,31 @@ window.closeSearchModal = function() {
 window.submitSearchModal = async function() {
   const input = document.getElementById('search-modal-input');
   if (!input) return;
-  const rawId = input.value;
+  const rawId = input.value.trim();
   if (!rawId) return;
   
-  const tgId = rawId.replace(/\s+/g, '');
   closeSearchModal();
   
   if (typeof showToast === 'function') showToast("Пошук...");
   
   try {
-    const profile = await window.fetchProfile(tgId);
+    let profile = null;
+
+    if (window.findProfileByIdCode) {
+      profile = await window.findProfileByIdCode(rawId);
+    }
+
+    if (!profile && window.fetchProfile) {
+      profile = await window.fetchProfile(rawId.replace(/\s+/g, ''));
+    }
+    
+    if (!profile && window.findTgByRobloxUsername) {
+      const tgId = await window.findTgByRobloxUsername(rawId);
+      if (tgId) {
+        profile = await window.fetchProfile(tgId);
+      }
+    }
+
     const btn = document.getElementById('search-docs-btn');
     if (profile && profile.roblox) {
       window.docData = loadLicenseInfo(profile.roblox, window.state.licenses || {});
@@ -1361,3 +1374,4 @@ window.submitSearchModal = async function() {
     if (typeof showToast === 'function') showToast("Помилка пошуку.");
   }
 }
+
