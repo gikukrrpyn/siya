@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+<meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="
 default-src 'self';
 img-src 'self' https: data: https://ukrainerpeh.com https://*.ukrainerpeh.com https://res.cloudinary.com;
 media-src 'self' https://res.cloudinary.com;
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com;
 font-src https://fonts.gstatic.com https://ukrainerpeh.com https://*.ukrainerpeh.com;
-script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net https://ukrainerpeh.com https://*.ukrainerpeh.com https://www.gstatic.com;
-connect-src 'self' https://xqcgezcoywcnrmigjdyi.supabase.co https://api.allorigins.win https://apis.roblox.com https://thumbnails.roblox.com https://firestore.googleapis.com https://firebase.googleapis.com https://*.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com https://uarpeh.xyz https://*.uarpeh.xyz https://www.gstatic.com https://api.imgbb.com https://api.cloudinary.com;
+script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net https://ukrainerpeh.com https://*.ukrainerpeh.com https://www.gstatic.com https://cdnjs.cloudflare.com;
+connect-src 'self' https://cdnjs.cloudflare.com https://xqcgezcoywcnrmigjdyi.supabase.co https://api.allorigins.win https://apis.roblox.com https://thumbnails.roblox.com https://firestore.googleapis.com https://firebase.googleapis.com https://*.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com https://uarpeh.xyz https://*.uarpeh.xyz https://www.gstatic.com https://api.imgbb.com https://api.cloudinary.com;
 object-src 'none';
 base-uri 'none';">
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>СіЯ</title> 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://ukrainerpeh.com/players.js"></script>
 <script src="https://ukrainerpeh.com/licenses.js"></script>
 <link rel="stylesheet" href="css/main.css">
@@ -336,6 +337,112 @@ base-uri 'none';">
 .update-card:first-child{
   animation:updatesFloat 5s ease-in-out infinite;
 }
+  .apple-pay-success {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 16px auto;
+  }
+  .checkmark {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 3.5;
+    stroke: #fff;
+    stroke-miterlimit: 10;
+    box-shadow: inset 0px 0px 0px #30d158;
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+  }
+  .checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3.5;
+    stroke-miterlimit: 10;
+    stroke: #30d158;
+    fill: none;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+  }
+  .checkmark-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke: #fff;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+  }
+  @keyframes stroke {
+    100% { stroke-dashoffset: 0; }
+  }
+  @keyframes scale {
+    0%, 100% { transform: none; }
+    50% { transform: scale3d(1.1, 1.1, 1); }
+  }
+  @keyframes fill {
+    100% { box-shadow: inset 0px 0px 0px 30px #30d158; }
+  }
+  .checkmark-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    stroke-width: 3;
+    stroke: #fff;
+    stroke-miterlimit: 10;
+    box-shadow: inset 0px 0px 0px transparent;
+    animation: scale-btn .3s ease-in-out .9s both;
+  }
+  .checkmark-btn-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3;
+    stroke-miterlimit: 10;
+    stroke: #fff;
+    fill: none;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+  }
+  .checkmark-btn-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke: #fff;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+  }
+  
+  .checkmark-green {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: inline-block;
+    stroke-width: 3;
+    stroke: #30d158;
+    stroke-miterlimit: 10;
+    box-shadow: inset 0px 0px 0px #30d158;
+    animation: fill-btn-green .4s ease-in-out .4s forwards, scale-btn .3s ease-in-out .9s both;
+  }
+  .checkmark-green-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3;
+    stroke-miterlimit: 10;
+    stroke: #30d158;
+    fill: none;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+  }
+  .checkmark-green-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke: #fff;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+  }
+
+  @keyframes scale-btn {
+    0%, 100% { transform: none; }
+    50% { transform: scale3d(1.1, 1.1, 1); }
+  }
+  @keyframes fill-btn-green {
+    100% { box-shadow: inset 0px 0px 0px 40px #30d158; }
+  }
 </style>
 </head>
 <body>
@@ -874,6 +981,46 @@ base-uri 'none';">
     </div>
   </div>
 
+  <div class="screen" id="screen-contracts">
+    <div class="header">
+      <button class="header-back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Назад
+      </button>
+      <div class="header-title" style="pointer-events:none;">Мої угоди</div>
+      <button class="header-action" style="position:relative;z-index:10;" onclick="openIssueContractScreen()">+ Створити</button>
+    </div>
+    <div class="scroll-area">
+      <div id="contracts-list"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-issue-contract">
+    <div class="header">
+      <button class="header-back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Назад
+      </button>
+      <div class="header-title">Нова угода</div>
+    </div>
+    <div class="scroll-area">
+      <div id="issue-contract-body" class="ff-form"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-admin-contracts">
+    <div class="header">
+      <button class="header-back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Назад
+      </button>
+      <div class="header-title" style="pointer-events:none;">Угоди на перевірку</div>
+    </div>
+    <div class="scroll-area">
+      <div id="admin-contracts-list"></div>
+    </div>
+  </div>
+
   <div class="screen" id="screen-settings">
     <div class="header">
       <button class="header-back" onclick="goBack()">
@@ -932,7 +1079,7 @@ base-uri 'none';">
 (function(){
   var v=Date.now();
   var a=[
-    "js/gen.js","js/fines.js","js/main.js",
+    "js/gen.js","js/fines.js","js/contracts.js","js/main.js",
     "js/chat.js"
   ];
   a.forEach(function(s){
@@ -1170,6 +1317,23 @@ base-uri 'none';">
 
 
 
+
+<!-- SIGNATURE MODAL -->
+<div class="modal-overlay" id="signature-modal" onclick="if(event.target===this) closeSignatureModal()">
+  <div class="modal-sheet" style="padding-bottom: max(30px, env(safe-area-inset-bottom));">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:8px;">Ваш підпис</div>
+    <div class="modal-subtitle" style="margin-bottom:12px;">Намалюйте свій підпис у віконці нижче. Він буде використовуватись у паспорті та на договорах.</div>
+    <div id="signature-container" style="border: 2px dashed #e5e5ea; border-radius: 12px; background: #fafafa; position: relative; display: flex; align-items: center; justify-content: center; min-height: 120px;">
+        <canvas id="signature-canvas" width="300" height="120" style="width:100%; height:120px; touch-action: none; cursor: crosshair;"></canvas>
+        <img id="signature-display" style="max-width:100%; max-height:120px; display:none; pointer-events:none;">
+      </div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn-secondary" onclick="clearSignature()">Очистити</button>
+      <button class="btn-primary" onclick="saveSignature()">Зберегти</button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="search-modal" onclick="if(event.target===this) closeSearchModal()">
   <div class="modal-sheet" style="padding-bottom: max(40px, env(safe-area-inset-bottom));">
