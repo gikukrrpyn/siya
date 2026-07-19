@@ -1271,3 +1271,18 @@ html, body {
   background: var(--accent, #007aff);
   color: white;
 }
+
+.animate-card {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.animate-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+.animate-card:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
