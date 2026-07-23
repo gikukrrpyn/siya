@@ -890,7 +890,7 @@ base-uri 'none';">
     </div>
     <div class="scroll-area">
       <div class="profile-hero anim-scale d0">
-        <div class="profile-avatar"><img src="https://pic2.kidstaff.com.ua/pictures_user/823/2058559/33284625/2058559_20230214034934_2823_600x600.jpg" alt="Олексій Мороз"></div>
+        <div class="profile-avatar">ОМ</div>
         <div class="profile-info">
           <div class="profile-name">Олексій Мороз</div>
           <div class="profile-id">ID: 12345678</div>
@@ -1228,6 +1228,63 @@ base-uri 'none';">
 })();
 </script>
 <script>
+window.checkEditPermissions = function() {
+    if (typeof players === 'undefined') return {isAdmin:false, isHead:false, myFraction:null};
+    
+    const tgUser = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) || null;
+    if (!tgUser) return {isAdmin:false, isHead:false, myFraction:null};
+    
+    const callerId = String(tgUser.id || "");
+    const callerTgUsername = String(tgUser.username || "").toLowerCase();
+
+    const PRIORITY = ['Адміністрація', 'Суд', 'Мерія', 'СБС', 'ДБР', 'ДАРШ', 'НПС', 'Інше'];
+    let myFraction = null;
+    let myRole = "";
+    let foundMe = false;
+
+    const matchesTelegram = (player) => {
+      if (!player || !player.telegram) return false;
+      const tgStr = String(player.telegram).toLowerCase();
+      if (callerId && tgStr.includes(callerId)) return true;
+      if (callerTgUsername && tgStr.includes(callerTgUsername)) return true;
+      return false;
+    };
+    
+    for (const frac of PRIORITY) {
+      if (players[frac] && Array.isArray(players[frac])) {
+        const match = players[frac].find(matchesTelegram);
+        if (match) {
+          myFraction = frac;
+          myRole = String(match.role || "");
+          foundMe = true;
+          break;
+        }
+      }
+    }
+    
+    if (!foundMe) {
+      for (const frac in players) {
+        if (!PRIORITY.includes(frac) && Array.isArray(players[frac])) {
+          const match = players[frac].find(matchesTelegram);
+          if (match) {
+            myFraction = frac;
+            myRole = String(match.role || "");
+            foundMe = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!foundMe) return {isAdmin:false, isHead:false, myFraction:null};
+
+    const isAdmin = myFraction === "Адміністрація";
+    const isHead = /директор|начальник|голова|керівник|заступник|генерал|мер/i.test(myRole);
+
+    return { isAdmin, isHead, myFraction };
+};
+</script>
+<script>
 (function() {
   function tgUrl(raw) {
     if (!raw) return null;
@@ -1240,15 +1297,19 @@ base-uri 'none';">
   function buildItems() {
     const items = [];
     if (typeof players !== 'undefined') {
-      Object.entries(players).forEach(([nick, entries]) => {
-        entries.forEach(p => {
-          items.push({
-            nick, avatar: p.avatar || null,
-            label: p.role || '', sublabel: p.category || '',
-            tag: p.category || '', source: 'players',
-            telegram: p.telegram || null, extra: null, cans: null,
+      Object.entries(players).forEach(([frac, arr]) => {
+        if (Array.isArray(arr)) {
+          arr.forEach(p => {
+            if (p && p.username) {
+              items.push({
+                nick: p.username, avatar: p.avatar || null,
+                label: p.role || '', sublabel: frac || '',
+                tag: frac || '', source: 'players',
+                telegram: p.telegram || null, extra: null, cans: null,
+              });
+            }
           });
-        });
+        }
       });
     }
     if (typeof window.licenses !== 'undefined') {
@@ -1272,7 +1333,7 @@ base-uri 'none';">
     }
     return items;
   }
-  const chipFilter = { 'Всі': null, 'НПС': ['Поліція', 'police'], 'СБС': ['СБС', 'sbs'], 'Суд': ['Суд'], 'Адм': ['Адміністрація'], 'ДБР': ['ДБР', 'dbr'], 'Зброя': ['weapon'], 'Адвокат': ['advocat'], 'Таксі': ['taxi'], 'Преса': ['presslicense'], 'ЗМІ': ['press'], 'Бізнес': ['business'], 'ОЗУ': ['mafia'] };
+  const chipFilter = { 'Всі': null, 'НПС': ['Поліція', 'police', 'НПС'], 'СБС': ['СБС', 'sbs'], 'Суд': ['Суд'], 'Адм': ['Адміністрація'], 'ДБР': ['ДБР', 'dbr'], 'Мерія': ['Мерія'], 'ДАРШ': ['ДАРШ'], 'Зброя': ['weapon'], 'Адвокат': ['advocat'], 'Таксі': ['taxi'], 'Преса': ['presslicense'], 'ЗМІ': ['press'], 'Бізнес': ['business'], 'ОЗУ': ['mafia'], 'Інше': ['Інше'] };
   let activeTags = null, searchQuery = '', allItems = [];
   function statusColor(item) {
     if (item.cans) return '#ff4d4d';
@@ -1285,6 +1346,44 @@ base-uri 'none';">
     const list = document.querySelector('.services-list');
     if (!list) return;
     list.innerHTML = '';
+    
+    const perms = typeof checkEditPermissions === 'function' ? checkEditPermissions() : {isAdmin:false, isHead:false, myFraction:null};
+    
+    if (activeTags && activeTags.length >= 1) {
+      const playerTagsInActive = activeTags.filter(t => ['НПС', 'СБС', 'Суд', 'Адміністрація', 'ДБР', 'Мерія', 'ДАРШ', 'Інше'].includes(t));
+      const licTagsInActive = activeTags.filter(t => ['weapon', 'advocat', 'taxi', 'presslicense', 'press', 'business', 'mafia', 'police'].includes(t));
+
+      playerTagsInActive.forEach(pTag => {
+        if (perms.isAdmin || (perms.isHead && perms.myFraction === pTag)) {
+          const row = document.createElement('div');
+          row.className = 'service-row';
+          row.style.cursor = 'pointer';
+          row.style.padding = '10px 0';
+          row.onclick = () => { if (typeof openRoleModal === 'function') openRoleModal('add', pTag); };
+          row.innerHTML = `<div class="service-row-icon" style="width:36px;height:36px;border-radius:10px;background:var(--gray-100);color:var(--black);font-size:20px;font-weight:400;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</div><div class="service-row-content" style="flex:1;min-width:0;"><div class="service-row-name" style="font-size:14px;">Додати гравця</div><div class="service-row-desc" style="font-size:11px;">Фракція: ${pTag}</div></div>`;
+          list.appendChild(row);
+        }
+      });
+
+      licTagsInActive.forEach(lTag => {
+        let canAddLic = false;
+        if (perms.isAdmin) canAddLic = true;
+        else if (perms.isHead) {
+          if (lTag === 'weapon' && (perms.myFraction === 'ДБР' || perms.myFraction === 'СБС')) canAddLic = true;
+          if (lTag === 'police' && perms.myFraction === 'НПС') canAddLic = true;
+        }
+        if (canAddLic) {
+          const row = document.createElement('div');
+          row.className = 'service-row';
+          row.style.cursor = 'pointer';
+          row.style.padding = '10px 0';
+          row.onclick = () => { if (typeof openLicModal === 'function') openLicModal('add', lTag); };
+          row.innerHTML = `<div class="service-row-icon" style="width:36px;height:36px;border-radius:10px;background:var(--gray-100);color:var(--black);font-size:20px;font-weight:400;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</div><div class="service-row-content" style="flex:1;min-width:0;"><div class="service-row-name" style="font-size:14px;">Додати ліцензію</div><div class="service-row-desc" style="font-size:11px;">Категорія: ${lTag}</div></div>`;
+          list.appendChild(row);
+        }
+      });
+    }
+
     const filtered = allItems.filter(item => {
       if (activeTags && !activeTags.includes(item.tag)) return false;
       if (searchQuery && !item.nick.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -1299,7 +1398,46 @@ base-uri 'none';">
       row.style.cursor = item.telegram ? 'pointer' : 'default';
       const safeAvatar = esc(item.avatar);
       const safeNick = esc(item.nick);
-      row.innerHTML = `<div class="service-row-icon" style="overflow:hidden;border-radius:50%;width:40px;height:40px;flex-shrink:0;background:var(--bg2,#222);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">${safeAvatar ? `<img src="${safeAvatar}" alt="${safeNick}" style="width:100%;height:100%;object-fit:cover;">` : (item.nick?item.nick.charAt(0).toUpperCase():'?')}</div><div class="service-row-content"><div class="service-row-name">${safeNick}</div><div class="service-row-desc" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;">${dot}${esc(item.sublabel)}${item.label ? ' • ' + esc(item.label) : ''}${item.extra ? ' · ' + esc(item.extra) : ''}</div></div>${item.telegram ? `<svg class="service-row-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>` : ''}`;
+      
+      const isPlayersSource = item.source === 'players';
+      const isLicensesSource = item.source === 'licenses';
+      
+      let canEdit = false;
+      if (isPlayersSource) {
+        canEdit = (perms.isAdmin || (perms.isHead && perms.myFraction === item.tag));
+      } else if (isLicensesSource) {
+        if (perms.isAdmin) canEdit = true;
+        else if (perms.isHead) {
+          if (item.tag === 'weapon' && (perms.myFraction === 'ДБР' || perms.myFraction === 'СБС')) canEdit = true;
+          if (item.tag === 'police' && perms.myFraction === 'НПС') canEdit = true;
+        }
+      }
+      
+      let actionsHtml = '';
+      if (canEdit) {
+        const editCall = isPlayersSource 
+          ? `openRoleModal('edit', '${esc(item.tag)}', '${safeNick}', '${esc(item.label)}', '${esc(item.telegram)}', '${safeAvatar}')`
+          : `openLicModal('edit', '${esc(item.tag)}', '${safeNick}')`;
+        
+        const delCall = isPlayersSource
+          ? `deletePlayerRole('${esc(item.tag)}', '${safeNick}')`
+          : `deleteLicense('${esc(item.tag)}', '${safeNick}')`;
+
+        actionsHtml = `
+          <div class="service-row-actions" style="display:flex;gap:12px;margin-left:12px;z-index:2;align-items:center;">
+            <button onclick="event.stopPropagation(); ${editCall}" style="background:none;border:none;color:var(--gray-400);padding:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color 0.2s;" onmouseover="this.style.color='var(--black)'" onmouseout="this.style.color='var(--gray-400)'">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button onclick="event.stopPropagation(); ${delCall}" style="background:none;border:none;color:var(--gray-400);padding:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color 0.2s;" onmouseover="this.style.color='#ff4d4d'" onmouseout="this.style.color='var(--gray-400)'">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+          </div>
+        `;
+      } else if (item.telegram) {
+        actionsHtml = `<svg class="service-row-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:12px;"><path d="M9 18l6-6-6-6"/></svg>`;
+      }
+      
+      row.innerHTML = `<div class="service-row-icon" style="overflow:hidden;border-radius:50%;width:40px;height:40px;flex-shrink:0;background:var(--bg2,#222);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">${safeAvatar ? `<img src="${safeAvatar}" alt="${safeNick}" style="width:100%;height:100%;object-fit:cover;">` : (item.nick?item.nick.charAt(0).toUpperCase():'?')}</div><div class="service-row-content" style="flex:1;min-width:0;"><div class="service-row-name">${safeNick}</div><div class="service-row-desc" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;">${dot}${esc(item.sublabel)}${item.label ? ' • ' + esc(item.label) : ''}${item.extra ? ' · ' + esc(item.extra) : ''}</div></div>${actionsHtml}`;
       if (item.telegram) { row.addEventListener('click', () => { const url = tgUrl(item.telegram); if (url) window.open(url, '_blank'); }); }
       list.appendChild(row);
     });
@@ -1314,7 +1452,16 @@ base-uri 'none';">
     if (!input) return;
     input.addEventListener('input', e => { searchQuery = e.target.value; renderList(); });
   }
-  function init() { allItems = buildItems(); renderList(); initChips(); initSearch(); }
+  function init() { 
+    allItems = buildItems(); 
+    renderList(); 
+    initChips(); 
+    initSearch(); 
+    
+    // Перевіряємо ще раз через мить, якщо Telegram WebApp підвантажує дані із затримкою
+    setTimeout(() => renderList(), 150);
+    setTimeout(() => renderList(), 600);
+  }
   window.reinitServices = init;
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
 })();
@@ -1359,5 +1506,456 @@ base-uri 'none';">
     </div>
   </div>
 </div>
+
+<div class="modal-overlay" id="lic-modal" onclick="if(event.target===this) closeLicModal()">
+  <div class="modal-sheet" style="padding-bottom: max(40px, env(safe-area-inset-bottom));">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="lic-modal-title">Додати ліцензію</div>
+    <div class="modal-subtitle" style="margin-bottom: 16px;" id="lic-modal-subtitle">Категорія: ...</div>
+    <div class="ff-form" style="padding:0; margin-bottom:24px;">
+      <div class="ff-field" id="lic-field-username">
+        <div class="ff-label" id="lic-label-username">Нікнейм (Roblox) *</div>
+        <input type="text" id="lic-username" placeholder="Введіть нікнейм" class="ff-input">
+      </div>
+      <div class="ff-field" id="lic-field-role">
+        <div class="ff-label" id="lic-label-role">Роль / Назва</div>
+        <input type="text" id="lic-role" placeholder="Введіть роль або назву" class="ff-input">
+      </div>
+      <div class="ff-field" id="lic-field-status">
+        <div class="ff-label" id="lic-label-status">Статус</div>
+        <input type="text" id="lic-status" placeholder="Напр. Дійсна" class="ff-input">
+      </div>
+      <div class="ff-field" id="lic-field-expiry">
+        <div class="ff-label" id="lic-label-expiry">Дійсна до</div>
+        <input type="text" id="lic-expiry" placeholder="01.12.2025" class="ff-input">
+      </div>
+      <div class="ff-field" id="lic-field-cans">
+        <div class="ff-label" id="lic-label-cans">Причина скасування</div>
+        <input type="text" id="lic-cans" placeholder="Якщо скасована, вкажіть чому" class="ff-input">
+      </div>
+      <div class="ff-field" id="lic-field-telegram">
+        <div class="ff-label" id="lic-label-telegram">Telegram</div>
+        <input type="text" id="lic-telegram" placeholder="t.me/username або ID" class="ff-input">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeLicModal()">Скасувати</button>
+      <button class="btn-primary" id="lic-modal-submit" onclick="submitLicModal()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="role-modal" onclick="if(event.target===this) closeRoleModal()">
+  <div class="modal-sheet" style="padding-bottom: max(40px, env(safe-area-inset-bottom));">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="role-modal-title">Додати гравця</div>
+    <div class="modal-subtitle" style="margin-bottom: 16px;" id="role-modal-subtitle">Фракція: ...</div>
+    <div class="ff-form" style="padding:0; margin-bottom:24px;">
+      <div class="ff-field">
+        <div class="ff-label">Нікнейм (Roblox) *</div>
+        <input type="text" id="role-username" placeholder="Введіть нікнейм" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Роль / Звання</div>
+        <input type="text" id="role-role" placeholder="Введіть посаду" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Telegram</div>
+        <input type="text" id="role-telegram" placeholder="t.me/username або ID" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">URL Аватарки</div>
+        <input type="text" id="role-avatar" placeholder="Посилання на картинку (необов'язково)" class="ff-input">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeRoleModal()">Скасувати</button>
+      <button class="btn-primary" id="role-modal-submit" onclick="submitRoleModal()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentRoleAction = 'add';
+  let currentRoleFraction = '';
+  let currentRoleOldUsername = '';
+
+  function openRoleModal(action, fraction, username = '', role = '', telegram = '', avatar = '') {
+    currentRoleAction = action;
+    currentRoleFraction = fraction;
+    currentRoleOldUsername = username;
+    
+    document.getElementById('role-modal-title').textContent = action === 'add' ? 'Додати гравця' : 'Редагувати гравця';
+    document.getElementById('role-modal-subtitle').textContent = 'Фракція: ' + fraction;
+    
+    document.getElementById('role-username').value = username;
+    document.getElementById('role-role').value = role;
+    document.getElementById('role-telegram').value = telegram;
+    document.getElementById('role-avatar').value = avatar;
+    
+    document.getElementById('role-modal').classList.add('open');
+  }
+
+  function closeRoleModal() {
+    document.getElementById('role-modal').classList.remove('open');
+  }
+
+  async function submitRoleModal() {
+    const data = {
+      username: document.getElementById('role-username').value.trim(),
+      role: document.getElementById('role-role').value.trim(),
+      telegram: document.getElementById('role-telegram').value.trim(),
+      avatar: document.getElementById('role-avatar').value.trim()
+    };
+    
+    if (!data.username) return alert('Нікнейм обов\'язковий!');
+    
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const initData = tg ? tg.initData : '';
+    if (!initData) {
+      alert('Помилка: не знайдено даних Telegram WebApp. Можливо ви зайшли через браузер без авторизації.');
+      return;
+    }
+
+    const payload = {
+      initData: initData,
+      targetFile: 'players.js',
+      action: currentRoleAction,
+      fraction: currentRoleFraction,
+      username: currentRoleOldUsername,
+      data: data
+    };
+
+    const submitBtn = document.getElementById('role-modal-submit');
+    submitBtn.textContent = 'Збереження...';
+    submitBtn.disabled = true;
+
+    try {
+      const res = await fetch('https://xqcgezcoywcnrmigjdyi.supabase.co/functions/v1/serversideroles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad',
+          'apikey': 'sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad'
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Помилка сервера');
+      
+      // Тимчасове оновлення локального стану
+      if (typeof window.state !== 'undefined' && window.state.players) {
+        let arr = window.state.players[currentRoleFraction];
+        if (!arr) arr = window.state.players[currentRoleFraction] = [];
+        
+        if (currentRoleAction === 'add') {
+          arr.push(data);
+        } else if (currentRoleAction === 'edit') {
+          const idx = arr.findIndex(p => p.username.toLowerCase() === currentRoleOldUsername.toLowerCase());
+          if (idx !== -1) arr[idx] = data;
+        }
+      }
+      
+      closeRoleModal();
+      if (typeof window.reinitServices === 'function') window.reinitServices();
+      
+      if (typeof window.showToast === 'function') window.showToast('Успішно збережено!');
+      else alert('Успішно збережено!');
+
+    } catch (err) {
+      alert('Помилка: ' + err.message);
+    } finally {
+      submitBtn.textContent = 'Зберегти';
+      submitBtn.disabled = false;
+    }
+  }
+
+  async function deletePlayerRole(fraction, username) {
+    if (!confirm(`Ви впевнені, що хочете видалити гравця ${username} з фракції ${fraction}?`)) return;
+    
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const initData = tg ? tg.initData : '';
+    if (!initData) return alert('Помилка авторизації Telegram');
+
+    const payload = {
+      initData: initData,
+      targetFile: 'players.js',
+      action: 'delete',
+      fraction: fraction,
+      username: username
+    };
+
+    try {
+      const res = await fetch('https://xqcgezcoywcnrmigjdyi.supabase.co/functions/v1/serversideroles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad',
+          'apikey': 'sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad'
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Помилка сервера');
+      
+      if (typeof window.state !== 'undefined' && window.state.players && window.state.players[fraction]) {
+        const arr = window.state.players[fraction];
+        const idx = arr.findIndex(p => p.username.toLowerCase() === username.toLowerCase());
+        if (idx !== -1) arr.splice(idx, 1);
+      }
+      
+      if (typeof window.reinitServices === 'function') window.reinitServices();
+      
+      if (typeof window.showToast === 'function') window.showToast('Гравця видалено');
+      else alert('Гравця видалено');
+
+    } catch (err) {
+      alert('Помилка: ' + err.message);
+    }
+  }
+
+  let currentLicAction = 'add';
+  let currentLicCategory = '';
+  let currentLicOldUsername = '';
+
+  function openLicModal(action, category, username = '') {
+    currentLicAction = action;
+    currentLicCategory = category;
+    currentLicOldUsername = username;
+    
+    document.getElementById('lic-modal-title').textContent = action === 'add' ? 'Додати ліцензію' : 'Редагувати ліцензію';
+    document.getElementById('lic-modal-subtitle').textContent = 'Категорія: ' + category;
+    
+    let d = {};
+    if (action === 'edit' && window.licenses && window.licenses[category]) {
+      const L = window.licenses[category];
+      if (Array.isArray(L)) {
+        const found = L.find(x => (x.username||x.name||'').toLowerCase() === username.toLowerCase());
+        if (found) d = found;
+      } else {
+        const k = Object.keys(L).find(x => x.toLowerCase() === username.toLowerCase());
+        if (k) d = L[k];
+      }
+    }
+    
+    document.getElementById('lic-username').value = username || d.username || d.name || '';
+    document.getElementById('lic-role').value = d.role || d.name || '';
+    document.getElementById('lic-status').value = d.status || '';
+    document.getElementById('lic-expiry').value = d.expiry || '';
+    document.getElementById('lic-cans').value = d.cans || '';
+    document.getElementById('lic-telegram').value = d.telegram || '';
+
+    const fRole = document.getElementById('lic-field-role');
+    const fStatus = document.getElementById('lic-field-status');
+    const fExpiry = document.getElementById('lic-field-expiry');
+    const fCans = document.getElementById('lic-field-cans');
+    const fTg = document.getElementById('lic-field-telegram');
+
+    const lRole = document.getElementById('lic-label-role');
+    const lStatus = document.getElementById('lic-label-status');
+    const lExpiry = document.getElementById('lic-label-expiry');
+    const lCans = document.getElementById('lic-label-cans');
+    const lTg = document.getElementById('lic-label-telegram');
+
+    const pRole = document.getElementById('lic-role');
+    const pStatus = document.getElementById('lic-status');
+    const pExpiry = document.getElementById('lic-expiry');
+    const pCans = document.getElementById('lic-cans');
+    const pTg = document.getElementById('lic-telegram');
+    
+    fRole.style.display = 'none';
+    fStatus.style.display = 'none';
+    fExpiry.style.display = 'none';
+    fCans.style.display = 'none';
+    fTg.style.display = 'none';
+    
+    if (category === 'weapon') {
+      fStatus.style.display = 'flex'; lStatus.textContent = 'Статус'; pStatus.placeholder = 'Дійсна / Скасовано...';
+      fExpiry.style.display = 'flex'; lExpiry.textContent = 'Кінцевий термін / період'; pExpiry.placeholder = '01.12.2025 або 01.01 to 01.02';
+      fTg.style.display = 'flex'; lTg.textContent = 'Telegram'; pTg.placeholder = 'username / ID';
+    } else if (category === 'business') {
+      fRole.style.display = 'flex'; lRole.textContent = 'Назва бізнесу'; pRole.placeholder = 'Назва';
+      fStatus.style.display = 'flex'; lStatus.textContent = 'ID бізнесу'; pStatus.placeholder = 'ID';
+      fCans.style.display = 'flex'; lCans.textContent = 'Причина скасування (якщо є)'; pCans.placeholder = 'CANS через...';
+      fTg.style.display = 'flex'; lTg.textContent = 'Telegram'; pTg.placeholder = 'username / ID';
+    } else if (category === 'police') {
+      fRole.style.display = 'flex'; lRole.textContent = 'Звання / Кількість XP'; pRole.placeholder = 'Звання або XP';
+      fStatus.style.display = 'flex'; lStatus.textContent = 'ID працівника'; pStatus.placeholder = 'xxxxxx (Roblox+TG)';
+      fExpiry.style.display = 'flex'; lExpiry.textContent = 'Підрозділ'; pExpiry.placeholder = 'Назва підрозділу';
+      fTg.style.display = 'flex'; lTg.textContent = 'Telegram'; pTg.placeholder = 'username / ID';
+    } else if (category === 'taxi') {
+      fStatus.style.display = 'flex'; lStatus.textContent = 'ID таксиста'; pStatus.placeholder = 'T0001';
+      fTg.style.display = 'flex'; lTg.textContent = 'Telegram'; pTg.placeholder = 'username / ID';
+    } else if (category === 'advocat') {
+      fStatus.style.display = 'flex'; lStatus.textContent = 'ID адвоката'; pStatus.placeholder = 'AXXXX';
+      fCans.style.display = 'flex'; lCans.textContent = 'Причина скасування (якщо є)'; pCans.placeholder = 'CANS через...';
+      fTg.style.display = 'flex'; lTg.textContent = 'Telegram'; pTg.placeholder = 'username / ID';
+    } else if (category === 'presslicense') {
+      fRole.style.display = 'flex'; lRole.textContent = 'Назва ЗМІ'; pRole.placeholder = 'ЗМІ';
+      fStatus.style.display = 'flex'; lStatus.textContent = 'ID журналіста / прес-карта'; pStatus.placeholder = '4+ символів';
+      fTg.style.display = 'flex'; lTg.textContent = 'Telegram'; pTg.placeholder = 'username / ID';
+    } else if (category === 'press') {
+      fStatus.style.display = 'flex'; lStatus.textContent = 'Назва ЗМІ'; pStatus.placeholder = 'Назва';
+      fTg.style.display = 'flex'; lTg.textContent = 'Telegram'; pTg.placeholder = 'username / ID';
+    } else if (category === 'mafia') {
+      fRole.style.display = 'flex'; lRole.textContent = 'Тип ОЗУ'; pRole.placeholder = 'Мафія, банда, клан...';
+      fStatus.style.display = 'flex'; lStatus.textContent = 'Назва ОЗУ'; pStatus.placeholder = 'Назва';
+      fCans.style.display = 'flex'; lCans.textContent = 'Причина скасування (якщо є)'; pCans.placeholder = 'CANS через...';
+      fTg.style.display = 'flex'; lTg.textContent = 'Telegram'; pTg.placeholder = 'username / ID';
+    } else {
+      fRole.style.display = 'flex'; fStatus.style.display = 'flex'; fExpiry.style.display = 'flex'; fCans.style.display = 'flex'; fTg.style.display = 'flex';
+    }
+    
+    document.getElementById('lic-modal').classList.add('open');
+  }
+
+  function closeLicModal() {
+    document.getElementById('lic-modal').classList.remove('open');
+  }
+
+  async function submitLicModal() {
+    const data = {};
+    const u = document.getElementById('lic-username').value.trim();
+    if (!u) return alert('Нікнейм обов\'язковий!');
+    
+    data.username = u;
+    
+    const r = document.getElementById('lic-role').value.trim();
+    if (r) data.role = r;
+    const s = document.getElementById('lic-status').value.trim();
+    if (s) data.status = s;
+    const e = document.getElementById('lic-expiry').value.trim();
+    if (e) data.expiry = e;
+    const c = document.getElementById('lic-cans').value.trim();
+    if (c) data.cans = c;
+    const t = document.getElementById('lic-telegram').value.trim();
+    if (t) data.telegram = t;
+    
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const initData = tg ? tg.initData : '';
+    if (!initData) return alert('Помилка: не знайдено даних Telegram WebApp.');
+
+    const payload = {
+      initData: initData,
+      targetFile: 'licenses.js',
+      action: currentLicAction,
+      category: currentLicCategory,
+      username: currentLicOldUsername,
+      data: data
+    };
+
+    const submitBtn = document.getElementById('lic-modal-submit');
+    submitBtn.textContent = 'Збереження...';
+    submitBtn.disabled = true;
+
+    try {
+      const res = await fetch('https://xqcgezcoywcnrmigjdyi.supabase.co/functions/v1/serversideroles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad',
+          'apikey': 'sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad'
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Помилка сервера');
+      
+      closeLicModal();
+      if (typeof window.showToast === 'function') window.showToast('Успішно збережено! (зміни з\'являться після перезавантаження)');
+      else alert('Успішно збережено! Оновіть сторінку.');
+
+    } catch (err) {
+      alert('Помилка: ' + err.message);
+    } finally {
+      submitBtn.textContent = 'Зберегти';
+      submitBtn.disabled = false;
+    }
+  }
+
+  async function deleteLicense(category, username) {
+    if (!confirm(`Ви впевнені, що хочете видалити ліцензію ${username}?`)) return;
+    
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const initData = tg ? tg.initData : '';
+    if (!initData) return alert('Помилка авторизації Telegram');
+
+    const payload = {
+      initData: initData,
+      targetFile: 'licenses.js',
+      action: 'delete',
+      category: category,
+      username: username
+    };
+
+    try {
+      const res = await fetch('https://xqcgezcoywcnrmigjdyi.supabase.co/functions/v1/serversideroles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad',
+          'apikey': 'sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad'
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Помилка сервера');
+      
+      if (typeof window.showToast === 'function') window.showToast('Ліцензію видалено (оновіть сторінку)');
+      else alert('Ліцензію видалено');
+
+    } catch (err) {
+      alert('Помилка: ' + err.message);
+    }
+  }
+
+  function checkEditPermissions() {
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const callerId = (window.state && window.state.telegram && String(window.state.telegram.id)) || "";
+    const callerTgUsername = (window.state && window.state.telegram && String(window.state.telegram.username).toLowerCase()) || "";
+    
+    if (!callerId && !callerTgUsername) return { isAdmin: false, isHead: false, myFraction: null };
+
+    const P = typeof players !== 'undefined' ? players : (window.state && window.state.players);
+    if (!P) return { isAdmin: false, isHead: false, myFraction: null };
+
+    const PRIORITY = ['Адміністрація', 'Суд', 'Мерія', 'СБС', 'ДБР', 'ДАРШ', 'НПС', 'Інше'];
+    let myFraction = "";
+    let myRole = "";
+    let foundMe = false;
+
+    const matchesTelegram = (player) => {
+      if (!player || !player.telegram) return false;
+      const tgStr = String(player.telegram).toLowerCase();
+      if (callerId && tgStr.includes(callerId)) return true;
+      if (callerTgUsername && tgStr.includes(callerTgUsername)) return true;
+      return false;
+    };
+    
+    for (const frac of PRIORITY) {
+      if (P[frac] && Array.isArray(P[frac])) {
+        const match = P[frac].find(matchesTelegram);
+        if (match) { myFraction = frac; myRole = String(match.role || ""); foundMe = true; break; }
+      }
+    }
+    if (!foundMe) {
+      for (const [frac, arr] of Object.entries(P)) {
+        if (!PRIORITY.includes(frac) && Array.isArray(arr)) {
+          const match = arr.find(matchesTelegram);
+          if (match) { myFraction = frac; myRole = String(match.role || ""); foundMe = true; break; }
+        }
+      }
+    }
+    
+    const isAdmin = myFraction === "Адміністрація";
+    const isHead = /директор|начальник|голова|керівник|заступник|генерал|мер/i.test(myRole);
+    
+    return { isAdmin, isHead, myFraction };
+  }
+</script>
 </body>
 </html>
