@@ -1423,8 +1423,29 @@ window.checkEditPermissions = function() {
           ? `deletePlayerRole('${esc(item.tag)}', '${safeNick}')`
           : `deleteLicense('${esc(item.tag)}', '${safeNick}')`;
 
+        const moveUpCall = isPlayersSource
+          ? `moveItemApi('players.js', '${esc(item.tag)}', '${safeNick}', 'moveUp')`
+          : `moveItemApi('licenses.js', '${esc(item.tag)}', '${safeNick}', 'moveUp')`;
+
+        const moveDownCall = isPlayersSource
+          ? `moveItemApi('players.js', '${esc(item.tag)}', '${safeNick}', 'moveDown')`
+          : `moveItemApi('licenses.js', '${esc(item.tag)}', '${safeNick}', 'moveDown')`;
+
+        let moveButtons = '';
+        if (isPlayersSource || (isLicensesSource && (item.tag === 'business' || item.tag === 'mafia' || item.tag === 'ozu'))) {
+           moveButtons = `
+             <button onclick="event.stopPropagation(); ${moveUpCall}" title="Підняти вище" style="background:none;border:none;color:var(--gray-400);padding:4px;cursor:pointer;transition:color 0.2s;" onmouseover="this.style.color='var(--black)'" onmouseout="this.style.color='var(--gray-400)'">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+             </button>
+             <button onclick="event.stopPropagation(); ${moveDownCall}" title="Опустити нижче" style="background:none;border:none;color:var(--gray-400);padding:4px;cursor:pointer;transition:color 0.2s;" onmouseover="this.style.color='var(--black)'" onmouseout="this.style.color='var(--gray-400)'">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+             </button>
+           `;
+        }
+
         actionsHtml = `
-          <div class="service-row-actions" style="display:flex;gap:12px;margin-left:12px;z-index:2;align-items:center;">
+          <div class="service-row-actions" style="display:flex;gap:8px;margin-left:12px;z-index:2;align-items:center;">
+            ${moveButtons}
             <button onclick="event.stopPropagation(); ${editCall}" style="background:none;border:none;color:var(--gray-400);padding:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color 0.2s;" onmouseover="this.style.color='var(--black)'" onmouseout="this.style.color='var(--gray-400)'">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
@@ -1707,9 +1728,51 @@ window.checkEditPermissions = function() {
       }
       
       if (typeof window.reinitServices === 'function') window.reinitServices();
+      if (typeof window.showToast === 'function') window.showToast('Успішно видалено!');
+      else alert('Успішно видалено!');
+
+    } catch (err) {
+      alert('Помилка: ' + err.message);
+    }
+  }
+
+  async function moveItemApi(targetFile, category, username, action) {
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const initData = tg ? tg.initData : '';
+    if (!initData) return alert('Помилка авторизації Telegram');
+
+    const payload = {
+      initData: initData,
+      targetFile: targetFile,
+      action: action,
+      username: username
+    };
+
+    if (targetFile === 'players.js') payload.fraction = category;
+    else payload.category = category;
+
+    try {
+      const res = await fetch('https://xqcgezcoywcnrmigjdyi.supabase.co/functions/v1/serversideroles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad',
+          'apikey': 'sb_publishable_S9Mo4BXYYPHHeznPMknN7w_GwEm_fad'
+        },
+        body: JSON.stringify(payload)
+      });
       
-      if (typeof window.showToast === 'function') window.showToast('Гравця видалено');
-      else alert('Гравця видалено');
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Помилка сервера');
+      
+      // We don't implement local state reordering since it requires reloading anyway to get the fresh data from github
+      // Actually let's just force reload the list
+      setTimeout(() => {
+        if (typeof window.reinitServices === 'function') window.reinitServices();
+      }, 500);
+
+      if (typeof window.showToast === 'function') window.showToast('Переміщено!');
+      else alert('Переміщено!');
 
     } catch (err) {
       alert('Помилка: ' + err.message);
