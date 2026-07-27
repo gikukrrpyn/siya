@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="
 default-src 'self';
-img-src 'self' https: data: https://ukrainerpeh.com https://*.ukrainerpeh.com https://res.cloudinary.com;
-media-src 'self' https://res.cloudinary.com;
+img-src 'self' https: data: blob: https://ukrainerpeh.com https://*.ukrainerpeh.com https://res.cloudinary.com;
+media-src 'self' blob: https://res.cloudinary.com;
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com;
 font-src https://fonts.gstatic.com https://ukrainerpeh.com https://*.ukrainerpeh.com;
 script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net https://ukrainerpeh.com https://*.ukrainerpeh.com https://www.gstatic.com https://cdnjs.cloudflare.com;
@@ -828,7 +828,31 @@ base-uri 'none';">
       <div class="header-title">Сервіси</div>
     </div>
     <div class="scroll-area">
-      <div class="services-grid">
+      <div class="services-search">
+        <span class="search-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input type="text" id="news-search-input" class="search-input" placeholder="Пошук...">
+      </div>
+      <div id="check-service-container" style="display:none; padding: 0 20px 12px;">
+        <div class="service-card" onclick="switchScreen('applications-review'); if(window.loadApplicationsReview) window.loadApplicationsReview();" style="background: var(--black); color: var(--white);">
+          <div class="service-icon" style="background: #222; color: var(--white);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg></div>
+          <div class="service-name" style="color: var(--white);">Перевірка</div>
+        </div>
+      </div>
+      <div class="services-grid" id="news-services-grid">
+        <div class="service-card" onclick="openOzuModal()">
+          <div class="service-icon">🥷</div>
+          <div class="service-name">Легалізація ОЗУ</div>
+        </div>
+        <div class="service-card" onclick="openTaxiModal()">
+          <div class="service-icon">🚕</div>
+          <div class="service-name">Ліцензія Таксиста</div>
+        </div>
+        <div class="service-card" onclick="openLawyerModal()">
+          <div class="service-icon">⚖️</div>
+          <div class="service-name">Адвокатська Ліцензія</div>
+        </div>
         <div class="service-card" onclick="openTgLink('https://t.me/CompensationURBot')">
           <div class="service-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></div>
           <div class="service-name">Отримати компенсацію / виплату</div>
@@ -881,6 +905,25 @@ base-uri 'none';">
         Профіль
       </button>
     </nav>
+  </div>
+
+  <div class="screen" id="screen-applications-review">
+    <div class="header">
+      <div class="header-action" onclick="goBack()">Назад</div>
+      <div class="header-title">Перевірка Анкет</div>
+      <div class="header-action" style="visibility:hidden">Назад</div>
+    </div>
+    <div class="scroll-area">
+      <div class="services-search">
+        <span class="search-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input type="text" id="apps-review-search-input" class="search-input" placeholder="Пошук (тип, ID, текст)...">
+      </div>
+      <div id="applications-review-list" style="padding: 0 20px 20px;">
+        <div style="text-align:center; padding:40px 0; color:var(--gray-500);">Завантаження...</div>
+      </div>
+    </div>
   </div>
 
   <div class="screen" id="screen-profile">
@@ -972,6 +1015,34 @@ base-uri 'none';">
     <div class="scroll-area">
       <div id="admin-fines-pending-list"></div>
       <div id="admin-fines-payments-list"></div>
+      <div id="admin-fines-appeals-list"></div>
+      <div id="admin-fines-purge"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-my-submissions">
+    <div class="header">
+      <button class="header-back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Назад
+      </button>
+      <div class="header-title" style="pointer-events:none;">Мої подання</div>
+    </div>
+    <div class="scroll-area">
+      <div id="my-submissions-list"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-my-applications">
+    <div class="header">
+      <button class="header-back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Назад
+      </button>
+      <div class="header-title" style="pointer-events:none;">Мої заявки</div>
+    </div>
+    <div class="scroll-area">
+      <div id="my-applications-list"></div>
     </div>
   </div>
 
@@ -1091,6 +1162,10 @@ base-uri 'none';">
   ];
   a.forEach(function(s){
     var t=document.createElement("script");
+    // async=false обов'язково: динамічно створені скрипти за замовчуванням async,
+    // тобто виконуються у довільному порядку. main.js залежить від fines.js
+    // (getUserIssuerRole), а fines.js/contracts.js — від window.esc з main.js.
+    t.async=false;
     t.src=s+"?v="+v;
     document.body.appendChild(t);
   });
@@ -1342,6 +1417,9 @@ window.checkEditPermissions = function() {
     if (s.includes('дійсна')) return '#30d158';
     return null;
   }
+  const PAGE_SIZE = 60;
+  let shownCount = PAGE_SIZE;
+
   function renderList() {
     const list = document.querySelector('.services-list');
     if (!list) return;
@@ -1390,13 +1468,23 @@ window.checkEditPermissions = function() {
       return true;
     });
     const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    filtered.forEach(item => {
+    // Малюємо порціями. Раніше сюди йшли всі ~800 записів одразу: це і сотні
+    // вузлів у DOM, і стільки ж запитів за аватарами. loading="lazy" тут не
+    // страховка — у headless його перевірити не вдалось, тож не покладаємось.
+    const slice = filtered.slice(0, shownCount);
+    slice.forEach(item => {
       const color = statusColor(item);
       const dot = color ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:5px;flex-shrink:0;"></span>` : '';
       const row = document.createElement('div');
       row.className = 'service-row';
       row.style.cursor = item.telegram ? 'pointer' : 'default';
-      const safeAvatar = esc(item.avatar);
+      // players.js має власне поле avatar, у licenses.js його немає зовсім —
+      // там аватар підтягується з мапи, яку збирає бот (див. backend/avatars.py).
+      // 75px вистачає для кружечка 40px навіть на щільних екранах: 150px важить
+      // 14.6 КБ проти 5.6 КБ, а видно різницю не буде.
+      const resolvedAvatar = item.avatar
+        || (typeof window.avatarForNick === 'function' ? window.avatarForNick(item.nick, 75) : null);
+      const safeAvatar = esc(resolvedAvatar);
       const safeNick = esc(item.nick);
       
       const isPlayersSource = item.source === 'players';
@@ -1416,7 +1504,7 @@ window.checkEditPermissions = function() {
       let actionsHtml = '';
       if (canEdit) {
         const editCall = isPlayersSource 
-          ? `openRoleModal('edit', '${esc(item.tag)}', '${safeNick}', '${esc(item.label)}', '${esc(item.telegram)}', '${safeAvatar}')`
+          ? `openRoleModal('edit', '${esc(item.tag)}', '${safeNick}', '${esc(item.label)}', '${esc(item.telegram)}', '${esc(item.avatar)}')`
           : `openLicModal('edit', '${esc(item.tag)}', '${safeNick}')`;
         
         const delCall = isPlayersSource
@@ -1458,20 +1546,29 @@ window.checkEditPermissions = function() {
         actionsHtml = `<svg class="service-row-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:12px;"><path d="M9 18l6-6-6-6"/></svg>`;
       }
       
-      row.innerHTML = `<div class="service-row-icon" style="overflow:hidden;border-radius:50%;width:40px;height:40px;flex-shrink:0;background:var(--bg2,#222);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">${safeAvatar ? `<img src="${safeAvatar}" alt="${safeNick}" style="width:100%;height:100%;object-fit:cover;">` : (item.nick?item.nick.charAt(0).toUpperCase():'?')}</div><div class="service-row-content" style="flex:1;min-width:0;"><div class="service-row-name">${safeNick}</div><div class="service-row-desc" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;">${dot}${esc(item.sublabel)}${item.label ? ' • ' + esc(item.label) : ''}${item.extra ? ' · ' + esc(item.extra) : ''}</div></div>${actionsHtml}`;
+      row.innerHTML = `<div class="service-row-icon" style="position:relative;overflow:hidden;border-radius:50%;width:40px;height:40px;flex-shrink:0;background:var(--bg2,#222);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">${item.nick ? item.nick.charAt(0).toUpperCase() : '?'}${safeAvatar ? `<img src="${safeAvatar}" alt="${safeNick}" loading="lazy" decoding="async" onerror="this.remove()" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">` : ''}</div><div class="service-row-content" style="flex:1;min-width:0;"><div class="service-row-name">${safeNick}</div><div class="service-row-desc" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;">${dot}${esc(item.sublabel)}${item.label ? ' • ' + esc(item.label) : ''}${item.extra ? ' · ' + esc(item.extra) : ''}</div></div>${actionsHtml}`;
       if (item.telegram) { row.addEventListener('click', () => { const url = tgUrl(item.telegram); if (url) window.open(url, '_blank'); }); }
       list.appendChild(row);
     });
+    if (filtered.length > shownCount) {
+      const more = document.createElement('button');
+      more.className = 'service-row';
+      more.type = 'button';
+      more.style.cssText = 'width:100%;border:none;background:none;font-family:inherit;cursor:pointer;justify-content:center;padding:14px;font-weight:700;color:var(--text2,#888);';
+      more.textContent = `Показати ще (${filtered.length - shownCount})`;
+      more.onclick = () => { shownCount += PAGE_SIZE; renderList(); };
+      list.appendChild(more);
+    }
     if (!list.children.length) list.innerHTML = '<div style="text-align:center;padding:32px;opacity:.5;">Нічого не знайдено</div>';
   }
   function initChips() {
     const chips = document.querySelectorAll('.cat-chip');
-    chips.forEach(chip => { chip.addEventListener('click', () => { chips.forEach(c => c.classList.remove('active')); chip.classList.add('active'); activeTags = chipFilter[chip.textContent.trim()] ?? null; renderList(); }); });
+    chips.forEach(chip => { chip.addEventListener('click', () => { chips.forEach(c => c.classList.remove('active')); chip.classList.add('active'); activeTags = chipFilter[chip.textContent.trim()] ?? null; shownCount = PAGE_SIZE; renderList(); }); });
   }
   function initSearch() {
     const input = document.querySelector('.search-input');
     if (!input) return;
-    input.addEventListener('input', e => { searchQuery = e.target.value; renderList(); });
+    input.addEventListener('input', e => { searchQuery = e.target.value; shownCount = PAGE_SIZE; renderList(); });
   }
   function init() { 
     allItems = buildItems(); 
@@ -1482,6 +1579,12 @@ window.checkEditPermissions = function() {
     // Перевіряємо ще раз через мить, якщо Telegram WebApp підвантажує дані із затримкою
     setTimeout(() => renderList(), 150);
     setTimeout(() => renderList(), 600);
+
+    // Мапа аватарів приходить із Firestore, тож список перемальовуємо, коли
+    // вона доїде. До того рядки показують ініціали — як і раніше.
+    if (typeof window.fetchAvatarMap === 'function') {
+      window.fetchAvatarMap().then(() => renderList()).catch(() => {});
+    }
   }
   window.reinitServices = init;
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
@@ -1592,6 +1695,115 @@ window.checkEditPermissions = function() {
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeRoleModal()">Скасувати</button>
       <button class="btn-primary" id="role-modal-submit" onclick="submitRoleModal()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<!-- OZU MODAL -->
+<div class="modal-overlay" id="ozu-modal" onclick="if(event.target===this) closeOzuModal()">
+  <div class="modal-sheet" style="padding-bottom: max(40px, env(safe-area-inset-bottom));">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Легалізація ОЗУ</div>
+    <div class="modal-subtitle" style="margin-bottom: 16px;">Офіційно легалізуйте своє організоване злочинне угруповання</div>
+    <div class="ff-form" style="padding:0; margin-bottom:24px;">
+      <div class="ff-field">
+        <div class="ff-label">Вкажіть свій username в Roblox *</div>
+        <input type="text" id="ozu-username" placeholder="Введіть username" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Вкажіть свій правдивий вік *</div>
+        <input type="text" id="ozu-age" placeholder="Ваш вік" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Оцініть своє знання правил сервера (x/5) *</div>
+        <input type="text" id="ozu-rules" placeholder="Наприклад: 5/5" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Яке саме ОЗУ ви хочете легалізувати? *</div>
+        <input type="text" id="ozu-desc" placeholder="Короткий опис діяльності" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Тип ОЗУ (Мафія / Банда) *</div>
+        <input type="text" id="ozu-type" placeholder="Мафія або Банда" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Чи є у вас люди в ОЗУ? (Ніки в Roblox) *</div>
+        <input type="text" id="ozu-members" placeholder="Список нікнеймів" class="ff-input">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeOzuModal()">Скасувати</button>
+      <button class="btn-primary" onclick="submitFormModal('ozu-modal')">Відправити</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAXI MODAL -->
+<div class="modal-overlay" id="taxi-modal" onclick="if(event.target===this) closeTaxiModal()">
+  <div class="modal-sheet" style="padding-bottom: max(40px, env(safe-area-inset-bottom));">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Ліцензія Таксиста</div>
+    <div class="modal-subtitle" style="margin-bottom: 16px;">Анкета для отримання ліцензії таксиста</div>
+    <div class="ff-form" style="padding:0; margin-bottom:24px;">
+      <div class="ff-field">
+        <div class="ff-label">Username в Roblox (з урахуванням великих та малих літер) *</div>
+        <input type="text" id="taxi-username" placeholder="Введіть username" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Оцініть ваше знання РП (x/10) *</div>
+        <input type="text" id="taxi-rp" placeholder="Наприклад: 8/10" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Чи знаєте ви ПДР? *</div>
+        <input type="text" id="taxi-pdr" placeholder="Так / Ні" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Чи є у вас власна автівка? (Не економ клас) *</div>
+        <input type="text" id="taxi-car" placeholder="Так, марка автівки / Ні" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Ваш пінг в грі *</div>
+        <input type="text" id="taxi-ping" placeholder="Вкажіть середній пінг" class="ff-input">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeTaxiModal()">Скасувати</button>
+      <button class="btn-primary" onclick="submitFormModal('taxi-modal')">Відправити</button>
+    </div>
+  </div>
+</div>
+
+<!-- LAWYER MODAL -->
+<div class="modal-overlay" id="lawyer-modal" onclick="if(event.target===this) closeLawyerModal()">
+  <div class="modal-sheet" style="padding-bottom: max(40px, env(safe-area-inset-bottom));">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Адвокатська Ліцензія</div>
+    <div class="modal-subtitle" style="margin-bottom: 16px;">Анкета для отримання ліцензії адвоката</div>
+    <div class="ff-form" style="padding:0; margin-bottom:24px;">
+      <div class="ff-field">
+        <div class="ff-label">Вкажіть свій username в Roblox *</div>
+        <input type="text" id="lawyer-username" placeholder="Введіть username" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Вкажіть свій справжній вік *</div>
+        <input type="text" id="lawyer-age" placeholder="Ваш вік" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Оцініть своє знання Конституції України (x/10) *</div>
+        <input type="text" id="lawyer-const" placeholder="Наприклад: 9/10" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Оцініть своє знання ККУ (x/10) *</div>
+        <input type="text" id="lawyer-kku" placeholder="Наприклад: 8/10" class="ff-input">
+      </div>
+      <div class="ff-field">
+        <div class="ff-label">Чому ми повинні видати вам цю ліцензію? *</div>
+        <input type="text" id="lawyer-reason" placeholder="Ваша аргументація" class="ff-input">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeLawyerModal()">Скасувати</button>
+      <button class="btn-primary" onclick="submitFormModal('lawyer-modal')">Відправити</button>
     </div>
   </div>
 </div>
