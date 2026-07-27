@@ -2227,7 +2227,7 @@ window.checkEditPermissions = function() {
     }
     
     const isAdmin = myFraction === "Адміністрація";
-    const isHead = /директор|начальник|голова|керівник|заступник|генерал|мер/i.test(myRole);
+    const isHead = /директор|начальник|голова|керівник|заступник|мер|суддя/i.test(myRole);
     
     return { isAdmin, isHead, myFraction };
   }
