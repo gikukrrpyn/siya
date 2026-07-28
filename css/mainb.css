@@ -77,19 +77,10 @@ body.viewer-mode #screen-docpage { padding-bottom: 24px; }
   font-size: 13px; color: var(--gray-400); margin-top: 6px;
 }
 .fine-card {
-  /* Картка темна в ОБОХ темах, тому кольори всередині не мають залежати від
-     теми. У світлій --black дорівнює #000, і підписи зі сумами ставали чорним
-     по чорному, а роздільник --gray-200 (#EBEBEB) світив білою смугою.
-     Перевизначаємо змінні локально — усі вкладені правила підхоплять їх самі. */
-  --black: #ededed;
-  --gray-200: rgba(255,255,255,0.10);
-  --gray-300: rgba(255,255,255,0.16);
-  --gray-400: #8e8e8e;
-  --gray-500: #9a9a9a;
-  color: #ededed;
-
+  color: var(--black);
   border-radius: var(--radius);
-  background: linear-gradient(135deg, #1f1f1f 0%, #000000 100%);
+  background: var(--white);
+  border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-md);
   padding: 16px 18px;
   display: flex;
@@ -424,6 +415,7 @@ body.theme-dark .fine-card-value { color: #ededed; }
 body.theme-dark .fine-card-label { color: #999; }
 body.theme-dark .fine-card-reason { border-top-color: #262626; color: #b8b8b8; }
 body.theme-dark .fine-card-pending { border: 1px dashed #555; background: linear-gradient(135deg, #1f1f1f 0%, #111111 100%); }
+
 body.theme-dark .fines-empty,
 body.theme-dark .fines-loading { background: #1a1a1a; color: #b8b8b8; }
 body.theme-dark .fine-evidence-link { color: #ededed; }
