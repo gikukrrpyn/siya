@@ -159,7 +159,9 @@ html, body {
     background: none;
     padding: 0;
     font-family: var(--font);
+    transition: transform 0.25s ease, opacity 0.25s ease;
   }
+  .header-back:hover { transform: translateX(-4px); opacity: 0.8; }
   .header-back svg { width: 20px; height: 20px; }
   .header-action {
     font-size: 14px;
@@ -169,7 +171,9 @@ html, body {
     border: none;
     background: none;
     font-family: var(--font);
+    transition: transform 0.25s ease, opacity 0.25s ease;
   }
+  .header-action:hover { transform: scale(1.06); opacity: 0.85; }
   .header-notif {
     position: relative;
     cursor: pointer;
@@ -1556,6 +1560,16 @@ html, body {
   background: var(--bg2, #f5f5f7);
   border-radius: 12px;
   padding: 12px 14px;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.25s ease, box-shadow 0.25s ease;
+}
+.doc-link-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  background: var(--gray-200, #ebebeb);
+}
+.doc-link-row:hover .doc-link-value {
+  color: var(--accent, #007aff);
 }
  
 .doc-link-label {
@@ -1573,8 +1587,9 @@ html, body {
   word-break: break-all;
   font-family: monospace;
   line-height: 1.4;
-  cursor: text;
+  cursor: pointer;
   user-select: all;
+  transition: color 0.2s ease;
 }
  
 .doc-action-btn {
@@ -1591,15 +1606,24 @@ html, body {
   cursor: pointer;
   background: var(--bg2, #f5f5f7);
   color: var(--text1, #111);
-  transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.25s ease, box-shadow 0.25s ease;
+}
+.doc-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  background: var(--gray-200, #ebebeb);
 }
 .doc-action-btn:active {
   opacity: .7;
   transform: scale(.97);
 }
 .doc-action-btn.primary {
-  background: var(--accent, #007aff);
+  background: var(--black, #000);
   color: white;
+}
+.doc-action-btn.primary:hover {
+  background: #222;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
 }
 
 .animate-card {
@@ -1661,3 +1685,463 @@ textarea:focus-visible {
 }
 
 .scroll-area { scroll-padding-top: var(--header-h); }
+
+/* Apple Pay Style Animated Success Modal */
+.apple-pay-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.apple-pay-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.apple-pay-modal-overlay.closing {
+  opacity: 0;
+}
+
+.apple-pay-modal-card {
+  width: 220px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transform: scale(0.85);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+}
+
+.apple-pay-modal-overlay.active .apple-pay-modal-card {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.apple-pay-modal-overlay.closing .apple-pay-modal-card {
+  transform: scale(0.9);
+  opacity: 0;
+}
+
+.apple-pay-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #34c759;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  box-shadow: 0 6px 18px rgba(52, 199, 89, 0.35);
+  animation: popCircle 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes popCircle {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.apple-pay-checkmark-svg {
+  width: 36px;
+  height: 36px;
+  stroke: #ffffff;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.apple-pay-checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: strokeCircle 0.5s ease-in-out forwards;
+}
+
+.apple-pay-checkmark-path {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: strokeCheck 0.35s 0.25s ease-in-out forwards;
+}
+
+@keyframes strokeCheck {
+  100% { stroke-dashoffset: 0; }
+}
+
+.apple-pay-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1c1c1e;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.apple-pay-sub {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(60, 60, 67, 0.7);
+}
+
+/* Dark Theme Overrides for Apple Pay Modal */
+body.theme-dark .apple-pay-modal-card {
+  background: rgba(28, 28, 30, 0.92);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+body.theme-dark .apple-pay-title {
+  color: #ffffff;
+}
+
+body.theme-dark .apple-pay-sub {
+  color: rgba(235, 235, 245, 0.6);
+}
+
+/* Active Fine Banner on Home Screen */
+.active-fine-banner {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, #1f1f1f 0%, #000000 100%);
+  border: 1px solid rgba(255, 59, 48, 0.5);
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4), 0 0 16px rgba(255, 59, 48, 0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.active-fine-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 59, 48, 0.35);
+}
+
+.fine-pulse-dot {
+  width: 8px; height: 8px;
+  background: #ff3b30;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 10px #ff3b30;
+  animation: pulseRed 1.5s infinite;
+}
+
+@keyframes pulseRed {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 14px #ff3b30; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.fine-banner-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.fine-banner-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.fine-banner-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #ff3b30;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.fine-banner-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fine-banner-sub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.fine-banner-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.fine-banner-amount {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ff3b30;
+}
+
+.fine-banner-btn {
+  background: #ff3b30;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(255, 59, 48, 0.4);
+}
+
+/* Dark Theme Overrides for Active Fine Banner */
+body.theme-dark .active-fine-banner {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 59, 48, 0.4);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 0 16px rgba(255, 59, 48, 0.25);
+}
+
+body.theme-dark .fine-banner-title {
+  color: #ededed !important;
+}
+
+body.theme-dark .fine-banner-sub {
+  color: #999999 !important;
+}
+
+/* Active Fine Launch Modal */
+.active-fine-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.active-fine-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.active-fine-modal-card {
+  width: 90%;
+  max-width: 340px;
+  background: #1c1c1e;
+  border: 1px solid rgba(255, 59, 48, 0.25);
+  border-radius: 24px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45), 0 0 24px rgba(255, 59, 48, 0.15);
+  transform: scale(0.88);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.active-fine-modal-overlay.active .active-fine-modal-card {
+  transform: scale(1);
+}
+
+.active-fine-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #ff3b30;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(255, 59, 48, 0.1);
+  padding: 4px 10px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.fine-modal-pulse {
+  width: 6px; height: 6px;
+  background: #ff3b30;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #ff3b30;
+  animation: pulseRed 1.5s infinite;
+}
+
+.active-fine-icon-wrapper {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 59, 48, 0.1);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+  box-shadow: 0 0 20px rgba(255, 59, 48, 0.15);
+}
+
+.active-fine-modal-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.active-fine-modal-sub {
+  font-size: 12px;
+  color: #666666;
+  margin-bottom: 16px;
+}
+
+.active-fine-details-box {
+  width: 100%;
+  background: #121214;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.fine-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.fine-detail-label {
+  color: #888888;
+}
+
+.fine-detail-val {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.fine-detail-val.price {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ff3b30;
+}
+
+.active-fine-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.fine-modal-btn {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.fine-modal-btn:active {
+  transform: scale(0.97);
+}
+
+.fine-modal-btn.primary {
+  background: #ff3b30;
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(255, 59, 48, 0.35);
+}
+
+.fine-modal-btn.secondary {
+  background: rgba(0, 0, 0, 0.05);
+  color: #666666;
+}
+
+/* Dark Theme Overrides for Active Fine Modal */
+body.theme-dark .active-fine-modal-card {
+  background: #1c1c1e;
+  border: 1px solid rgba(255, 59, 48, 0.35);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.65), 0 0 32px rgba(255, 59, 48, 0.25);
+}
+
+body.theme-dark .active-fine-modal-title {
+  color: #ffffff;
+}
+
+body.theme-dark .active-fine-modal-sub {
+  color: #888888;
+}
+
+body.theme-dark .active-fine-details-box {
+  background: #121214;
+}
+
+body.theme-dark .fine-detail-val {
+  color: #ffffff;
+}
+
+body.theme-dark .fine-modal-btn.secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #888888;
+}
+
+/* Profile Row & Bottom Nav Badges */
+.profile-row-badge {
+  background: #000000;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  margin-left: auto;
+  margin-right: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.nav-badge {
+  position: absolute;
+  top: 4px;
+  right: 18px;
+  background: #000000;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  animation: pulseBadge 2s infinite;
+}
+
+@keyframes pulseBadge {
+  0% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.12); opacity: 1; box-shadow: 0 0 10px rgba(0, 0, 0, 0.7); }
+  100% { transform: scale(1); opacity: 0.9; }
+}
