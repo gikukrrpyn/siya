@@ -309,8 +309,6 @@ body.theme-dark {
   background: #0e0e0e;
   color: #ededed;
 
-  /* На тлі #0e0e0e чорна тінь не видна взагалі, тож у темній темі глибину
-     тримає не тінь, а світлий контур зверху плюс щільніша розмита частина. */
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
   --shadow-md: 0 2px 6px rgba(0,0,0,0.55), 0 8px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
   --shadow-lg: 0 4px 10px rgba(0,0,0,0.6), 0 16px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
@@ -318,9 +316,7 @@ body.theme-dark {
   --shadow-sheet: 0 -10px 40px rgba(0,0,0,0.6);
   --focus-ring: 0 0 0 2px #0e0e0e, 0 0 0 4px #ededed;
 }
-/* «body.theme-dark html» ніколи не спрацьовує (html не буває нащадком body),
-   тому при оверсколі в темній темі світив білий фон html. :has() лагодить це
-   в сучасних webview; старі просто лишаються як були. */
+
 html:has(body.theme-dark) { background: #0e0e0e; }
 body.theme-dark #app { background: #0e0e0e; color: #ededed; }
 body.theme-dark .screen,
@@ -351,8 +347,7 @@ body.theme-dark .doc-card.light .doc-card-name,
 body.theme-dark .doc-card .doc-card-name { color: #ededed; }
 body.theme-dark .doc-card.light .doc-card-type,
 body.theme-dark .doc-card .doc-card-type { color: #999; }
-/* Іконка паспорта — SVG зі stroke:currentColor, а базовий колір var(--white)
-   у темній темі стає #0e0e0e — іконка зникала на картці #1a1a1a. */
+
 body.theme-dark .doc-card-icon { color: #ededed; }
 body.theme-dark .news-card { border-color: #262626; background: #1a1a1a; }
 body.theme-dark .news-card-img { background: #0a0a0a; }
@@ -384,6 +379,7 @@ body.theme-dark .doc-item.light .doc-share-btn { background: #ededed; color: #0e
 body.theme-dark .service-card { background: #1a1a1a; }
 body.theme-dark .service-card:active { background: #262626; }
 body.theme-dark .service-name { color: #ededed; }
+body.theme-dark .service-icon { background: #262626; color: #ededed; }
 body.theme-dark .profile-name,
 body.theme-dark .profile-id,
 body.theme-dark .profile-tag,
@@ -460,13 +456,19 @@ body.theme-dark .doc-page-label { color: rgba(255,255,255,0.55); }
 body.theme-dark .doc-page-card .doc-item-name { color: #ededed; }
 body.theme-dark .doc-page-qr-box { background: #fff; }
 body.theme-dark .doc-actions .doc-action-btn { background: #1a1a1a; color: #ededed; }
+body.theme-dark .doc-actions .doc-action-btn:hover { background: #262626; color: #fff; }
 body.theme-dark .doc-actions .doc-action-btn:active { background: #262626; }
 body.theme-dark .doc-actions .doc-action-btn.primary { background: #ededed; color: #0e0e0e; }
+body.theme-dark .doc-actions .doc-action-btn.primary:hover { background: #ffffff; color: #000; box-shadow: 0 6px 18px rgba(255,255,255,0.2); }
 body.theme-dark .doc-link-row { background: #1a1a1a; }
+body.theme-dark .doc-link-row:hover { background: #262626; }
+body.theme-dark .doc-link-row:hover .doc-link-value { color: #3b82f6; }
 body.theme-dark .doc-link-label { color: #888; }
 body.theme-dark .doc-link-value { color: #ededed; }
 body.theme-dark .doc-info-rows { background: #1a1a1a; }
 body.theme-dark .doc-info-row { border-bottom-color: #262626; }
+body.theme-dark .doc-info-row:hover { background: rgba(255,255,255,0.06); }
+body.theme-dark .doc-info-row:hover .doc-info-row-label { color: #3b82f6; }
 body.theme-dark .doc-info-row-label { color: #888; }
 body.theme-dark .doc-info-row-value { color: #ededed; }
 body.theme-dark #viewer-error { background: #0e0e0e; }
@@ -547,7 +549,7 @@ body.theme-dark .update-text {
 body.theme-dark .update-media {
   background-color: #262626;
 }
-/* --- Кастомне вікно підтвердження виходу --- */
+
 .custom-modal-overlay {
   position: fixed; inset: 0; z-index: 10000;
   background: rgba(0, 0, 0, 0.4);
@@ -739,9 +741,6 @@ body.theme-dark .btn-danger { background: rgba(255, 69, 58, 0.12); color: #ff453
 @keyframes chatFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes chatPop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
 
-/* Увага: у блоках body.theme-dark НЕ можна писати var(--white)/var(--black) —
-   темна тема інвертує ці змінні (--white стає #0e0e0e), і «білий» текст
-   виходив темним на темному. Нижче всюди явні кольори. */
 body.theme-dark .chat-panel{background: rgba(21, 21, 26, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color:#f2f2f2; border-top: 1px solid rgba(255,255,255,0.08);}
 body.theme-dark #chat-fab{background:#fff;color:#111}
 body.theme-dark .chat-header,body.theme-dark .chat-inputbar,body.theme-dark .chat-emoji-panel.open,body.theme-dark .chat-reply-bar,body.theme-dark .chat-modal-head,body.theme-dark .chat-modal-foot{border-color:rgba(255,255,255,.1)}
@@ -832,8 +831,7 @@ body.theme-dark .chat-scrolldown svg{stroke:#fff}
 body.theme-dark .chat-msg-menu-item svg{stroke:#f2f2f2}
 body.theme-dark .chat-msg-menu-item.danger,
 body.theme-dark .chat-msg-menu-item.danger svg{color:#ff6b6b;stroke:#ff6b6b}
-/* Бекдроп лишається напівпрозорим: суцільний #0d0d0d закривав увесь застосунок
-   позаду шторки чату. */
+
 body.theme-dark #chat-overlay{background:rgba(0,0,0,.65)}
 body.theme-dark #chat-view-contacts,
 body.theme-dark #chat-view-convo,
@@ -1195,8 +1193,7 @@ body.theme-dark .chat-bubble.has-media{
 	background:none !important;
 	border:none !important;
 }
-/* Великі emoji без «бульбашки»: загальне правило .chat-bubble вище має більшу
-   специфічність за .chat-bubble.emoji-only і малювало їм фон із рамкою. */
+
 body.theme-dark .chat-bubble.emoji-only{
 	background:none !important;
 	border:none !important;
@@ -1400,8 +1397,6 @@ body.theme-dark .cat-chip.active{
 body.theme-dark .bg-btn { background: #333 !important; color: #fff !important; }
 body.theme-dark .bg-input { background: rgba(255,255,255,0.1) !important; color: #fff !important; }
 
-
-/* Custom BG Overrides */
 body.has-custom-bg,
 body.has-custom-bg #app,
 body.has-custom-bg .screen,
