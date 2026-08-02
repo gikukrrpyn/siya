@@ -371,14 +371,14 @@ html, body {
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.45s ease, background 0.45s ease;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.35s ease, background 0.35s ease;
     min-height: 90px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
   }
   .doc-card:active { transform: scale(var(--press-lg)); box-shadow: var(--shadow-sm); }
-  .docs-scroll .doc-card:last-child:nth-child(odd) { grid-column: 1 / -1; max-width: 380px; width: 100%; }
+  .docs-scroll .doc-card:last-child:nth-child(odd) { grid-column: 1 / -1; width: 100%; }
   .doc-card.light {
     background: var(--gray-100);
   }
@@ -464,7 +464,7 @@ html, body {
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.45s ease, background 0.45s ease;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.35s ease, background 0.35s ease;
     min-height: 140px;
     display: flex;
     flex-direction: column;
@@ -1340,11 +1340,12 @@ html, body {
   .doc-page-card {
     position: relative;
     overflow: hidden;
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-                box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-                border-color 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+                box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+                border-color 0.35s ease,
+                background 0.35s ease;
     will-change: transform, box-shadow;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     z-index: 1;
   }
 
@@ -1355,35 +1356,35 @@ html, body {
   }
 
   .doc-card-icon {
-    transform: scale(1);
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s ease, color 0.3s ease;
+    transform: scale(1) translateY(0);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.35s ease, color 0.35s ease;
   }
 
   .doc-valid-dot,
   .status-dot {
     transform: scale(1);
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease;
   }
 
   .doc-card-name,
   .doc-item-name {
     transform: translateX(0);
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.3s ease, text-shadow 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.35s ease, text-shadow 0.35s ease;
   }
 
   .doc-card-type,
   .doc-item-type {
-    transition: color 0.3s ease, letter-spacing 0.3s ease;
+    transition: color 0.35s ease, letter-spacing 0.35s ease;
   }
 
   .doc-share-btn {
     transform: scale(1);
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.35s ease, box-shadow 0.35s ease, color 0.35s ease;
   }
 
   .doc-page-qr-box {
     transform: scale(1);
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease;
     cursor: pointer;
   }
 
@@ -1431,18 +1432,18 @@ html, body {
 
   .doc-card:hover .doc-card-name,
   .doc-item:hover .doc-item-name {
-    transform: translateX(3px);
+    transform: translateX(2px);
   }
 
   .doc-card:hover .doc-card-type,
   .doc-item:hover .doc-item-type {
     color: rgba(255, 255, 255, 0.85);
-    letter-spacing: 1.8px;
+    letter-spacing: 1.2px;
   }
 
   .doc-item:hover .doc-share-btn {
-    transform: scale(1.08) rotate(2deg);
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.25);
+    transform: scale(1.04);
+    box-shadow: 0 4px 14px rgba(255, 255, 255, 0.22);
   }
 
   .doc-action-btn:hover {
