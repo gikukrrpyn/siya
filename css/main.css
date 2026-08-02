@@ -1253,8 +1253,8 @@ html, body {
     to   { opacity: 1; transform: scale(1); }
   }
   @keyframes flipIn {
-    from { opacity: 0; transform: perspective(400px) rotateX(-18deg) translateY(16px); }
-    to   { opacity: 1; transform: perspective(400px) rotateX(0) translateY(0); }
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
   @keyframes blurIn {
     from { opacity: 0; filter: blur(8px); transform: scale(0.96); }
@@ -1340,19 +1340,18 @@ html, body {
   .doc-page-card {
     position: relative;
     overflow: hidden;
-    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
-                box-shadow 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
-                border-color 0.45s ease,
-                background 0.45s ease !important;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+                border-color 0.3s ease;
     will-change: transform, box-shadow;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
+    z-index: 1;
   }
 
-  /* Reset keyframe entrance animations on hover so CSS transform transitions smoothly */
   .doc-card:hover,
   .doc-item:hover,
   .doc-page-card:hover {
-    animation: none !important;
+    z-index: 10;
   }
 
   .doc-card::after,
@@ -1368,53 +1367,53 @@ html, body {
       115deg,
       transparent 20%,
       rgba(255, 255, 255, 0.03) 38%,
-      rgba(255, 255, 255, 0.25) 50%,
+      rgba(255, 255, 255, 0.22) 50%,
       rgba(255, 255, 255, 0.03) 62%,
       transparent 80%
     );
     transform: rotate(25deg) translate(-100%, -100%);
-    transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+    transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
     opacity: 0;
     pointer-events: none;
     z-index: 3;
   }
 
   .doc-card-icon {
-    transform: translateY(0) scale(1) rotate(0deg);
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.45s ease, color 0.35s ease;
+    transform: scale(1);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s ease, color 0.3s ease;
   }
 
   .doc-valid-dot,
   .status-dot {
     transform: scale(1);
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.45s ease;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
   }
 
   .doc-card-name,
   .doc-item-name {
     transform: translateX(0);
-    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.4s ease, text-shadow 0.4s ease;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.3s ease, text-shadow 0.3s ease;
   }
 
   .doc-card-type,
   .doc-item-type {
-    transition: color 0.4s ease, letter-spacing 0.4s ease;
+    transition: color 0.3s ease, letter-spacing 0.3s ease;
   }
 
   .doc-share-btn {
-    transform: scale(1) rotate(0deg);
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease, box-shadow 0.4s ease, color 0.4s ease;
+    transform: scale(1);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
   }
 
   .doc-page-qr-box {
     transform: scale(1);
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.45s ease;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
     cursor: pointer;
   }
 
   .doc-action-btn {
     transform: translateY(0);
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background var(--dur) var(--ease), box-shadow 0.35s ease, color 0.35s ease;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background var(--dur) var(--ease), box-shadow 0.3s ease, color 0.3s ease;
   }
 
   .doc-info-row {
@@ -1423,24 +1422,24 @@ html, body {
 
   /* Hover States */
   .doc-card:hover {
-    transform: translateY(-6px) scale(1.025);
-    box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.45),
-                0 0 20px 2px rgba(255, 255, 255, 0.12),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.45),
+                0 0 16px 2px rgba(255, 255, 255, 0.1),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.25);
   }
 
   .doc-item:hover {
-    transform: translateY(-6px) scale(1.015);
-    box-shadow: 0 22px 45px -10px rgba(0, 0, 0, 0.5),
-                0 0 28px 4px rgba(255, 255, 255, 0.14),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.5),
+                0 0 20px 3px rgba(255, 255, 255, 0.12),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.3);
   }
 
   .doc-page-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5),
-                0 0 24px 3px rgba(255, 255, 255, 0.12),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px -6px rgba(0, 0, 0, 0.45),
+                0 0 18px 2px rgba(255, 255, 255, 0.1),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.2);
   }
 
   .doc-card:hover::after,
@@ -1451,14 +1450,14 @@ html, body {
   }
 
   .doc-card:hover .doc-card-icon {
-    transform: translateY(-3px) scale(1.18) rotate(-4deg);
-    filter: drop-shadow(0 4px 10px rgba(255, 255, 255, 0.35));
+    transform: scale(1.06);
+    filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.25));
   }
 
   .doc-card:hover .doc-valid-dot,
   .doc-item:hover .status-dot {
-    transform: scale(1.4);
-    box-shadow: 0 0 12px 2px #00E676;
+    transform: scale(1.2);
+    box-shadow: 0 0 10px 1px #00E676;
   }
 
   .doc-card:hover .doc-card-name,
