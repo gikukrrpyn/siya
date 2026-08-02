@@ -1220,39 +1220,7 @@ base-uri 'none';">
     </div>
   </div>
 
-  <!-- Active Fine Notification Launch Modal -->
-  <div class="active-fine-modal-overlay" id="active-fine-modal">
-    <div class="active-fine-modal-card">
-      <div class="active-fine-icon-wrapper">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
-      </div>
-      <div class="active-fine-modal-title">⚠️ У вас є активний штраф</div>
-      <div class="active-fine-modal-sub">Вам було виданно штраф</div>
-      
-      <div class="active-fine-details-box">
-        <div class="fine-detail-row">
-          <span class="fine-detail-label">Причина / Стаття</span>
-          <span class="fine-detail-val" id="fine-modal-reason">Стаття 14.2 — Перевищення швидкості</span>
-        </div>
-        <div class="fine-detail-row highlight">
-          <span class="fine-detail-label">Сума до сплати</span>
-          <span class="fine-detail-val price" id="fine-modal-amount">500 €</span>
-        </div>
-      </div>
 
-      <div class="active-fine-modal-actions">
-        <button class="fine-modal-btn primary" onclick="closeActiveFineModal(); switchScreen('fines'); if(window.renderFines) window.renderFines();">
-          Сплатити зараз
-        </button>
-        <button class="fine-modal-btn secondary" onclick="closeActiveFineModal()">
-          Переглянути пізніше
-        </button>
-      </div>
-    </div>
-  </div>
 
   <div class="modal-overlay" id="modal" onclick="closeModalBg(event)">
     <div class="modal-sheet">
