@@ -38,18 +38,13 @@ base-uri 'none';">
   #onboarding-overlay.hidden { display: none; }
   #ob-splash {
     position: absolute; inset: 0;
-    background: #000;
-    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at center, #121319 0%, #08080a 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
     z-index: 10;
-    animation: obSplashOut 0.5s 1.5s cubic-bezier(.4,0,.2,1) both;
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.5s ease;
   }
-  #ob-splash img { width: 88px; height: 88px; animation: obBlurIn 0.6s ease both; }
-  #ob-splash .ob-splash-fb {
-    display: none; color: #fff;
-    font-family: 'Raleway', sans-serif; font-size: 32px; font-weight: 800; letter-spacing: -1px;
-  }
-  @keyframes obSplashOut { to { opacity: 0; pointer-events: none; visibility: hidden; } }
-  @keyframes obBlurIn { from { opacity: 0; filter: blur(8px); transform: scale(.95); } to { opacity: 1; filter: none; transform: scale(1); } }
+  #ob-splash.hidden { opacity: 0; pointer-events: none; visibility: hidden; filter: blur(8px); transform: scale(1.04); }
+  @keyframes obSplashOut { to { opacity: 0; pointer-events: none; visibility: hidden; filter: blur(8px); transform: scale(1.04); } }
   #ob-steps { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   #ob-step-terms {
     flex: 1; display: flex; flex-direction: column;
@@ -538,9 +533,19 @@ base-uri 'none';">
 })();
 </script>
 <div id="onboarding-overlay">
-  <div id="ob-splash">
-    <img src="png/ciyablack.png" alt="CiЯ">
-    <div class="ob-splash-fb">CiЯ</div>
+  <div id="ob-splash" class="splash-screen">
+    <div class="splash-logo-container">
+      <img src="png/ciya.png" alt="СіЯ" class="splash-logo">
+    </div>
+    <div class="splash-progress-box">
+      <div class="splash-progress-track">
+        <div class="splash-progress-fill" id="ob-splash-progress-fill"></div>
+      </div>
+      <div class="splash-progress-info">
+        <span class="splash-status" id="ob-splash-status-text">Ініціалізація системи...</span>
+        <span class="splash-percent" id="ob-splash-progress-percent">0%</span>
+      </div>
+    </div>
   </div>
   <div id="ob-steps">
 
@@ -668,12 +673,22 @@ base-uri 'none';">
   </div>
 </div>
 
-<div id="splash">
-  <img src="png/ciya.png" class="splash-logo" style="height:80px;object-fit:contain;">
-  <p class="splash-tagline">Сервер і Я</p>
+<div id="splash" class="splash-screen">
+  <div class="splash-logo-container">
+    <img src="png/ciya.png" alt="СіЯ" class="splash-logo">
+  </div>
+  <div class="splash-progress-box">
+    <div class="splash-progress-track">
+      <div class="splash-progress-fill" id="splash-progress-fill"></div>
+    </div>
+    <div class="splash-progress-info">
+      <span class="splash-status" id="splash-status-text">Ініціалізація системи...</span>
+      <span class="splash-percent" id="splash-progress-percent">0%</span>
+    </div>
+  </div>
 </div>
 <div id="app">
-  <div class="screen active" id="screen-home">
+  <div class="screen tab-screen active" id="screen-home">
     <div class="header">
       <div class="header-logo"><img id="header-logo-img" src="png/ciyablack.png" style="height:36px;object-fit:contain;"></div>
     </div>
@@ -739,7 +754,7 @@ base-uri 'none';">
     </nav>
   </div>
 
-  <div class="screen" id="screen-docs">
+  <div class="screen tab-screen" id="screen-docs">
     <div class="header">
       <div class="header-title">Документи</div>
       <button class="header-action" id="search-docs-btn" onclick="promptSearchDocs()">Шукати</button>
@@ -771,7 +786,7 @@ base-uri 'none';">
     </nav>
   </div>
 
-  <div class="screen" id="screen-services">
+  <div class="screen tab-screen" id="screen-services">
     <div class="header">
       <div class="header-title">Фракції</div>
     </div>
@@ -823,7 +838,7 @@ base-uri 'none';">
     </nav>
   </div>
 
-  <div class="screen" id="screen-news">
+  <div class="screen tab-screen" id="screen-news">
     <div class="header">
       <div class="header-title">Сервіси</div>
     </div>
@@ -835,9 +850,9 @@ base-uri 'none';">
         <input type="text" id="news-search-input" class="search-input" placeholder="Пошук...">
       </div>
       <div id="check-service-container" style="display:none; padding: 0 20px 12px;">
-        <div class="service-card" onclick="switchScreen('applications-review'); if(window.loadApplicationsReview) window.loadApplicationsReview();" style="background: var(--black); color: var(--white);">
-          <div class="service-icon" style="background: #222; color: var(--white);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg></div>
-          <div class="service-name" style="color: var(--white);">Перевірка</div>
+        <div class="service-card" onclick="switchScreen('applications-review'); if(window.loadApplicationsReview) window.loadApplicationsReview();">
+          <div class="service-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg></div>
+          <div class="service-name">Перевірка</div>
         </div>
       </div>
       <div class="services-grid" id="news-services-grid">
@@ -907,7 +922,7 @@ base-uri 'none';">
     </nav>
   </div>
 
-  <div class="screen" id="screen-applications-review">
+  <div class="screen sub-screen" id="screen-applications-review">
     <div class="header">
       <div class="header-action" onclick="goBack()">Назад</div>
       <div class="header-title">Перевірка Анкет</div>
@@ -926,7 +941,7 @@ base-uri 'none';">
     </div>
   </div>
 
-  <div class="screen" id="screen-profile">
+  <div class="screen tab-screen" id="screen-profile">
     <div class="header">
       <div class="header-title">Профіль</div>
       <button class="header-action" onclick="switchScreen('settings')">Налашт.</button>
@@ -950,7 +965,7 @@ base-uri 'none';">
         Логін через Roblox
       </button>
       <div style="height:2px"></div>
-      <button class="profile-logout anim-pop d3" onclick="logout()">Вийти з акаунту</button>
+      <button class="profile-logout anim-pop d3" onclick="deleteAccount()">Видалити акаунт</button>
       <div style="height:8px"></div>
     </div>
     <nav class="bottom-nav">
@@ -970,14 +985,15 @@ base-uri 'none';">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
         Сервіси
       </button>
-      <button class="nav-item active" onclick="switchScreen('profile')">
+      <button class="nav-item active" onclick="switchScreen('profile')" style="position:relative;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Профіль
+        <span class="nav-badge" id="nav-profile-badge" style="display:none;">0</span>
       </button>
     </nav>
   </div>
 
-  <div class="screen" id="screen-docpage">
+  <div class="screen sub-screen" id="screen-docpage">
     <div class="header">
       <button class="header-back" onclick="goBack()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -990,7 +1006,7 @@ base-uri 'none';">
     </div>
   </div>
 
-  <div class="screen" id="screen-fines">
+  <div class="screen sub-screen" id="screen-fines">
     <div class="header">
       <button class="header-back" onclick="goBack()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -1004,7 +1020,7 @@ base-uri 'none';">
     </div>
   </div>
 
-  <div class="screen" id="screen-admin-fines">
+  <div class="screen sub-screen" id="screen-admin-fines">
     <div class="header">
       <button class="header-back" onclick="goBack()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -1020,7 +1036,7 @@ base-uri 'none';">
     </div>
   </div>
 
-  <div class="screen" id="screen-my-submissions">
+  <div class="screen sub-screen" id="screen-my-submissions">
     <div class="header">
       <button class="header-back" onclick="goBack()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -1033,7 +1049,7 @@ base-uri 'none';">
     </div>
   </div>
 
-  <div class="screen" id="screen-my-applications">
+  <div class="screen sub-screen" id="screen-my-applications">
     <div class="header">
       <button class="header-back" onclick="goBack()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -1046,7 +1062,7 @@ base-uri 'none';">
     </div>
   </div>
 
-  <div class="screen" id="screen-issue-fine">
+  <div class="screen sub-screen" id="screen-issue-fine">
     <div class="header">
       <button class="header-back" onclick="goBack()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -1059,7 +1075,7 @@ base-uri 'none';">
     </div>
   </div>
 
-  <div class="screen" id="screen-contracts">
+  <div class="screen sub-screen" id="screen-contracts">
     <div class="header">
       <button class="header-back" onclick="goBack()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -1073,7 +1089,7 @@ base-uri 'none';">
     </div>
   </div>
 
-  <div class="screen" id="screen-issue-contract">
+  <div class="screen sub-screen" id="screen-issue-contract">
     <div class="header">
       <button class="header-back" onclick="goBack()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -1086,7 +1102,7 @@ base-uri 'none';">
     </div>
   </div>
 
-  <div class="screen" id="screen-admin-contracts">
+  <div class="screen sub-screen" id="screen-admin-contracts">
     <div class="header">
       <button class="header-back" onclick="goBack()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -1099,7 +1115,7 @@ base-uri 'none';">
     </div>
   </div>
 
-  <div class="screen" id="screen-settings">
+  <div class="screen sub-screen" id="screen-settings">
     <div class="header">
       <button class="header-back" onclick="goBack()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -1120,17 +1136,120 @@ base-uri 'none';">
             </span>
           </label>
 
-            <div class="profile-row settings-row" style="flex-direction:column; align-items:flex-start; gap: 8px; padding-bottom: 12px; padding-top: 12px;">
-              <div style="display:flex; align-items:center; gap: 12px; width: 100%;">
-                <div class="profile-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-                <div class="profile-row-label" style="flex:1;">Кастомний Фон</div>
-              </div>
-              <div style="display:flex; width: 100%; gap: 8px;">
-                <input type="text" id="custom-bg-url" placeholder="URL зображення..." class="bg-input" onkeypress="if(event.key === 'Enter') applyCustomBg()" style="flex:1; background: rgba(128,128,128,0.1); border:none; padding:8px 12px; border-radius:6px; color: inherit; outline:none; font-family: inherit;">
-                <button onclick="applyCustomBg()" style="position: relative; z-index: 9999; background: var(--black); color: var(--white); border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; font-family: inherit;" class="bg-btn">Ок</button>
-              </div>
+          <div class="profile-row settings-row" style="flex-direction:column; align-items:flex-start; gap: 8px; padding-bottom: 12px; padding-top: 12px;">
+            <div style="display:flex; align-items:center; gap: 12px; width: 100%;">
+              <div class="profile-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+              <div class="profile-row-label" style="flex:1;">Кастомний Фон</div>
             </div>
+            <div style="display:flex; width: 100%; gap: 8px;">
+              <input type="text" id="custom-bg-url" placeholder="URL зображення..." class="bg-input" onkeypress="if(event.key === 'Enter') applyCustomBg()" style="flex:1; background: rgba(128,128,128,0.1); border:none; padding:8px 12px; border-radius:6px; color: inherit; outline:none; font-family: inherit;">
+              <button onclick="applyCustomBg()" style="position: relative; z-index: 9999; background: var(--black); color: var(--white); border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; font-family: inherit;" class="bg-btn">Ок</button>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div class="profile-section" style="margin-top: 16px;">
+        <div class="profile-section-title">Звуки та Вібрація</div>
+        <div class="profile-rows">
+          <label class="profile-row settings-row" for="sound-toggle" onclick="if(window.playApplePayChime) window.playApplePayChime();">
+            <div class="profile-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
+            <div class="profile-row-label">Звукові ефекти (Apple Pay Chime)</div>
+            <span class="toggle-switch">
+              <input type="checkbox" id="sound-toggle" onchange="toggleSoundSetting(this.checked)">
+              <span class="toggle-slider"></span>
+            </span>
+          </label>
+
+          <label class="profile-row settings-row" for="haptic-toggle">
+            <div class="profile-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+            <div class="profile-row-label">Тактильний відгук (Haptic)</div>
+            <span class="toggle-switch">
+              <input type="checkbox" id="haptic-toggle" onchange="toggleHapticSetting(this.checked)">
+              <span class="toggle-slider"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="profile-section" style="margin-top: 16px;">
+        <div class="profile-section-title">Сповіщення (Supabase Cloud)</div>
+        <div class="profile-rows">
+          <label class="profile-row settings-row" for="notify-fines-toggle">
+            <div class="profile-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="profile-row-label">Штрафи та постанови</div>
+            <span class="toggle-switch">
+              <input type="checkbox" id="notify-fines-toggle" onchange="toggleNotificationPref('fines', this.checked)">
+              <span class="toggle-slider"></span>
+            </span>
+          </label>
+
+          <label class="profile-row settings-row" for="notify-licenses-toggle">
+            <div class="profile-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+            <div class="profile-row-label">Видані ліцензії та договори</div>
+            <span class="toggle-switch">
+              <input type="checkbox" id="notify-licenses-toggle" onchange="toggleNotificationPref('licenses', this.checked)">
+              <span class="toggle-slider"></span>
+            </span>
+          </label>
+
+          <label class="profile-row settings-row" for="notify-apps-toggle">
+            <div class="profile-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div class="profile-row-label">Зміна статусу анкет</div>
+            <span class="toggle-switch">
+              <input type="checkbox" id="notify-apps-toggle" onchange="toggleNotificationPref('apps', this.checked)">
+              <span class="toggle-slider"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="apple-pay-modal-overlay" id="apple-pay-modal">
+    <div class="apple-pay-modal-card">
+      <div class="apple-pay-ring-outer"></div>
+      <div class="apple-pay-circle">
+        <svg class="apple-pay-checkmark-svg" viewBox="0 0 52 52">
+          <circle class="apple-pay-checkmark-circle" cx="26" cy="26" r="24" fill="none"/>
+          <path class="apple-pay-checkmark-path" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+      <div class="apple-pay-title">Успішно</div>
+      <div class="apple-pay-sub">СіЯ · Цифрові документи</div>
+    </div>
+  </div>
+
+  <!-- Active Fine Notification Launch Modal -->
+  <div class="active-fine-modal-overlay" id="active-fine-modal">
+    <div class="active-fine-modal-card">
+      <div class="active-fine-icon-wrapper">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div class="active-fine-modal-title">⚠️ У вас є активний штраф</div>
+      <div class="active-fine-modal-sub">Вам було виданно штраф</div>
+      
+      <div class="active-fine-details-box">
+        <div class="fine-detail-row">
+          <span class="fine-detail-label">Причина / Стаття</span>
+          <span class="fine-detail-val" id="fine-modal-reason">Стаття 14.2 — Перевищення швидкості</span>
+        </div>
+        <div class="fine-detail-row highlight">
+          <span class="fine-detail-label">Сума до сплати</span>
+          <span class="fine-detail-val price" id="fine-modal-amount">500 €</span>
+        </div>
+      </div>
+
+      <div class="active-fine-modal-actions">
+        <button class="fine-modal-btn primary" onclick="closeActiveFineModal(); switchScreen('fines'); if(window.renderFines) window.renderFines();">
+          Сплатити зараз
+        </button>
+        <button class="fine-modal-btn secondary" onclick="closeActiveFineModal()">
+          Переглянути пізніше
+        </button>
       </div>
     </div>
   </div>
@@ -1152,17 +1271,19 @@ base-uri 'none';">
   <div class="toast" id="toast"></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script type="module" src="js/firebase.js?v=1784483208272"></script>
+<script type="module" src="js/firebase/firebase.js?v=1784483208272"></script>
 <script>
 (function(){
   var v=Date.now();
   var a=[
-    "js/gen.js","js/fines.js","js/contracts.js","js/main.js",
-    "js/chat.js"
+    "js/roblox/gen.js",
+    "js/player/fines.js",
+    "js/player/contracts.js",
+    "js/main/main.js",
+    "js/other/chat.js"
   ];
   a.forEach(function(s){
     var t=document.createElement("script");
-
     t.async=false;
     t.src=s+"?v="+v;
     document.body.appendChild(t);
@@ -1282,21 +1403,20 @@ base-uri 'none';">
           .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
       });
   }
-  var _origLogout = window.logout;
-  Object.defineProperty(window, 'logout', {
-    configurable: true, writable: true,
-    value: function() {
-      if (typeof _origLogout === 'function') _origLogout.apply(this, arguments);
-      localStorage.removeItem(ONBOARD_KEY);
+  window.resetOnboardingUI = function() {
+    try { localStorage.removeItem(ONBOARD_KEY); } catch (e) {}
+    if (overlay) {
       overlay.classList.remove('hidden');
       overlay.style.opacity = '1';
       overlay.style.transition = '';
-      stepTerms.style.display = 'none';
+    }
+    if (stepTerms) stepTerms.style.display = 'none';
+    if (stepLogin) {
       stepLogin.style.display  = 'flex';
       stepLogin.classList.add('active');
       stepLogin.style.opacity = '1';
     }
-  });
+  };
 
 })();
 </script>
@@ -1469,6 +1589,9 @@ window.checkEditPermissions = function() {
       return true;
     });
     const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    // Малюємо порціями. Раніше сюди йшли всі ~800 записів одразу: це і сотні
+    // вузлів у DOM, і стільки ж запитів за аватарами. loading="lazy" тут не
+    // страховка — у headless його перевірити не вдалось, тож не покладаємось.
     const slice = filtered.slice(0, shownCount);
     let lastSource = null;
     slice.forEach(item => {
@@ -1484,7 +1607,10 @@ window.checkEditPermissions = function() {
       const row = document.createElement('div');
       row.className = 'service-row';
       row.style.cursor = item.telegram ? 'pointer' : 'default';
-
+      // players.js має власне поле avatar, у licenses.js його немає зовсім —
+      // там аватар підтягується з мапи, яку збирає бот (див. backend/avatars.py).
+      // 75px вистачає для кружечка 40px навіть на щільних екранах: 150px важить
+      // 14.6 КБ проти 5.6 КБ, а видно різницю не буде.
       const resolvedAvatar = item.avatar
         || (typeof window.avatarForNick === 'function' ? window.avatarForNick(item.nick, 75) : null);
       const safeAvatar = esc(resolvedAvatar);
@@ -1580,9 +1706,12 @@ window.checkEditPermissions = function() {
     initChips(); 
     initSearch(); 
     
+    // Перевіряємо ще раз через мить, якщо Telegram WebApp підвантажує дані із затримкою
     setTimeout(() => renderList(), 150);
     setTimeout(() => renderList(), 600);
 
+    // Мапа аватарів приходить із Firestore, тож список перемальовуємо, коли
+    // вона доїде. До того рядки показують ініціали — як і раніше.
     if (typeof window.fetchAvatarMap === 'function') {
       window.fetchAvatarMap().then(() => renderList()).catch(() => {});
     }
@@ -1596,6 +1725,8 @@ window.checkEditPermissions = function() {
 
 
 
+
+<!-- SIGNATURE MODAL -->
 <div class="modal-overlay" id="signature-modal" onclick="if(event.target===this) closeSignatureModal()">
   <div class="modal-sheet" style="padding-bottom: max(30px, env(safe-area-inset-bottom));">
     <div class="modal-handle"></div>
@@ -1706,7 +1837,7 @@ window.checkEditPermissions = function() {
   </div>
 </div>
 
-
+<!-- OZU MODAL -->
 <div class="modal-overlay" id="ozu-modal" onclick="if(event.target===this) closeOzuModal()">
   <div class="modal-sheet" style="padding-bottom: max(40px, env(safe-area-inset-bottom));">
     <div class="modal-handle"></div>
@@ -1745,7 +1876,7 @@ window.checkEditPermissions = function() {
   </div>
 </div>
 
-
+<!-- TAXI MODAL -->
 <div class="modal-overlay" id="taxi-modal" onclick="if(event.target===this) closeTaxiModal()">
   <div class="modal-sheet" style="padding-bottom: max(40px, env(safe-area-inset-bottom));">
     <div class="modal-handle"></div>
@@ -1780,6 +1911,7 @@ window.checkEditPermissions = function() {
   </div>
 </div>
 
+<!-- LAWYER MODAL -->
 <div class="modal-overlay" id="lawyer-modal" onclick="if(event.target===this) closeLawyerModal()">
   <div class="modal-sheet" style="padding-bottom: max(40px, env(safe-area-inset-bottom));">
     <div class="modal-handle"></div>
@@ -1832,6 +1964,8 @@ window.checkEditPermissions = function() {
     document.getElementById('role-telegram').value = telegram;
     document.getElementById('role-avatar').value = avatar;
     
+    // We don't have suspended passed in openRoleModal's arguments directly,
+    // so we'll look it up from window.state.players if available.
     let susp = '';
     if (window.state && window.state.players && window.state.players[fraction]) {
       const p = window.state.players[fraction].find(x => x.username.toLowerCase() === username.toLowerCase());
@@ -1892,6 +2026,8 @@ window.checkEditPermissions = function() {
       
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Помилка сервера');
+      
+      // Тимчасове оновлення локального стану
       if (typeof window.state !== 'undefined' && window.state.players) {
         let arr = window.state.players[currentRoleFraction];
         if (!arr) arr = window.state.players[currentRoleFraction] = [];
@@ -1997,6 +2133,8 @@ window.checkEditPermissions = function() {
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Помилка сервера');
       
+      // We don't implement local state reordering since it requires reloading anyway to get the fresh data from github
+      // Actually let's just force reload the list
       setTimeout(() => {
         if (typeof window.reinitServices === 'function') window.reinitServices();
       }, 500);
