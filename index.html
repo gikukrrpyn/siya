@@ -2492,6 +2492,97 @@ window.checkEditPermissions = function() {
     };
   };
 
+  // Authentication UI (Сіа.ID)
+  window.startCiYaAuth = function(params) {
+    const returnUrl = params.returnUrl || 'nbu/index.html';
+    const user = params.user || 'Гравець';
+    const avatar = params.avatar || '';
+    
+    let modal = document.getElementById('ciya-auth-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'ciya-auth-modal';
+      modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px);
+        z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 20px;
+        font-family: 'Raleway', 'Inter', sans-serif;
+      `;
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div style="
+        background: #121319; border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px; padding: 32px 28px; width: 100%; max-width: 440px;
+        color: #fff; box-shadow: 0 25px 60px rgba(0,0,0,0.9); text-align: center;
+        display: flex; flex-direction: column; gap: 20px;
+      ">
+        <div style="
+          width: 64px; height: 64px; background: rgba(10, 132, 255, 0.15);
+          border: 1px solid #0A84FF; color: #0A84FF; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 28px; margin: 0 auto; box-shadow: 0 0 25px rgba(10, 132, 255, 0.25);
+          overflow: hidden;
+        ">
+          ${avatar ? `<img src="${avatar}" style="width:100%; height:100%; object-fit:cover;">` : `🛂`}
+        </div>
+
+        <div>
+          <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px;">Сіа.ID</h2>
+          <div style="font-size: 12px; color: #8E8E93;">Єдина система авторизації</div>
+        </div>
+
+        <div style="
+          background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 16px; padding: 16px; text-align: left; display: flex; flex-direction: column; gap: 10px; font-size: 13px;
+        ">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:#8E8E93;">Запитувач:</span>
+            <span style="font-weight:700;">Національний Банк України</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#8E8E93;">Ваш акаунт:</span>
+            <span style="font-weight:700;">${user}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:#8E8E93;">Доступ:</span>
+            <span style="font-weight:700; color:#0A84FF;">Читання базового профілю</span>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <button id="ciya-auth-confirm-btn" style="
+            width:100%; background: #0A84FF; color: #fff; border: none; border-radius: 16px;
+            padding: 16px; font-size: 15px; font-weight: 800; cursor: pointer;
+            box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3); transition: transform 0.2s;
+          ">
+            🛂 Надати доступ
+          </button>
+          
+          <button id="ciya-auth-cancel-btn" style="
+            width:100%; background: transparent; color: #8E8E93; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 12px; font-size: 13px; font-weight: 600; cursor: pointer;
+          ">
+            Скасувати
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('ciya-auth-confirm-btn').onclick = function() {
+      // Share authentication identity securely via shared origin localStorage
+      localStorage.setItem('currentUser', user);
+      if (avatar) localStorage.setItem('currentUserAvatar', avatar);
+      window.location.href = returnUrl;
+    };
+
+    document.getElementById('ciya-auth-cancel-btn').onclick = function() {
+      modal.remove();
+      window.location.href = returnUrl; // User can just exit or return empty-handed
+    };
+  };
+
   // Check URL parameters on portal load
   (function checkCiYaSignAction() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -2515,14 +2606,19 @@ window.checkEditPermissions = function() {
         // Wait until Telegram auth populates the user state
         if (window.state && window.state.roblox && window.state.roblox.username) {
           clearInterval(checkAuth);
-          // Share authentication identity securely via shared origin localStorage
-          localStorage.setItem('currentUser', window.state.roblox.username);
-          window.location.href = returnUrl;
+          window.startCiYaAuth({ 
+            returnUrl: returnUrl, 
+            user: window.state.roblox.username,
+            avatar: window.state.roblox.avatar || ''
+          });
         } else if (window.state && window.state.telegram && window.state.telegram.id) {
-          // If roblox is missing but telegram is linked, try to use TG username or ID
+          // If roblox is missing but telegram is linked
           clearInterval(checkAuth);
-          localStorage.setItem('currentUser', window.state.telegram.username || window.state.telegram.id);
-          window.location.href = returnUrl;
+          window.startCiYaAuth({ 
+            returnUrl: returnUrl, 
+            user: window.state.telegram.username || window.state.telegram.id,
+            avatar: window.state.telegram.photo_url || ''
+          });
         }
       }, 500);
       
