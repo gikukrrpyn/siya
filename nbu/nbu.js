@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, increment, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -174,7 +174,6 @@ function initFirestoreListeners() {
     if (docSnap.exists()) {
       const data = docSnap.data();
       window.NBS_STATE.balanceUC = data.balanceUC || 0;
-      window.NBS_STATE.dailyLimit = data.dailyLimit || 50000;
       window.NBS_STATE.cardNumber = data.cardNumber || '4441 5829 9012 3456';
       
       if (!data.cvv) {
@@ -190,7 +189,6 @@ function initFirestoreListeners() {
       const initCvv = Math.floor(100 + Math.random() * 900).toString();
       setDoc(cardRef, {
         balanceUC: 0,
-        dailyLimit: 50000,
         cardNumber: '4441 ' + Math.floor(1000 + Math.random()*9000) + ' ' + Math.floor(1000 + Math.random()*9000) + ' ' + Math.floor(1000 + Math.random()*9000),
         cvv: initCvv,
         ownerUid: auth.currentUser ? auth.currentUser.uid : 'anon'
@@ -233,7 +231,6 @@ window.renderUI = function() {
   if(document.getElementById('cardCvvDisplay')) {
     document.getElementById('cardCvvDisplay').innerText = 'CVV ' + window.NBS_STATE.cvv;
   }
-  document.getElementById('limitInput').value = window.NBS_STATE.dailyLimit;
 }
 
 window.renderTransactions = function() {
@@ -277,10 +274,38 @@ window.closeModal = function(id) {
   document.getElementById(id).classList.remove('active');
 }
 
+// Close modals on backdrop click
+window.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-backdrop')) {
+    e.target.classList.remove('active');
+  }
+});
+
+window.switchTab = function(tabName) {
+  const items = document.querySelectorAll('.nav-item');
+  items.forEach(item => item.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  
+  if (tabName === 'home') {
+    // Just visual for MVP
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// Missing Exchange Calculator
 window.runExchangeCalc = function() {
-  const eur = parseFloat(document.getElementById('calcEur').value) || 0;
-  const uc = Math.round(eur * window.NBS_STATE.eurRate);
-  document.getElementById('calcUc').value = uc.toLocaleString('uk-UA');
+  const eurInput = document.getElementById('calcEur');
+  const ucOutput = document.getElementById('calcUc');
+  if (eurInput && ucOutput) {
+    const eur = parseFloat(eurInput.value) || 0;
+    const uc = (eur * window.NBS_STATE.eurRate).toFixed(0);
+    ucOutput.value = parseInt(uc).toLocaleString('uk-UA');
+  }
+}
+
+// Deposit System
+window.triggerDepUpload = function() {
+  document.getElementById('depUpload').click();
 }
 
 async function fetchNbuRate() {
@@ -289,9 +314,12 @@ async function fetchNbuRate() {
     const data = await res.json();
     if (data && data[0] && data[0].rate) {
       window.NBS_STATE.eurRate = parseFloat(data[0].rate.toFixed(2));
-      renderUI();
     }
-  } catch(e) {}
+  } catch(e) {
+    console.warn("Failed to fetch NBU rate, using fallback.", e);
+  } finally {
+    renderUI();
+  }
 }
 
 window.handleScreenshotSelect = function(e) {
@@ -328,7 +356,8 @@ window.submitDepositRequest = async function() {
       amount: amount,
       img: window.NBS_STATE.screenshotBase64,
       status: 'pending',
-      timestamp: serverTimestamp()
+      timestamp: serverTimestamp(),
+      ownerUid: auth.currentUser.uid
     });
 
     closeModal('modalDeposit');
@@ -553,18 +582,6 @@ window.rejectReq = async function(id) {
   } catch(e) {
     console.error(e);
     alert(e.message || "Помилка бази даних");
-  }
-}
-
-window.saveLimitSetting = async function() {
-  const val = parseFloat(document.getElementById('limitInput').value) || 50000;
-  try {
-    const cardRef = doc(db, "cards", window.NBS_STATE.user.username);
-    await updateDoc(cardRef, { dailyLimit: val });
-    closeModal('modalLimit');
-    showToast('Ліміт успішно збережено!');
-  } catch(e) {
-    console.error(e);
   }
 }
 
