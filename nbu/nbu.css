@@ -72,6 +72,30 @@ body {
   font-size: 20px;
 }
 
+.header-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-dark);
+  border: 1px solid var(--border-dark);
+  padding: 4px 12px 4px 4px;
+  border-radius: 20px;
+}
+
+.header-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #2a2a2c;
+}
+
+.header-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
 .header-actions {
   display: flex;
   align-items: center;
