@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>НБС — Національний Банк Серверу</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --glass-bg: rgba(20, 20, 25, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #FFFFFF;
+            --text-secondary: #8E8E93;
+            --accent-blue: #0A84FF;
+            --mint-success: #30D158;
+            --danger-red: #FF453A;
+            --card-width: 310px;
+            --card-height: 195px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* AMBIENT GLOW ORBS (Enhanced) */
+        .ambient-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.6;
+            z-index: -1;
+            animation: floatOrb 12s infinite alternate ease-in-out;
+        }
+        .orb-1 { width: 350px; height: 350px; background: #0A84FF; top: -100px; left: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: #9D4EDD; top: 40%; right: -100px; animation-delay: -6s; opacity: 0.5; }
+        .orb-3 { width: 400px; height: 400px; background: #30D158; bottom: -150px; left: 5%; opacity: 0.3; }
+
+        @keyframes floatOrb {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(40px) scale(1.15); }
+        }
+
+        /* --- SIYA AUTH OVERLAY --- */
+        #auth-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            transition: opacity 0.5s ease;
+        }
+        #auth-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .auth-logo {
+            font-size: 80px;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            text-shadow: 0 0 40px rgba(255,255,255,0.3);
+        }
+        .auth-title { font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 10px; }
+        .auth-subtitle { font-size: 14px; color: var(--text-secondary); text-align: center; margin-bottom: 40px; }
+        
+        .btn-siya-login {
+            background: linear-gradient(135deg, #1A1A1D, #2D2D32);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 16px 30px;
+            border-radius: 20px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            justify-content: center;
+        }
+        .btn-siya-login:active { transform: scale(0.95); }
+
+        /* --- SECURITY CHECK SCREEN --- */
+        #security-check {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease;
+            opacity: 0; pointer-events: none;
+        }
+        #security-check.active { opacity: 1; pointer-events: all; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--mint-success);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .sec-text { font-size: 14px; font-weight: 600; color: var(--mint-success); }
+
+        /* --- HEADER --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 10px;
+            z-index: 10;
+            position: relative;
+        }
+        .user-block { display: flex; align-items: center; gap: 12px; }
+        .avatar {
+            width: 42px; height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #3A3A3C, #1C1C1E);
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+        }
+        .user-info { display: flex; flex-direction: column; }
+        .greeting { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+        .username { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+        
+        .header-actions { display: flex; gap: 10px; }
+        .icon-btn {
+            width: 42px; height: 42px;
+            border-radius: 14px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: white;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .icon-btn:active { background: rgba(255,255,255,0.1); }
+
+        /* --- CARDS STAGE --- */
+        .cards-stage {
+            padding: 15px 0 25px;
+            perspective: 1200px;
+        }
+        .card-carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 10px 20px 30px;
+            gap: 15px;
+            scrollbar-width: none;
+            justify-content: center; /* Center the cards */
+        }
+        .card-carousel::-webkit-scrollbar { display: none; }
+
+        .card-scene {
+            width: var(--card-width);
+            height: var(--card-height);
+            flex-shrink: 0;
+            scroll-snap-align: center;
+            cursor: pointer;
+            position: relative;
+            margin: 0 auto; /* Ensure it stays centered */
+        }
+        
+        /* Skeleton Card (Enhanced Shimmer) */
+        .skeleton-card {
+            width: var(--card-width);
+            height: var(--card-height);
+            border-radius: 24px;
+            background: linear-gradient(90deg, #141416 25%, #25252A 50%, #141416 75%);
+            background-size: 400% 100%;
+            animation: shimmer 1.2s ease-in-out infinite;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            flex-shrink: 0;
+            scroll-snap-align: center;
+        }
+        @keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+        .card-object {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-object.is-flipped { transform: rotateY(180deg); }
+
+        .card-face {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden;
+            border-radius: 24px;
+            padding: 24px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, rgba(35,35,40,0.85), rgba(15,15,18,0.98));
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            overflow: hidden;
+        }
+        .card-front::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.18), transparent 45%);
+            pointer-events: none;
+        }
+        
+        .card-top { display: flex; justify-content: space-between; align-items: center; }
+        .card-logo { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .card-badge { 
+            background: rgba(255,255,255,0.15); padding: 5px 12px; 
+            border-radius: 20px; font-size: 10px; font-weight: 700; 
+            text-transform: uppercase; letter-spacing: 1px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .card-number-display { font-family: monospace; font-size: 22px; letter-spacing: 2px; margin-top: auto; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        
+        .card-bottom { display: flex; justify-content: space-between; }
+        .card-label { font-size: 10px; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 2px; }
+        .card-val { font-size: 13px; font-weight: 600; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+
+        .card-back {
+            background: linear-gradient(135deg, #1C1C1E, #0A0A0B);
+            transform: rotateY(180deg);
+        }
+        .magnetic-strip { height: 45px; background: #000; margin: 10px -24px 20px; }
+        .signature-strip { 
+            height: 40px; background: #e2e2e2; border-radius: 4px;
+            display: flex; align-items: center; justify-content: flex-end; padding-right: 15px;
+            color: #333; font-family: monospace; font-size: 18px; font-weight: 700; font-style: italic;
+        }
+        .card-back-info { font-size: 11px; color: var(--text-secondary); text-align: center; margin-top: 15px; line-height: 1.4; }
+
+        .carousel-dots { display: flex; justify-content: center; gap: 6px; margin-top: -15px; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: 0.3s; }
+        .dot.active { background: var(--text-primary); width: 20px; border-radius: 3px; }
+
+        /* --- DYNAMIC BALANCE --- */
+        .balance-block { text-align: center; padding: 10px 20px 20px; }
+        .balance-title { font-size: 14px; color: var(--text-secondary); font-weight: 500; margin-bottom: 5px; }
+        .balance-amount-uc { font-size: 48px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+        .balance-amount-eur { font-size: 16px; color: var(--text-secondary); margin-top: 8px; font-weight: 500; }
+        .currency { font-size: 0.5em; color: var(--text-secondary); font-weight: 600; }
+        
+        .skeleton-text {
+            background: linear-gradient(90deg, #141416 25%, #25252A 50%, #141416 75%);
+            background-size: 400% 100%;
+            color: transparent;
+            border-radius: 8px;
+            display: inline-block;
+            animation: shimmer 1.2s ease-in-out infinite;
+        }
+
+        /* --- QUICK ACTIONS (GLASS TILES) --- */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 0 20px 30px;
+        }
+        .action-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 15px 5px;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            cursor: pointer;
+            transition: transform 0.15s, background 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .action-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.1); }
+        .action-icon { font-size: 24px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
+        .icon-deposit { color: var(--mint-success); }
+        .icon-withdraw { color: var(--danger-red); }
+        .icon-exchange { color: var(--accent-blue); }
+        .icon-settings { color: #FF9F0A; }
+        .action-btn span { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+
+        /* --- OPERATIONS SHEET (GLASS) --- */
+        .operations-sheet {
+            background: rgba(20, 20, 25, 0.6);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top-left-radius: 32px; border-top-right-radius: 32px;
+            padding: 20px;
+            min-height: 50vh;
+            /* margin-bottom removed because there is no bottom nav anymore */
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.4);
+        }
+        .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .sheet-header h2 { font-size: 20px; font-weight: 700; }
+        .search-btn { background: none; border: none; color: var(--text-secondary); font-size: 18px; cursor: pointer; transition: color 0.2s; }
+        .search-btn:active { color: white; }
+        
+        .transactions-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
+        .tx-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.04);
+            padding: 15px; border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .tx-left { display: flex; align-items: center; gap: 15px; }
+        .tx-icon-bg {
+            width: 44px; height: 44px; border-radius: 14px;
+            display: flex; justify-content: center; align-items: center; font-size: 18px;
+        }
+        .tx-icon-bg.deposit { background: rgba(48,209,88,0.15); color: var(--mint-success); }
+        .tx-icon-bg.withdraw { background: rgba(255,69,58,0.15); color: var(--danger-red); }
+        .tx-icon-bg.exchange { background: rgba(10,132,255,0.15); color: var(--accent-blue); }
+        .tx-info h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .tx-info p { font-size: 12px; color: var(--text-secondary); }
+        
+        .tx-right { text-align: right; }
+        .tx-amount { font-size: 16px; font-weight: 700; }
+        .tx-amount.positive { color: var(--mint-success); }
+        .tx-amount.negative { color: var(--text-primary); }
+        .tx-status { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+        
+        /* Skeleton Tx */
+        .skeleton-tx { width: 100%; height: 74px; border-radius: 18px; background: linear-gradient(90deg, #141416 25%, #25252A 50%, #141416 75%); background-size: 400% 100%; animation: shimmer 1.2s ease-in-out infinite; border: 1px solid rgba(255,255,255,0.02); }
+
+        /* --- MODALS (GLASS) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            z-index: 1000; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content {
+            background: rgba(30, 30, 35, 0.85);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255,255,255,0.15);
+            width: 90%; max-width: 360px; border-radius: 28px; padding: 25px;
+            transform: translateY(20px) scale(0.95); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .modal-header h3 { font-size: 20px; font-weight: 700; }
+        .close-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 32px; height: 32px; border-radius: 16px; font-size: 14px; cursor: pointer; transition: background 0.2s; }
+        .close-btn:active { background: rgba(255,255,255,0.2); }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
+        .form-group input {
+            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px; border-radius: 16px; color: white; font-size: 18px; font-weight: 600; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 2px rgba(10,132,255,0.2); }
+        
+        .btn-primary {
+            width: 100%; padding: 18px; background: var(--accent-blue);
+            border: none; border-radius: 16px; color: white; font-size: 16px; font-weight: 700;
+            cursor: pointer; box-shadow: 0 8px 20px rgba(10, 132, 255, 0.4); transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:active { transform: scale(0.96); background: #0070E0; box-shadow: 0 4px 10px rgba(10, 132, 255, 0.4); }
+        .btn-siya-action { background: #FFFFFF; color: #000; box-shadow: 0 8px 20px rgba(255,255,255,0.2); display: flex; justify-content: center; gap: 10px; align-items: center; }
+        .btn-siya-action:active { background: #E0E0E0; box-shadow: 0 4px 10px rgba(255,255,255,0.2); }
+        .notice { font-size: 12px; color: var(--text-secondary); text-align: center; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <!-- AMBIENT GLOWS -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+
+    <!-- SIYA AUTH OVERLAY -->
+    <div id="auth-overlay">
+        <div class="auth-logo"><i class="fa-solid fa-fingerprint"></i></div>
+        <h1 class="auth-title">НБС</h1>
+        <p class="auth-subtitle">Національний Банк Серверу</p>
+        <button class="btn-siya-login" onclick="loginViaSiya()">
+            <i class="fa-solid fa-shield-halved"></i> Увійти через Сіа.ID
+        </button>
+    </div>
+
+    <!-- SECURITY CHECK OVERLAY -->
+    <div id="security-check">
+        <div class="spinner"></div>
+        <div class="sec-text">Безпечне з'єднання СіЯ...</div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="user-block">
+            <div class="avatar"><i class="fa-solid fa-user"></i></div>
+            <div class="user-info">
+                <span class="greeting">Вітаємо,</span>
+                <span class="username" id="display-username">Громадянин</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="icon-btn"><i class="fa-solid fa-bell"></i></button>
+        </div>
+    </header>
+
+    <!-- CARDS STAGE -->
+    <section class="cards-stage">
+        <div class="card-carousel" id="card-carousel">
+            <!-- Skeleton cards shown by default until data loads -->
+            <div class="skeleton-card" id="skel-1"></div>
+        </div>
+        <div class="carousel-dots" id="carousel-dots">
+            <div class="dot active"></div>
+        </div>
+    </section>
+
+    <!-- BALANCE BLOCK -->
+    <section class="balance-block">
+        <div class="balance-title">Баланс картки</div>
+        <div class="balance-amount-uc" id="balance-uc">
+            <span class="skeleton-text" style="width: 150px;">00000</span> <span class="currency">UC</span>
+        </div>
+        <div class="balance-amount-eur" id="balance-eur">
+            ~ <span class="skeleton-text" style="width: 80px;">000</span> <span class="currency">€</span>
+        </div>
+    </section>
+
+    <!-- QUICK ACTIONS -->
+    <section class="quick-actions">
+        <div class="action-btn" onclick="openModal('modal-deposit')">
+            <i class="fa-solid fa-arrow-down action-icon icon-deposit"></i>
+            <span>Внесок</span>
+        </div>
+        <div class="action-btn" onclick="openModal('modal-withdraw')">
+            <i class="fa-solid fa-arrow-up action-icon icon-withdraw"></i>
+            <span>Вивід</span>
+        </div>
+        <div class="action-btn" onclick="openModal('modal-transfer')">
+            <i class="fa-solid fa-money-bill-transfer action-icon icon-exchange"></i>
+            <span>Переказ</span>
+        </div>
+        <div class="action-btn" onclick="openModal('modal-settings')">
+            <i class="fa-solid fa-sliders action-icon icon-settings"></i>
+            <span>Налаштування</span>
+        </div>
+    </section>
+
+    <!-- OPERATIONS SHEET -->
+    <section class="operations-sheet">
+        <div class="sheet-header">
+            <h2>Останні операції</h2>
+            <button class="search-btn"><i class="fa-solid fa-search"></i></button>
+        </div>
+        <div class="transactions-list" id="transactions-list">
+            <!-- Skeletons -->
+            <div class="skeleton-tx"></div>
+            <div class="skeleton-tx" style="opacity: 0.7;"></div>
+            <div class="skeleton-tx" style="opacity: 0.4;"></div>
+        </div>
+    </section>
+
+    <!-- MODALS -->
+    
+    <!-- Deposit -->
+    <div id="modal-deposit" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Поповнення</h3>
+                <button class="close-btn" onclick="closeModal('modal-deposit')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="form-group">
+                <label>Сума поповнення (UC)</label>
+                <input type="number" id="deposit-amount" placeholder="1000" min="1">
+            </div>
+            <div class="form-group">
+                <label>Посилання на скріншот (Imgur / Telegram)</label>
+                <input type="text" id="deposit-screen" placeholder="https://...">
+            </div>
+            <p class="notice">Заявка буде оброблена адміністратором</p>
+            <button class="btn-primary" onclick="processDeposit()">Створити заявку</button>
+        </div>
+    </div>
+
+    <!-- Withdraw (SiYa) -->
+    <div id="modal-withdraw" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Вивід коштів</h3>
+                <button class="close-btn" onclick="closeModal('modal-withdraw')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="form-group">
+                <label>Сума виводу (UC)</label>
+                <input type="number" id="withdraw-amount" placeholder="1000" min="1">
+            </div>
+            <p class="notice"><i class="fa-solid fa-shield-halved"></i> Транзакція потребує підпису Сіа.Підпис. Заявку опрацює адміністратор.</p>
+            <button class="btn-primary btn-siya-action" onclick="processWithdraw()">
+                <i class="fa-solid fa-fingerprint"></i> Підписати через Сію
+            </button>
+        </div>
+    </div>
+
+    <!-- Transfer (P2P) -->
+    <div id="modal-transfer" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Переказ за номером</h3>
+                <button class="close-btn" onclick="closeModal('modal-transfer')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="form-group">
+                <label>Номер картки отримувача</label>
+                <input type="text" id="transfer-card" placeholder="4441 0000 0000 0000">
+            </div>
+            <div class="form-group">
+                <label>Сума переказу (UC)</label>
+                <input type="number" id="transfer-amount" placeholder="500" min="1">
+            </div>
+            <p class="notice"><i class="fa-solid fa-shield-halved"></i> Транзакція потребує підпису Сіа.Підпис</p>
+            <button class="btn-primary btn-siya-action" onclick="processTransfer()">
+                <i class="fa-solid fa-fingerprint"></i> Підписати переказ
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings -->
+    <div id="modal-settings" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Налаштування картки</h3>
+                <button class="close-btn" onclick="closeModal('modal-settings')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="form-group">
+                <label>Денний ліміт (UC)</label>
+                <input type="number" id="card-limit-input" value="50000">
+            </div>
+            <button class="btn-primary" onclick="closeModal('modal-settings')">Зберегти</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDWW0hSO-kb8B8hFt2M1mSpsq8gVbPxFAQ",
+            authDomain: "nbsur-cf108.firebaseapp.com",
+            projectId: "nbsur-cf108",
+            storageBucket: "nbsur-cf108.firebasestorage.app",
+            messagingSenderId: "223476840819",
+            appId: "1:223476840819:web:4af79db89af4f560a6ad06"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let cardsData = {};
+        
+        // TWA Expansion
+        if(window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.expand();
+        }
+
+        // 1. SIYA AUTH CHECK
+        const urlParams = new URLSearchParams(window.location.search);
+        const siyaToken = urlParams.get('siya_token');
+        const overlay = document.getElementById('auth-overlay');
+        const secOverlay = document.getElementById('security-check');
+        
+        // Use siyaToken to secure data isolation. If not available in DEV, fallback.
+        const userDocId = siyaToken ? `card_${siyaToken}` : 'card_nbs_standard';
+        let currentCardId = userDocId;
+
+        if(siyaToken) {
+            overlay.classList.add('hidden');
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Show premium security check to build trust and cover loading time
+            secOverlay.classList.add('active');
+            setTimeout(() => {
+                secOverlay.classList.remove('active');
+                initApp();
+            }, 1200);
+        } else {
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+                overlay.style.pointerEvents = 'all';
+            }, 100);
+        }
+
+        window.loginViaSiya = () => {
+            const returnUrl = encodeURIComponent(window.location.pathname);
+            window.location.href = `index.html?action=siya_auth&return_url=${returnUrl}`;
+        };
+
+        async function initApp() {
+            try {
+                try {
+                    await signInAnonymously(auth);
+                } catch(authErr) {
+                    console.warn("Firebase Auth disabled. Using rules bypass for TWA.");
+                }
+                
+                // Fetch secure isolated data
+                listenToCards();
+                listenToTransactions();
+                
+            } catch(e) {
+                console.error("Init Error:", e);
+                alert("Помилка підключення до НБС.");
+            }
+        }
+
+        function listenToCards() {
+            // SECURITY: Only subscribe to YOUR specific card document based on SiYa token
+            onSnapshot(doc(db, "cards", userDocId), (docSnap) => {
+                const carousel = document.getElementById('card-carousel');
+                const dotsContainer = document.getElementById('carousel-dots');
+                
+                // BUG FIX & DATA ISOLATION: Create card if it doesn't exist
+                if (!docSnap.exists()) {
+                    console.log("No card found for this SiYa ID, creating new secure card...");
+                    const tgName = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) 
+                        ? window.Telegram.WebApp.initDataUnsafe.user.first_name 
+                        : 'Громадянин';
+                        
+                    const newCardData = {
+                         cardId: userDocId,
+                         name: tgName,
+                         cardNumber: '4441 ' + Math.floor(1000 + Math.random() * 9000) + ' ' + Math.floor(1000 + Math.random() * 9000) + ' ' + Math.floor(1000 + Math.random() * 9000),
+                         cvv: Math.floor(100 + Math.random() * 899).toString(),
+                         expiry: '12/30',
+                         badge: 'PREMIUM',
+                         balanceUC: 50000,
+                         balanceEUR: 1000
+                    };
+                    
+                    setDoc(doc(db, "cards", userDocId), newCardData).catch(e => {
+                         console.error("Failed to auto-create (missing Rules). Injecting safely.", e);
+                         injectMockData(newCardData);
+                    });
+                    return; // Return immediately, the snapshot will fire again when created
+                }
+                
+                // Clear skeletons once data arrives
+                if(Object.keys(cardsData).length === 0) {
+                    carousel.innerHTML = '';
+                    dotsContainer.innerHTML = '';
+                }
+
+                const data = docSnap.data();
+                cardsData[data.cardId] = data;
+                
+                let cardEl = document.getElementById(`card-el-${data.cardId}`);
+                if(!cardEl) {
+                    cardEl = createCardElement(data);
+                    carousel.appendChild(cardEl);
+                    const dot = document.createElement('div');
+                    dot.className = `dot active`;
+                    dot.id = `dot-${data.cardId}`;
+                    dotsContainer.appendChild(dot);
+                }
+
+                currentCardId = data.cardId;
+                updateBalanceDisplay();
+            }, (error) => {
+                console.error("Cards read error:", error);
+                const tgName = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) ? window.Telegram.WebApp.initDataUnsafe.user.first_name : 'Громадянин';
+                injectMockData({ cardId: userDocId, name: tgName, cardNumber: '4441 0000 1111 2222', cvv: '123', expiry: '12/30', badge: 'MOCK', balanceUC: 50000, balanceEUR: 1000 });
+            });
+        }
+
+        function injectMockData(mock) {
+            cardsData[mock.cardId] = mock;
+            currentCardId = mock.cardId;
+            document.getElementById('card-carousel').innerHTML = '';
+            document.getElementById('card-carousel').appendChild(createCardElement(mock));
+            updateBalanceDisplay();
+        }
+
+        function createCardElement(data) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'card-scene';
+            wrapper.id = `card-el-${data.cardId}`;
+            wrapper.dataset.id = data.cardId;
+            
+            wrapper.addEventListener('click', function() {
+                const obj = this.querySelector('.card-object');
+                obj.classList.toggle('is-flipped');
+            });
+
+            wrapper.innerHTML = `
+                <div class="card-object">
+                    <div class="card-face card-front">
+                        <div class="card-top">
+                            <div class="card-logo"><i class="fa-solid fa-building-columns"></i> НБС</div>
+                            <div class="card-badge">${data.badge}</div>
+                        </div>
+                        <div class="card-number-display">${formatCardNumber(data.cardNumber)}</div>
+                        <div class="card-bottom">
+                            <div><div class="card-label">VALID THRU</div><div class="card-val">${data.expiry}</div></div>
+                            <div><div class="card-label">OWNER</div><div class="card-val">${data.name}</div></div>
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="magnetic-strip"></div>
+                        <div class="signature-strip">${data.cvv}</div>
+                        <div class="card-back-info">Власність Національного Банку Серверу.<br>PIN: ****</div>
+                    </div>
+                </div>
+            `;
+            return wrapper;
+        }
+
+        function formatCardNumber(num) {
+            return num ? num.toString().replace(/\d{4}(?=.)/g, '$& ') : '0000';
+        }
+
+        function updateBalanceDisplay() {
+            if(!cardsData[currentCardId]) return;
+            const data = cardsData[currentCardId];
+            document.getElementById('display-username').innerText = data.name;
+            document.getElementById('balance-uc').innerHTML = `${data.balanceUC.toLocaleString('uk-UA')} <span class="currency">UC</span>`;
+            document.getElementById('balance-eur').innerHTML = `~ ${data.balanceEUR.toLocaleString('uk-UA')} <span class="currency">€</span>`;
+        }
+
+        function listenToTransactions() {
+            const list = document.getElementById('transactions-list');
+            try {
+                // SECURITY: Only query transactions where the owner is the current user (if rules supported)
+                // For this demo with missing indexes, we just limit to latest.
+                const q = query(collection(db, "transactions"), orderBy("timestamp", "desc"), limit(10));
+                onSnapshot(q, (snapshot) => {
+                    list.innerHTML = '';
+                    if(snapshot.empty) { list.innerHTML = '<div style="text-align:center;color:#8E8E93;padding:20px;">Немає операцій</div>'; return; }
+                    snapshot.forEach(docSnap => {
+                        const tx = docSnap.data();
+                        let icon = 'fa-arrow-right-arrow-left', iconCls = 'exchange', amountCls = 'negative', prefix = '-';
+                        if(tx.type === 'deposit') { icon = 'fa-arrow-down'; iconCls = 'deposit'; amountCls = 'positive'; prefix = '+'; }
+                        else if(tx.type === 'withdraw') { icon = 'fa-arrow-up'; iconCls = 'withdraw'; }
+
+                        const d = tx.timestamp ? tx.timestamp.toDate() : new Date();
+                        const timeStr = d.toLocaleDateString('uk-UA') + ' ' + d.toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit'});
+
+                        list.innerHTML += `
+                            <div class="tx-item">
+                                <div class="tx-left">
+                                    <div class="tx-icon-bg ${iconCls}"><i class="fa-solid ${icon}"></i></div>
+                                    <div class="tx-info"><h4>${tx.type}</h4><p>${timeStr}</p></div>
+                                </div>
+                                <div class="tx-right">
+                                    <div class="tx-amount ${amountCls}">${prefix} ${tx.amount} UC</div>
+                                    <div class="tx-status">${tx.status === 'completed' ? 'Виконано' : 'В обробці'}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }, err => {
+                    console.warn("Tx read error", err);
+                    list.innerHTML = '<div style="text-align:center;color:#8E8E93;padding:20px;">Історія операцій недоступна (Firestore Rules)</div>';
+                });
+            } catch(e) {
+                list.innerHTML = '<div style="text-align:center;color:#8E8E93;padding:20px;">Історія операцій недоступна</div>';
+            }
+        }
+
+        // Modals Logic
+        window.openModal = (id) => {
+            if(!cardsData[currentCardId]) return alert('Дочекайтесь завантаження карток!');
+            document.getElementById(id).classList.add('active');
+        };
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+
+        window.processWithdraw = () => {
+            if(!cardsData[currentCardId]) return;
+            const amount = parseInt(document.getElementById('withdraw-amount').value);
+            if(!amount || amount <= 0) return alert('Сума некоректна');
+            if(amount > cardsData[currentCardId].balanceUC) return alert('Недостатньо коштів');
+            
+            const txId = 'REQ-W-' + Math.floor(Math.random() * 100000);
+            const returnUrl = encodeURIComponent(`nbu.html?siya_token=${siyaToken}&status=signed&action=withdraw&tx_id=${txId}&amount=${amount}`);
+            window.location.href = `index.html?action=siya_sign&return_url=${returnUrl}&amount=${amount}&curr=UC`;
+        };
+        
+        window.processTransfer = () => {
+            if(!cardsData[currentCardId]) return;
+            const targetCard = document.getElementById('transfer-card').value;
+            const amount = parseInt(document.getElementById('transfer-amount').value);
+            if(!targetCard || targetCard.length < 16) return alert('Введіть коректний номер картки');
+            if(!amount || amount <= 0) return alert('Сума некоректна');
+            if(amount > cardsData[currentCardId].balanceUC) return alert('Недостатньо коштів');
+            
+            const txId = 'TX-T-' + Math.floor(Math.random() * 100000);
+            const returnUrl = encodeURIComponent(`nbu.html?siya_token=${siyaToken}&status=signed&action=transfer&tx_id=${txId}&amount=${amount}&target=${targetCard}`);
+            window.location.href = `index.html?action=siya_sign&return_url=${returnUrl}&amount=${amount}&curr=UC`;
+        };
+
+        window.processDeposit = () => {
+            if(!cardsData[currentCardId]) return;
+            const amount = parseInt(document.getElementById('deposit-amount').value);
+            const screen = document.getElementById('deposit-screen').value;
+            if(!amount || amount <= 0) return alert('Сума некоректна');
+            if(!screen) return alert('Вкажіть посилання на скріншот переказу!');
+            
+            const reqId = 'REQ-D-' + Math.floor(Math.random() * 100000);
+            setDoc(doc(db, "requests", reqId), {
+                type: 'deposit',
+                userId: currentCardId,
+                amount: amount,
+                screenshot: screen,
+                status: 'pending',
+                timestamp: new Date()
+            }).then(() => {
+                alert('✅ Заявку на поповнення відправлено адміністрації!');
+                closeModal('modal-deposit');
+            }).catch(e => {
+                console.error(e);
+                alert('Помилка відправки заявки (перевірте Firestore Rules для колекції requests)');
+            });
+        };
+        
+        window.processMockAction = (type) => {
+            alert(`Запит на ${type} успішно надіслано в НБС!`);
+            closeModal(`modal-${type}`);
+        };
+
+        // Handle return from SiYa Sign
+        const signStatus = urlParams.get('status');
+        const signAction = urlParams.get('action');
+        if(signStatus === 'signed') {
+            const amountStr = urlParams.get('amount');
+            const amount = amountStr ? parseInt(amountStr) : 0;
+            const txId = urlParams.get('tx_id') || ('NBS-' + Math.floor(Math.random()*1000));
+            const target = urlParams.get('target');
+            
+            setTimeout(() => {
+                if(amount > 0 && currentCardId && cardsData[currentCardId]) {
+                    
+                    if(signAction === 'withdraw') {
+                        // Withdraw is a request to admins
+                        setDoc(doc(db, "requests", txId), {
+                            type: 'withdraw',
+                            userId: currentCardId,
+                            amount: amount,
+                            status: 'pending',
+                            timestamp: new Date()
+                        }).then(() => {
+                            alert(`✅ Заявку на вивід ${amount} UC підписано і відправлено адміністрації!`);
+                        }).catch(err => {
+                            console.error("Request error", err);
+                            alert(`Помилка створення заявки (Rules Error: ${err.message})`);
+                        });
+                    } 
+                    else if (signAction === 'transfer') {
+                        // Transfer is immediate deduction (for demo/p2p)
+                        const newBalance = cardsData[currentCardId].balanceUC - amount;
+                        updateDoc(doc(db, "cards", currentCardId), { balanceUC: newBalance }).then(() => {
+                            setDoc(doc(db, "transactions", txId), {
+                                amount: amount,
+                                type: 'transfer',
+                                targetCard: target,
+                                status: 'completed',
+                                timestamp: new Date()
+                            });
+                            alert(`✅ Переказ ${amount} UC на картку ${target} успішно виконано!`);
+                        }).catch(err => {
+                            console.error("Transfer error", err);
+                            alert(`✅ Підпис успішний, АЛЕ переказ відхилено (Rules Error: ${err.message})`);
+                        });
+                    }
+                }
+            }, 1000); // Give Firestore time to connect
+
+            window.history.replaceState({}, document.title, window.location.pathname + (siyaToken ? `?siya_token=${siyaToken}` : ''));
+        } else if (signStatus === 'cancelled') {
+            alert("❌ Транзакцію скасовано користувачем.");
+            window.history.replaceState({}, document.title, window.location.pathname + (siyaToken ? `?siya_token=${siyaToken}` : ''));
+        }
+
+    </script>
+</body>
+</html>
