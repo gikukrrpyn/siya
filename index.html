@@ -2590,7 +2590,7 @@ window.checkEditPermissions = function() {
     // SiYa Signature Flow
     if (urlParams.get('action') === 'siya_sign') {
       window.startCiYaSignature({
-        return_url: urlParams.get('return_url') || 'nbu.html',
+        return_url: urlParams.get('return_url') || 'nbu/index.html',
         tx_id: urlParams.get('tx_id'),
         amount: urlParams.get('amount'),
         curr: urlParams.get('curr'),
