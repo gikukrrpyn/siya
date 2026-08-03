@@ -3,421 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>НБС — Національний Банк Серверу</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>НБС | Головна</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            --bg-dark: #050505;
-            --glass-bg: rgba(20, 20, 25, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-primary: #FFFFFF;
-            --text-secondary: #8E8E93;
-            --accent-blue: #0A84FF;
-            --mint-success: #30D158;
-            --danger-red: #FF453A;
-            --card-width: 310px;
-            --card-height: 195px;
+            /* Pure Black SiYa Style */
+            --bg-color: #000000;
+            --surface-color: #1c1c1e;
+            --btn-bg: #1c1c1e;
+            --accent: #30D158;
+            --text-main: #ffffff;
+            --text-sec: #8e8e93;
+            
+            --card-width: 320px;
+            --card-height: 200px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
+            background-color: var(--bg-color);
+            color: var(--text-main);
             overflow-x: hidden;
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
-
-        /* AMBIENT GLOW ORBS (Enhanced) */
-        .ambient-orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.6;
-            z-index: -1;
-            animation: floatOrb 12s infinite alternate ease-in-out;
-        }
-        .orb-1 { width: 350px; height: 350px; background: #0A84FF; top: -100px; left: -100px; }
-        .orb-2 { width: 300px; height: 300px; background: #9D4EDD; top: 40%; right: -100px; animation-delay: -6s; opacity: 0.5; }
-        .orb-3 { width: 400px; height: 400px; background: #30D158; bottom: -150px; left: 5%; opacity: 0.3; }
-
-        @keyframes floatOrb {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(40px) scale(1.15); }
-        }
-
-        /* --- SIYA AUTH OVERLAY --- */
-        #auth-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 10000;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Top Balance Section */
+        .balance-section {
+            text-align: center;
+            padding: 40px 20px 20px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            padding: 30px;
-            transition: opacity 0.5s ease;
         }
-        #auth-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        .auth-logo {
-            font-size: 80px;
-            color: var(--text-primary);
-            margin-bottom: 20px;
-            text-shadow: 0 0 40px rgba(255,255,255,0.3);
-        }
-        .auth-title { font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 10px; }
-        .auth-subtitle { font-size: 14px; color: var(--text-secondary); text-align: center; margin-bottom: 40px; }
         
-        .btn-siya-login {
-            background: linear-gradient(135deg, #1A1A1D, #2D2D32);
-            border: 1px solid rgba(255,255,255,0.15);
-            padding: 16px 30px;
-            border-radius: 20px;
-            color: white;
-            font-size: 18px;
+        .balance-amount {
+            font-size: 52px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+        .balance-amount span.currency {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-sec);
+        }
+        
+        .balance-eur {
+            font-size: 15px;
+            color: var(--text-sec);
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            width: 100%;
-            justify-content: center;
+            margin-top: 8px;
         }
-        .btn-siya-login:active { transform: scale(0.95); }
 
-        /* --- SECURITY CHECK SCREEN --- */
-        #security-check {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.5s ease;
-            opacity: 0; pointer-events: none;
-        }
-        #security-check.active { opacity: 1; pointer-events: all; }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: var(--mint-success);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .sec-text { font-size: 14px; font-weight: 600; color: var(--mint-success); }
+        /* Hidden Display Username (needed for JS logic) */
+        #display-username { display: none; }
 
-        /* --- HEADER --- */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 20px 10px;
-            z-index: 10;
-            position: relative;
-        }
-        .user-block { display: flex; align-items: center; gap: 12px; }
-        .avatar {
-            width: 42px; height: 42px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #3A3A3C, #1C1C1E);
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            border: 1px solid var(--glass-border);
-        }
-        .user-info { display: flex; flex-direction: column; }
-        .greeting { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
-        .username { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
-        
-        .header-actions { display: flex; gap: 10px; }
-        .icon-btn {
-            width: 42px; height: 42px;
-            border-radius: 14px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            color: white;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .icon-btn:active { background: rgba(255,255,255,0.1); }
-
-        /* --- CARDS STAGE --- */
+        /* Cards Stage */
         .cards-stage {
-            padding: 15px 0 25px;
-            perspective: 1200px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
         }
+        
         .card-carousel {
             display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            padding: 10px 20px 30px;
-            gap: 15px;
-            scrollbar-width: none;
-            justify-content: center; /* Center the cards */
+            justify-content: center;
+            width: 100%;
+            padding: 10px 0;
+            position: relative;
         }
-        .card-carousel::-webkit-scrollbar { display: none; }
 
+        /* Card Geometry generated by JS */
         .card-scene {
             width: var(--card-width);
             height: var(--card-height);
-            flex-shrink: 0;
-            scroll-snap-align: center;
+            perspective: 1000px;
             cursor: pointer;
-            position: relative;
-            margin: 0 auto; /* Ensure it stays centered */
+            z-index: 10;
         }
-        
-        /* Skeleton Card (Enhanced Shimmer) */
-        .skeleton-card {
-            width: var(--card-width);
-            height: var(--card-height);
-            border-radius: 24px;
-            background: linear-gradient(90deg, #141416 25%, #25252A 50%, #141416 75%);
-            background-size: 400% 100%;
-            animation: shimmer 1.2s ease-in-out infinite;
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            flex-shrink: 0;
-            scroll-snap-align: center;
-        }
-        @keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
 
         .card-object {
             width: 100%; height: 100%;
             position: relative;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+
         .card-object.is-flipped { transform: rotateY(180deg); }
 
         .card-face {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden;
-            border-radius: 24px;
-            padding: 24px;
-            display: flex; flex-direction: column; justify-content: space-between;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .card-front {
-            background: linear-gradient(135deg, rgba(35,35,40,0.85), rgba(15,15,18,0.98));
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 20px;
+            padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
             overflow: hidden;
-        }
-        .card-front::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at top right, rgba(255,255,255,0.18), transparent 45%);
-            pointer-events: none;
-        }
-        
-        .card-top { display: flex; justify-content: space-between; align-items: center; }
-        .card-logo { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .card-badge { 
-            background: rgba(255,255,255,0.15); padding: 5px 12px; 
-            border-radius: 20px; font-size: 10px; font-weight: 700; 
-            text-transform: uppercase; letter-spacing: 1px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .card-number-display { font-family: monospace; font-size: 22px; letter-spacing: 2px; margin-top: auto; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        /* Card Design (Premium Dark) */
+        .card-front {
+            background: linear-gradient(135deg, #1f1f21 0%, #0d0d0f 100%);
+        }
         
-        .card-bottom { display: flex; justify-content: space-between; }
-        .card-label { font-size: 10px; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 2px; }
-        .card-val { font-size: 13px; font-weight: 600; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        /* Subtle red/blue accent behind the card numbers */
+        .card-front::before {
+            content: ''; position: absolute; top: -50%; right: -20%;
+            width: 250px; height: 250px; background: rgba(255, 59, 48, 0.15);
+            filter: blur(50px); border-radius: 50%; pointer-events: none;
+        }
+        .card-front::after {
+            content: ''; position: absolute; bottom: -50%; left: -20%;
+            width: 200px; height: 200px; background: rgba(10, 132, 255, 0.15);
+            filter: blur(50px); border-radius: 50%; pointer-events: none;
+        }
+
+        .card-top { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; }
+        .card-logo { font-size: 16px; font-weight: 800; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; color: #fff; }
+        .card-badge { background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #fff; }
+
+        .card-number-display { font-size: 24px; font-weight: 600; letter-spacing: 4px; font-family: monospace; text-shadow: 0 2px 5px rgba(0,0,0,0.8); position: relative; z-index: 2; margin-top: 25px; color: #fff; }
+
+        .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; position: relative; z-index: 2; }
+        .card-label { font-size: 10px; color: rgba(255,255,255,0.5); font-weight: 600; margin-bottom: 4px; }
+        .card-val { font-size: 14px; font-weight: 600; text-transform: uppercase; color: #fff; letter-spacing: 1px; }
 
         .card-back {
-            background: linear-gradient(135deg, #1C1C1E, #0A0A0B);
-            transform: rotateY(180deg);
+            background: #111;
         }
-        .magnetic-strip { height: 45px; background: #000; margin: 10px -24px 20px; }
-        .signature-strip { 
-            height: 40px; background: #e2e2e2; border-radius: 4px;
-            display: flex; align-items: center; justify-content: flex-end; padding-right: 15px;
-            color: #333; font-family: monospace; font-size: 18px; font-weight: 700; font-style: italic;
+        .magnetic-strip { background: #000; height: 45px; width: 100%; position: absolute; top: 25px; left: 0; }
+        .signature-strip { background: #fff; height: 35px; width: 70%; position: absolute; top: 90px; left: 24px; display: flex; align-items: center; justify-content: flex-end; padding-right: 15px; color: #000; font-family: monospace; font-weight: bold; font-style: italic; border-radius: 4px; }
+        .card-back-info { position: absolute; bottom: 20px; left: 24px; font-size: 10px; color: rgba(255,255,255,0.4); max-width: 80%; line-height: 1.4; }
+
+        /* Skeleton Card */
+        .skeleton-card {
+            width: var(--card-width); height: var(--card-height); border-radius: 20px;
+            background: linear-gradient(90deg, #1c1c1e 0%, #2c2c2e 50%, #1c1c1e 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        .card-back-info { font-size: 11px; color: var(--text-secondary); text-align: center; margin-top: 15px; line-height: 1.4; }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
-        .carousel-dots { display: flex; justify-content: center; gap: 6px; margin-top: -15px; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: 0.3s; }
-        .dot.active { background: var(--text-primary); width: 20px; border-radius: 3px; }
-
-        /* --- DYNAMIC BALANCE --- */
-        .balance-block { text-align: center; padding: 10px 20px 20px; }
-        .balance-title { font-size: 14px; color: var(--text-secondary); font-weight: 500; margin-bottom: 5px; }
-        .balance-amount-uc { font-size: 48px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
-        .balance-amount-eur { font-size: 16px; color: var(--text-secondary); margin-top: 8px; font-weight: 500; }
-        .currency { font-size: 0.5em; color: var(--text-secondary); font-weight: 600; }
-        
-        .skeleton-text {
-            background: linear-gradient(90deg, #141416 25%, #25252A 50%, #141416 75%);
-            background-size: 400% 100%;
-            color: transparent;
-            border-radius: 8px;
-            display: inline-block;
-            animation: shimmer 1.2s ease-in-out infinite;
-        }
-
-        /* --- QUICK ACTIONS (GLASS TILES) --- */
+        /* Quick Actions (Perfect Black Circles) */
         .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            padding: 0 20px 30px;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            padding: 10px 20px 30px;
         }
-        .action-btn {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 15px 5px;
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
             cursor: pointer;
-            transition: transform 0.15s, background 0.3s, box-shadow 0.3s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
-        .action-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.1); }
-        .action-icon { font-size: 24px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
-        .icon-deposit { color: var(--mint-success); }
-        .icon-withdraw { color: var(--danger-red); }
-        .icon-exchange { color: var(--accent-blue); }
-        .icon-settings { color: #FF9F0A; }
-        .action-btn span { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+        
+        .action-btn {
+            width: 60px;
+            height: 60px;
+            background: var(--btn-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #fff;
+            transition: transform 0.15s, background 0.15s;
+        }
+        .action-item:active .action-btn {
+            transform: scale(0.92);
+            background: #2c2c2e;
+        }
+        
+        .action-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            text-align: center;
+        }
 
-        /* --- OPERATIONS SHEET (GLASS) --- */
+        /* Operations Sheet (Bottom) */
         .operations-sheet {
-            background: rgba(20, 20, 25, 0.6);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            border-top-left-radius: 32px; border-top-right-radius: 32px;
-            padding: 20px;
-            min-height: 50vh;
-            /* margin-bottom removed because there is no bottom nav anymore */
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.4);
+            flex-grow: 1;
+            background: var(--surface-color);
+            border-radius: 24px 24px 0 0;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
         }
-        .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .sheet-header h2 { font-size: 20px; font-weight: 700; }
-        .search-btn { background: none; border: none; color: var(--text-secondary); font-size: 18px; cursor: pointer; transition: color 0.2s; }
-        .search-btn:active { color: white; }
-        
-        .transactions-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
-        .tx-item {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.04);
-            padding: 15px; border-radius: 18px;
-            border: 1px solid rgba(255,255,255,0.03);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .tx-left { display: flex; align-items: center; gap: 15px; }
-        .tx-icon-bg {
-            width: 44px; height: 44px; border-radius: 14px;
-            display: flex; justify-content: center; align-items: center; font-size: 18px;
-        }
-        .tx-icon-bg.deposit { background: rgba(48,209,88,0.15); color: var(--mint-success); }
-        .tx-icon-bg.withdraw { background: rgba(255,69,58,0.15); color: var(--danger-red); }
-        .tx-icon-bg.exchange { background: rgba(10,132,255,0.15); color: var(--accent-blue); }
-        .tx-info h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-        .tx-info p { font-size: 12px; color: var(--text-secondary); }
-        
-        .tx-right { text-align: right; }
-        .tx-amount { font-size: 16px; font-weight: 700; }
-        .tx-amount.positive { color: var(--mint-success); }
-        .tx-amount.negative { color: var(--text-primary); }
-        .tx-status { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
-        
-        /* Skeleton Tx */
-        .skeleton-tx { width: 100%; height: 74px; border-radius: 18px; background: linear-gradient(90deg, #141416 25%, #25252A 50%, #141416 75%); background-size: 400% 100%; animation: shimmer 1.2s ease-in-out infinite; border: 1px solid rgba(255,255,255,0.02); }
 
-        /* --- MODALS (GLASS) --- */
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .sheet-header h2 { font-size: 20px; font-weight: 700; color: #fff; }
+        .search-btn { background: transparent; border: none; color: var(--text-sec); font-size: 18px; }
+        
+        .transactions-list { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 20px; }
+        
+        /* Minimalist Transactions (Generated by JS) */
+        .tx-item { display: flex; justify-content: space-between; align-items: center; }
+        .tx-left { display: flex; align-items: center; gap: 14px; }
+        .tx-icon-bg { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; }
+        .tx-icon-bg.exchange { background: #2c2c2e; }
+        .tx-icon-bg.deposit { background: rgba(48, 209, 88, 0.15); color: #30D158; }
+        .tx-icon-bg.withdraw { background: rgba(255, 69, 58, 0.15); color: #ff453a; }
+        .tx-info h4 { font-size: 16px; font-weight: 600; color: #fff; text-transform: capitalize; margin-bottom: 2px; }
+        .tx-info p { font-size: 13px; color: var(--text-sec); }
+        
+        .tx-right { text-align: right; display: flex; flex-direction: column; gap: 4px; }
+        .tx-amount { font-size: 16px; font-weight: 700; }
+        .tx-amount.positive { color: #30D158; }
+        .tx-amount.negative { color: #fff; }
+        .tx-status { font-size: 12px; color: var(--text-sec); }
+
+        .skeleton-tx { height: 44px; background: rgba(255,255,255,0.03); border-radius: 12px; animation: shimmer 1.5s infinite linear; }
+
+        /* Modals */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            z-index: 1000; display: flex; justify-content: center; align-items: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            z-index: 100; display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
+        
         .modal-content {
-            background: rgba(30, 30, 35, 0.85);
-            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255,255,255,0.15);
-            width: 90%; max-width: 360px; border-radius: 28px; padding: 25px;
-            transform: translateY(20px) scale(0.95); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            background: #1c1c1e; width: 100%; border-radius: 24px 24px 0 0;
+            padding: 30px 20px 40px; transform: translateY(100%); transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; gap: 20px;
         }
-        .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
-        
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .modal-header h3 { font-size: 20px; font-weight: 700; }
-        .close-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 32px; height: 32px; border-radius: 16px; font-size: 14px; cursor: pointer; transition: background 0.2s; }
-        .close-btn:active { background: rgba(255,255,255,0.2); }
-        
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .modal-header h3 { font-size: 20px; font-weight: 700; color: #fff; }
+        .close-btn { background: #2c2c2e; border: none; width: 36px; height: 36px; border-radius: 50%; color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s; }
+        .close-btn:active { transform: scale(0.9); }
+
+        .form-group label { display: block; font-size: 12px; color: var(--text-sec); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .form-group input {
-            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
-            padding: 16px; border-radius: 16px; color: white; font-size: 18px; font-weight: 600; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%; background: #2c2c2e; border: 1px solid rgba(255,255,255,0.05); color: #fff;
+            padding: 18px 16px; border-radius: 12px; font-size: 16px; font-weight: 600; outline: none; transition: 0.2s;
         }
-        .form-group input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 2px rgba(10,132,255,0.2); }
+        .form-group input:focus { border-color: var(--accent); }
         
         .btn-primary {
-            width: 100%; padding: 18px; background: var(--accent-blue);
-            border: none; border-radius: 16px; color: white; font-size: 16px; font-weight: 700;
-            cursor: pointer; box-shadow: 0 8px 20px rgba(10, 132, 255, 0.4); transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+            width: 100%; padding: 18px; border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 700; color: #000; cursor: pointer;
+            background: var(--accent); display: flex; justify-content: center; align-items: center; gap: 10px;
+            box-shadow: 0 4px 15px rgba(48, 209, 88, 0.2); transition: 0.15s;
         }
-        .btn-primary:active { transform: scale(0.96); background: #0070E0; box-shadow: 0 4px 10px rgba(10, 132, 255, 0.4); }
-        .btn-siya-action { background: #FFFFFF; color: #000; box-shadow: 0 8px 20px rgba(255,255,255,0.2); display: flex; justify-content: center; gap: 10px; align-items: center; }
-        .btn-siya-action:active { background: #E0E0E0; box-shadow: 0 4px 10px rgba(255,255,255,0.2); }
-        .notice { font-size: 12px; color: var(--text-secondary); text-align: center; margin-bottom: 15px; }
+        .btn-primary:active { transform: scale(0.97); background: #2ebd52; }
+
+        .notice { font-size: 13px; color: var(--text-sec); text-align: center; margin-bottom: 5px; }
+        .notice i { color: var(--accent); }
+
+        /* Auth Overlays */
+        #auth-overlay, #security-check {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 30px; text-align: center;
+        }
+        .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- AMBIENT GLOWS -->
-    <div class="ambient-orb orb-1"></div>
-    <div class="ambient-orb orb-2"></div>
-    <div class="ambient-orb orb-3"></div>
-
-    <!-- SIYA AUTH OVERLAY -->
+    <!-- AUTH OVERLAYS -->
     <div id="auth-overlay">
-        <div class="auth-logo"><i class="fa-solid fa-fingerprint"></i></div>
-        <h1 class="auth-title">НБС</h1>
-        <p class="auth-subtitle">Національний Банк Серверу</p>
-        <button class="btn-siya-login" onclick="loginViaSiya()">
-            <i class="fa-solid fa-shield-halved"></i> Увійти через Сіа.ID
+        <i class="fa-solid fa-fingerprint" style="font-size: 60px; color: #30D158; margin-bottom: 20px;"></i>
+        <h2 style="font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 10px;">Авторизація</h2>
+        <p style="color: var(--text-sec); font-size: 14px;">Будь ласка, увійдіть через СіЯ для доступу до ваших карток</p>
+        <button class="btn-primary" style="margin-top: 30px; max-width: 300px;" onclick="window.location.href='index.html?action=siya_auth&return_url=' + encodeURIComponent(window.location.href)">
+            Увійти через СіЯ
         </button>
     </div>
 
     <div id="security-check" style="display:none;">
         <div class="spinner"></div>
-        <h2 style="font-size: 20px; font-weight: 700; color: #fff;">Безпечне з'єднання СіЯ...</h2>
-        <p style="color: var(--text-sec); margin-top: 10px; font-size: 13px;">Отримуємо дані захищеної сесії</p>
+        <h2 style="font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 10px;">Безпечне з'єднання СіЯ...</h2>
+        <p style="color: var(--text-sec); font-size: 13px;">Отримуємо дані захищеної сесії</p>
     </div>
 
     <!-- MAIN APP -->
+
+    <!-- Hidden Display Username (required by JS, visually not needed here) -->
+    <div id="display-username"></div>
 
     <!-- Balance Section -->
     <section class="balance-section">
@@ -429,15 +319,16 @@
         </div>
     </section>
 
-    <!-- Card Section -->
-    <section class="card-carousel">
-        <div class="card-scene">
-            <!-- Inject card via JS -->
-            <div class="card-face skeleton-card" id="card-skeleton"></div>
+    <!-- CAROUSEL (Requires #card-carousel and #carousel-dots for JS) -->
+    <section class="cards-stage">
+        <div class="card-carousel" id="card-carousel">
+            <!-- Skeleton card shown until JS loads data -->
+            <div class="skeleton-card" id="skel-1"></div>
         </div>
+        <div class="carousel-dots" id="carousel-dots" style="display:none;"></div>
     </section>
 
-    <!-- Quick Actions (Monobank style) -->
+    <!-- Quick Actions (Perfect Black Circles) -->
     <section class="quick-actions">
         <div class="action-item" onclick="openModal('modal-deposit')">
             <div class="action-btn"><i class="fa-solid fa-arrow-down"></i></div>
@@ -461,6 +352,7 @@
     <section class="operations-sheet">
         <div class="sheet-header">
             <h2>Операції</h2>
+            <button class="search-btn"><i class="fa-solid fa-search"></i></button>
         </div>
         <div class="transactions-list" id="transactions-list">
             <!-- Skeletons -->
@@ -502,7 +394,10 @@
                 <label>Сума виводу (UC)</label>
                 <input type="number" id="withdraw-amount" placeholder="1000" min="1">
             </div>
-            <button class="btn-primary" onclick="processWithdraw()">Підписати через Сію</button>
+            <p class="notice"><i class="fa-solid fa-shield-halved"></i> Транзакція потребує підпису Сіа.Підпис</p>
+            <button class="btn-primary btn-siya-action" onclick="processWithdraw()">
+                <i class="fa-solid fa-fingerprint"></i> Підписати через Сію
+            </button>
         </div>
     </div>
 
@@ -521,7 +416,10 @@
                 <label>Сума переказу (UC)</label>
                 <input type="number" id="transfer-amount" placeholder="500" min="1">
             </div>
-            <button class="btn-primary" onclick="processTransfer()">Підписати переказ</button>
+            <p class="notice"><i class="fa-solid fa-shield-halved"></i> Транзакція потребує підпису Сіа.Підпис</p>
+            <button class="btn-primary btn-siya-action" onclick="processTransfer()">
+                <i class="fa-solid fa-fingerprint"></i> Підписати переказ
+            </button>
         </div>
     </div>
 
