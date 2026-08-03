@@ -2495,6 +2495,8 @@ window.checkEditPermissions = function() {
   // Check URL parameters on portal load
   (function checkCiYaSignAction() {
     const urlParams = new URLSearchParams(window.location.search);
+    
+    // SiYa Signature Flow
     if (urlParams.get('action') === 'siya_sign') {
       window.startCiYaSignature({
         return_url: urlParams.get('return_url') || 'nbu.html',
@@ -2503,6 +2505,29 @@ window.checkEditPermissions = function() {
         curr: urlParams.get('curr'),
         user: urlParams.get('user')
       });
+    }
+    
+    // SiYa Authentication Flow for Ecosystem Apps (e.g., NBS)
+    if (urlParams.get('action') === 'siya_auth') {
+      const returnUrl = urlParams.get('return_url') || 'nbu/index.html';
+      
+      const checkAuth = setInterval(() => {
+        // Wait until Telegram auth populates the user state
+        if (window.state && window.state.roblox && window.state.roblox.username) {
+          clearInterval(checkAuth);
+          // Share authentication identity securely via shared origin localStorage
+          localStorage.setItem('currentUser', window.state.roblox.username);
+          window.location.href = returnUrl;
+        } else if (window.state && window.state.telegram && window.state.telegram.id) {
+          // If roblox is missing but telegram is linked, try to use TG username or ID
+          clearInterval(checkAuth);
+          localStorage.setItem('currentUser', window.state.telegram.username || window.state.telegram.id);
+          window.location.href = returnUrl;
+        }
+      }, 500);
+      
+      // Stop checking after 10 seconds to prevent memory leaks if auth fails
+      setTimeout(() => clearInterval(checkAuth), 10000);
     }
   })();
 </script>
