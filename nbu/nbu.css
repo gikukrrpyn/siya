@@ -653,3 +653,43 @@ body {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
+
+/* Bottom Navbar */
+.bottom-navbar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 440px;
+  background: rgba(28, 28, 30, 0.85);
+  backdrop-filter: blur(16px);
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 10px 24px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 100;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.nav-item i {
+  font-size: 20px;
+}
+.nav-item span {
+  font-size: 10px;
+  font-weight: 600;
+}
+.nav-item.active {
+  color: var(--accent-mint);
+}
+
+.app-shell {
+  padding-bottom: 80px;
+}
