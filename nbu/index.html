@@ -31,9 +31,6 @@
       </div>
 
       <div class="header-actions">
-        <div class="header-icon-btn" onclick="openModal('modalLimit')">
-          <i class="fa-solid fa-sliders"></i>
-        </div>
         <div class="header-icon-btn" id="adminToggleBtn" onclick="toggleAdminPanel()" style="display: none;">
           <i class="fa-solid fa-user-shield"></i>
         </div>
@@ -124,6 +121,22 @@
         <div style="font-size:13px; color:var(--text-sub); text-align:center; padding:10px;">Завантаження...</div>
       </div>
     </section>
+
+    <!-- Monobank Style Bottom Navbar -->
+    <nav class="bottom-navbar">
+      <div class="nav-item active" onclick="switchTab('home')">
+        <i class="fa-solid fa-credit-card"></i>
+        <span>Картки</span>
+      </div>
+      <div class="nav-item" onclick="openModal('modalTransfer')">
+        <i class="fa-solid fa-money-bill-transfer"></i>
+        <span>Переказ</span>
+      </div>
+      <div class="nav-item" onclick="openModal('modalExchange')">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Курси</span>
+      </div>
+    </nav>
 
   </div>
 
@@ -223,25 +236,6 @@
         <label class="form-label">UkraineCoin (UC)</label>
         <input type="text" id="calcUc" class="form-input" readonly value="4,585">
       </div>
-    </div>
-  </div>
-
-  <!-- Modal: Limits -->
-  <div class="modal-backdrop" id="modalLimit">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3>Налаштування лімітів</h3>
-        <button class="close-modal-btn" onclick="closeModal('modalLimit')">&times;</button>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Денний ліміт переказів (UC)</label>
-        <input type="number" id="limitInput" class="form-input" value="50000">
-      </div>
-
-      <button class="btn-submit-main" onclick="saveLimitSetting()">
-        <i class="fa-solid fa-check"></i> Зберегти ліміт
-      </button>
     </div>
   </div>
 
