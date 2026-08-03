@@ -114,6 +114,16 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (urlParams.has('user') || urlParams.has('status')) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+    
+    // Render Header User Profile
+    const headerProfile = document.getElementById('headerUserProfile');
+    if (headerProfile) {
+      const avatarUrl = localStorage.getItem('currentUserAvatar');
+      headerProfile.innerHTML = `
+        <img class="header-user-avatar" src="${avatarUrl || 'png/ciyablack.png'}" alt="Avatar">
+        <span class="header-user-name">${window.NBS_STATE.user.username}</span>
+      `;
+    }
   }
 
   // Dynamic Admin Verification (Без заглушок)
