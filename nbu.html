@@ -411,73 +411,56 @@
         </button>
     </div>
 
-    <!-- SECURITY CHECK OVERLAY -->
-    <div id="security-check">
+    <div id="security-check" style="display:none;">
         <div class="spinner"></div>
-        <div class="sec-text">Безпечне з'єднання СіЯ...</div>
+        <h2 style="font-size: 20px; font-weight: 700; color: #fff;">Безпечне з'єднання СіЯ...</h2>
+        <p style="color: var(--text-sec); margin-top: 10px; font-size: 13px;">Отримуємо дані захищеної сесії</p>
     </div>
 
-    <!-- HEADER -->
-    <header class="header">
-        <div class="user-block">
-            <div class="avatar"><i class="fa-solid fa-user"></i></div>
-            <div class="user-info">
-                <span class="greeting">Вітаємо,</span>
-                <span class="username" id="display-username">Громадянин</span>
-            </div>
-        </div>
-        <div class="header-actions">
-            <button class="icon-btn"><i class="fa-solid fa-bell"></i></button>
-        </div>
-    </header>
+    <!-- MAIN APP -->
 
-    <!-- CARDS STAGE -->
-    <section class="cards-stage">
-        <div class="card-carousel" id="card-carousel">
-            <!-- Skeleton cards shown by default until data loads -->
-            <div class="skeleton-card" id="skel-1"></div>
+    <!-- Balance Section -->
+    <section class="balance-section">
+        <div class="balance-amount" id="balance-uc">
+            0 <span class="currency">UC</span>
         </div>
-        <div class="carousel-dots" id="carousel-dots">
-            <div class="dot active"></div>
+        <div class="balance-eur" id="balance-eur">
+            ~ 0 €
         </div>
     </section>
 
-    <!-- BALANCE BLOCK -->
-    <section class="balance-block">
-        <div class="balance-title">Баланс картки</div>
-        <div class="balance-amount-uc" id="balance-uc">
-            <span class="skeleton-text" style="width: 150px;">00000</span> <span class="currency">UC</span>
-        </div>
-        <div class="balance-amount-eur" id="balance-eur">
-            ~ <span class="skeleton-text" style="width: 80px;">000</span> <span class="currency">€</span>
+    <!-- Card Section -->
+    <section class="card-carousel">
+        <div class="card-scene">
+            <!-- Inject card via JS -->
+            <div class="card-face skeleton-card" id="card-skeleton"></div>
         </div>
     </section>
 
-    <!-- QUICK ACTIONS -->
+    <!-- Quick Actions (Monobank style) -->
     <section class="quick-actions">
-        <div class="action-btn" onclick="openModal('modal-deposit')">
-            <i class="fa-solid fa-arrow-down action-icon icon-deposit"></i>
-            <span>Внесок</span>
+        <div class="action-item" onclick="openModal('modal-deposit')">
+            <div class="action-btn"><i class="fa-solid fa-arrow-down"></i></div>
+            <span class="action-label">Внесок</span>
         </div>
-        <div class="action-btn" onclick="openModal('modal-withdraw')">
-            <i class="fa-solid fa-arrow-up action-icon icon-withdraw"></i>
-            <span>Вивід</span>
+        <div class="action-item" onclick="openModal('modal-withdraw')">
+            <div class="action-btn"><i class="fa-solid fa-arrow-up"></i></div>
+            <span class="action-label">Вивід</span>
         </div>
-        <div class="action-btn" onclick="openModal('modal-transfer')">
-            <i class="fa-solid fa-money-bill-transfer action-icon icon-exchange"></i>
-            <span>Переказ</span>
+        <div class="action-item" onclick="openModal('modal-transfer')">
+            <div class="action-btn"><i class="fa-solid fa-money-bill-transfer"></i></div>
+            <span class="action-label">Переказ</span>
         </div>
-        <div class="action-btn" onclick="openModal('modal-settings')">
-            <i class="fa-solid fa-sliders action-icon icon-settings"></i>
-            <span>Налаштування</span>
+        <div class="action-item" onclick="openModal('modal-settings')">
+            <div class="action-btn"><i class="fa-solid fa-sliders"></i></div>
+            <span class="action-label">Налаштування</span>
         </div>
     </section>
 
-    <!-- OPERATIONS SHEET -->
+    <!-- Operations Sheet (Bottom) -->
     <section class="operations-sheet">
         <div class="sheet-header">
-            <h2>Останні операції</h2>
-            <button class="search-btn"><i class="fa-solid fa-search"></i></button>
+            <h2>Операції</h2>
         </div>
         <div class="transactions-list" id="transactions-list">
             <!-- Skeletons -->
@@ -504,7 +487,6 @@
                 <label>Посилання на скріншот (Imgur / Telegram)</label>
                 <input type="text" id="deposit-screen" placeholder="https://...">
             </div>
-            <p class="notice">Заявка буде оброблена адміністратором</p>
             <button class="btn-primary" onclick="processDeposit()">Створити заявку</button>
         </div>
     </div>
@@ -520,10 +502,7 @@
                 <label>Сума виводу (UC)</label>
                 <input type="number" id="withdraw-amount" placeholder="1000" min="1">
             </div>
-            <p class="notice"><i class="fa-solid fa-shield-halved"></i> Транзакція потребує підпису Сіа.Підпис. Заявку опрацює адміністратор.</p>
-            <button class="btn-primary btn-siya-action" onclick="processWithdraw()">
-                <i class="fa-solid fa-fingerprint"></i> Підписати через Сію
-            </button>
+            <button class="btn-primary" onclick="processWithdraw()">Підписати через Сію</button>
         </div>
     </div>
 
@@ -531,21 +510,18 @@
     <div id="modal-transfer" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Переказ за номером</h3>
+                <h3>Переказ</h3>
                 <button class="close-btn" onclick="closeModal('modal-transfer')"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="form-group">
                 <label>Номер картки отримувача</label>
-                <input type="text" id="transfer-card" placeholder="4441 0000 0000 0000">
+                <input type="text" id="transfer-card" placeholder="4441 XXXX XXXX XXXX">
             </div>
             <div class="form-group">
                 <label>Сума переказу (UC)</label>
                 <input type="number" id="transfer-amount" placeholder="500" min="1">
             </div>
-            <p class="notice"><i class="fa-solid fa-shield-halved"></i> Транзакція потребує підпису Сіа.Підпис</p>
-            <button class="btn-primary btn-siya-action" onclick="processTransfer()">
-                <i class="fa-solid fa-fingerprint"></i> Підписати переказ
-            </button>
+            <button class="btn-primary" onclick="processTransfer()">Підписати переказ</button>
         </div>
     </div>
 
@@ -553,7 +529,7 @@
     <div id="modal-settings" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Налаштування картки</h3>
+                <h3>Налаштування</h3>
                 <button class="close-btn" onclick="closeModal('modal-settings')"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="form-group">
