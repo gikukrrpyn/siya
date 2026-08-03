@@ -28,9 +28,6 @@ window.NBS_STATE = {
   requests: []
 };
 
-// Admin list
-const ADMIN_USERS = ['admin', 'owner']; // Users who can approve
-
 // Public External API for other SiYa Ecosystem Apps
 window.NBSApi = {
   getBalance: function() {
@@ -44,7 +41,6 @@ window.NBSApi = {
     return Promise.resolve({ status: 'initiated', txId: 'NBS-EXT-' + Math.floor(Math.random() * 900000) });
   },
   processDirectPayment: async function(params) {
-    // API для сторонніх додатків для прямого знімання коштів (вимагає CVV)
     if (!params || !params.amount || !params.cvv) return { success: false, error: "Missing amount or cvv" };
     if (params.cvv !== window.NBS_STATE.cvv) return { success: false, error: "Invalid CVV" };
     if (params.amount > window.NBS_STATE.balanceUC) return { success: false, error: "Insufficient funds" };
@@ -72,9 +68,9 @@ window.NBSApi = {
   }
 };
 
-// Listen for Cross-Origin API requests from other apps in the SiYa ecosystem
+// Listen for Cross-Origin API requests
 if (window.parent && window.parent !== window) {
-  window.parent.NBSApi = window.NBSApi; // Expose to parent if same-origin
+  window.parent.NBSApi = window.NBSApi;
 }
 
 window.addEventListener('message', async (event) => {
@@ -83,16 +79,14 @@ window.addEventListener('message', async (event) => {
   
   if (data.type === 'NBS_GET_BALANCE') {
     event.source.postMessage({ id: data.id, response: window.NBSApi.getBalance() }, '*');
-  } 
-  else if (data.type === 'NBS_REQUEST_PAYMENT') {
+  } else if (data.type === 'NBS_REQUEST_PAYMENT') {
     try {
       const res = await window.NBSApi.requestPayment(data.payload);
       event.source.postMessage({ id: data.id, response: res }, '*');
     } catch(e) {
       event.source.postMessage({ id: data.id, error: e.toString() }, '*');
     }
-  }
-  else if (data.type === 'NBS_PROCESS_DIRECT_PAYMENT') {
+  } else if (data.type === 'NBS_PROCESS_DIRECT_PAYMENT') {
     const res = await window.NBSApi.processDirectPayment(data.payload);
     event.source.postMessage({ id: data.id, response: res }, '*');
   }
@@ -100,7 +94,6 @@ window.addEventListener('message', async (event) => {
 
 // DOM Ready
 window.addEventListener('DOMContentLoaded', async () => {
-  // Try authenticating
   try {
     await signInAnonymously(auth);
   } catch(e) {
@@ -109,23 +102,48 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Determine user (SiYa Auth Flow)
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('status') === 'authenticated' && urlParams.get('user')) {
-    window.NBS_STATE.user.username = urlParams.get('user');
-    localStorage.setItem('currentUser', window.NBS_STATE.user.username);
-    window.history.replaceState({}, document.title, window.location.pathname);
-  } else if (urlParams.get('user')) {
-    window.NBS_STATE.user.username = urlParams.get('user');
-    localStorage.setItem('currentUser', window.NBS_STATE.user.username);
-  } else if (!localStorage.getItem('currentUser')) {
+  
+  if (!localStorage.getItem('currentUser')) {
     // Redirect to SiYa ecosystem auth if not logged in
     window.location.href = `../index.html?action=siya_auth&return_url=nbu/index.html`;
     return;
   } else {
     window.NBS_STATE.user.username = localStorage.getItem('currentUser');
+    
+    // Clean any old insecure URL parameters if they exist
+    if (urlParams.has('user') || urlParams.has('status')) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }
 
-  window.NBS_STATE.user.isAdmin = ADMIN_USERS.includes(window.NBS_STATE.user.username.toLowerCase());
+  // Dynamic Admin Verification (Без заглушок)
+  window.NBS_STATE.user.isAdmin = false;
   
+  // 1. Check SiYa Ecosystem Parent (if in iframe)
+  try {
+    if (window.parent && typeof window.parent.checkEditPermissions === 'function') {
+      const perms = window.parent.checkEditPermissions();
+      if (perms && perms.isAdmin) {
+        window.NBS_STATE.user.isAdmin = true;
+      }
+    }
+  } catch(e) {}
+
+  // 2. Fallback to NBS Firestore Config (for standalone or custom admins)
+  if (!window.NBS_STATE.user.isAdmin) {
+    try {
+      const adminDoc = await getDoc(doc(db, "config", "admins"));
+      if (adminDoc.exists()) {
+        const adminList = adminDoc.data().list || [];
+        if (adminList.map(a => a.toLowerCase()).includes(window.NBS_STATE.user.username.toLowerCase())) {
+          window.NBS_STATE.user.isAdmin = true;
+        }
+      }
+    } catch(e) {
+      console.warn("Admin config read failed or missing (check rules/db)");
+    }
+  }
+
   if (window.NBS_STATE.user.isAdmin) {
     document.getElementById('adminToggleBtn').style.display = 'flex';
   } else {
