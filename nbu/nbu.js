@@ -94,12 +94,6 @@ window.addEventListener('message', async (event) => {
 
 // DOM Ready
 window.addEventListener('DOMContentLoaded', async () => {
-  try {
-    await signInAnonymously(auth);
-  } catch(e) {
-    console.warn("Auth warning", e);
-  }
-
   // Determine user (SiYa Auth Flow)
   const urlParams = new URLSearchParams(window.location.search);
   
@@ -126,43 +120,50 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Dynamic Admin Verification (Без заглушок)
+  // Strict Admin Verification via DB (Игнорируем window.parent для записи)
   window.NBS_STATE.user.isAdmin = false;
-  
-  // 1. Check SiYa Ecosystem Parent (if in iframe)
   try {
-    if (window.parent && typeof window.parent.checkEditPermissions === 'function') {
-      const perms = window.parent.checkEditPermissions();
-      if (perms && perms.isAdmin) {
+    const adminDoc = await getDoc(doc(db, "config", "admins"));
+    if (adminDoc.exists()) {
+      const adminList = adminDoc.data().list || [];
+      // Case-insensitive check
+      const match = adminList.find(a => a.toLowerCase() === window.NBS_STATE.user.username.toLowerCase());
+      if (match) {
         window.NBS_STATE.user.isAdmin = true;
+        window.NBS_STATE.user.exactAdminName = match; // Save exact casing for Firestore rule!
       }
     }
-  } catch(e) {}
+  } catch(e) {
+    console.warn("Admin config read failed or missing");
+  }
 
-  // 2. Fallback to NBS Firestore Config (for standalone or custom admins)
-  if (!window.NBS_STATE.user.isAdmin) {
-    try {
-      const adminDoc = await getDoc(doc(db, "config", "admins"));
-      if (adminDoc.exists()) {
-        const adminList = adminDoc.data().list || [];
-        if (adminList.map(a => a.toLowerCase()).includes(window.NBS_STATE.user.username.toLowerCase())) {
-          window.NBS_STATE.user.isAdmin = true;
-        }
-      }
-    } catch(e) {
-      console.warn("Admin config read failed or missing (check rules/db)");
+  const adminBtn = document.getElementById('adminToggleBtn');
+  if (adminBtn) {
+    if (window.NBS_STATE.user.isAdmin) {
+      adminBtn.style.display = 'flex';
+    } else {
+      adminBtn.style.display = 'none';
     }
   }
 
-  if (window.NBS_STATE.user.isAdmin) {
-    document.getElementById('adminToggleBtn').style.display = 'flex';
-  } else {
-    document.getElementById('adminToggleBtn').style.display = 'none';
-  }
+  // Wait for Firebase Auth to be ready before initiating listeners to prevent ownerUid='anon'
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // Auth is ready, now we can safely create cards and listen
+      if (!window.listenersInitialized) {
+        window.listenersInitialized = true;
+        initFirestoreListeners();
+        checkSiYaReturn();
+        fetchNbuRate();
+      }
+    }
+  });
 
-  initFirestoreListeners();
-  checkSiYaReturn();
-  fetchNbuRate();
+  try {
+    await signInAnonymously(auth);
+  } catch(e) {
+    console.warn("Auth warning", e);
+  }
 });
 
 function initFirestoreListeners() {
@@ -509,9 +510,16 @@ window.loadAdminRequests = function() {
 
 window.approveReq = async function(id, userId, amount) {
   try {
+    const adminName = window.NBS_STATE.user.exactAdminName || window.NBS_STATE.user.username;
     const reqRef = doc(db, "requests", id);
-    await updateDoc(reqRef, { status: 'completed' });
+    // 1. Оновлюємо статус заявки безпечно
+    await updateDoc(reqRef, { 
+      status: 'completed',
+      processedBy: adminName,
+      processedAt: serverTimestamp()
+    });
 
+    // 2. Нараховуємо кошти (захищено правилами increment)
     const cardRef = doc(db, "cards", userId);
     await updateDoc(cardRef, { balanceUC: increment(amount) });
 
@@ -519,7 +527,7 @@ window.approveReq = async function(id, userId, amount) {
       userId: userId,
       type: 'deposit',
       title: 'Поповнення',
-      sub: 'Схвалено адміністрацією',
+      sub: 'Схвалено адміністратором ' + adminName,
       amount: amount,
       status: 'completed',
       timestamp: serverTimestamp()
@@ -528,16 +536,23 @@ window.approveReq = async function(id, userId, amount) {
     showToast(`Заявку схвалено!`);
   } catch(e) {
     console.error(e);
+    alert(e.message || "Помилка бази даних");
   }
 }
 
 window.rejectReq = async function(id) {
   try {
+    const adminName = window.NBS_STATE.user.exactAdminName || window.NBS_STATE.user.username;
     const reqRef = doc(db, "requests", id);
-    await updateDoc(reqRef, { status: 'rejected' });
+    await updateDoc(reqRef, { 
+      status: 'rejected',
+      processedBy: adminName,
+      processedAt: serverTimestamp()
+    });
     showToast(`Заявку відхилено.`);
   } catch(e) {
     console.error(e);
+    alert(e.message || "Помилка бази даних");
   }
 }
 
