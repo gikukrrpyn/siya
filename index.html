@@ -2513,57 +2513,58 @@ window.checkEditPermissions = function() {
 
     modal.innerHTML = `
       <div style="
-        background: #121319; border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 24px; padding: 32px 28px; width: 100%; max-width: 440px;
-        color: #fff; box-shadow: 0 25px 60px rgba(0,0,0,0.9); text-align: center;
-        display: flex; flex-direction: column; gap: 20px;
+        background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 28px; padding: 36px 24px 24px 24px; width: 100%; max-width: 380px;
+        color: #fff; box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1); text-align: center;
+        display: flex; flex-direction: column; gap: 24px;
       ">
         <div style="
-          width: 64px; height: 64px; background: rgba(10, 132, 255, 0.15);
-          border: 1px solid #0A84FF; color: #0A84FF; border-radius: 50%;
+          width: 80px; height: 80px; background: rgba(255, 255, 255, 0.05);
+          border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-size: 28px; margin: 0 auto; box-shadow: 0 0 25px rgba(10, 132, 255, 0.25);
-          overflow: hidden;
+          font-size: 32px; margin: 0 auto; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+          overflow: hidden; padding: 4px;
         ">
-          ${avatar ? `<img src="${avatar}" style="width:100%; height:100%; object-fit:cover;">` : `🛂`}
+          ${avatar ? `<img src="${avatar}" style="width:100%; height:100%; object-fit:cover; border-radius: 50%;">` : `<i class="fa-solid fa-user" style="color: #8E8E93;"></i>`}
         </div>
 
         <div>
-          <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px;">Сіа.ID</h2>
-          <div style="font-size: 12px; color: #8E8E93;">Єдина система авторизації</div>
+          <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px;">Cia.ID</h2>
+          <div style="font-size: 13px; color: #8E8E93; font-weight: 500;">Єдина система авторизації</div>
         </div>
 
         <div style="
-          background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 16px; padding: 16px; text-align: left; display: flex; flex-direction: column; gap: 10px; font-size: 13px;
+          background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.05);
+          border-radius: 18px; padding: 18px; text-align: left; display: flex; flex-direction: column; gap: 14px; font-size: 13px;
         ">
-          <div style="display:flex; justify-content:space-between;">
-            <span style="color:#8E8E93;">Запитувач:</span>
-            <span style="font-weight:700;">Національний Банк України</span>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#8E8E93; font-weight: 500;">Запитувач</span>
+            <span style="font-weight:700; color: #fff;">Національний Банк</span>
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="color:#8E8E93;">Ваш акаунт:</span>
-            <span style="font-weight:700;">${user}</span>
+            <span style="color:#8E8E93; font-weight: 500;">Акаунт</span>
+            <span style="font-weight:700; color: #fff;">${user}</span>
           </div>
-          <div style="display:flex; justify-content:space-between;">
-            <span style="color:#8E8E93;">Доступ:</span>
-            <span style="font-weight:700; color:#0A84FF;">Читання базового профілю</span>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#8E8E93; font-weight: 500;">Доступ</span>
+            <span style="font-weight:700; color:#30D158;">Базовий профіль</span>
           </div>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top: 8px;">
           <button id="ciya-auth-confirm-btn" style="
-            width:100%; background: #0A84FF; color: #fff; border: none; border-radius: 16px;
+            width:100%; background: linear-gradient(135deg, #0A84FF 0%, #0062D6 100%); color: #fff; border: none; border-radius: 18px;
             padding: 16px; font-size: 15px; font-weight: 800; cursor: pointer;
-            box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3); transition: transform 0.2s;
-          ">
-            🛂 Надати доступ
+            box-shadow: 0 10px 20px rgba(10, 132, 255, 0.4); transition: transform 0.2s, filter 0.2s;
+          " onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
+            Надати доступ
           </button>
           
           <button id="ciya-auth-cancel-btn" style="
-            width:100%; background: transparent; color: #8E8E93; border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px; padding: 12px; font-size: 13px; font-weight: 600; cursor: pointer;
-          ">
+            width:100%; background: transparent; color: #FF453A; border: none;
+            border-radius: 18px; padding: 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: background 0.2s;
+          " onmouseover="this.style.background='rgba(255, 69, 58, 0.1)'" onmouseout="this.style.background='transparent'">
             Скасувати
           </button>
         </div>
