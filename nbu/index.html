@@ -2,250 +2,580 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000000">
   <title>НБС — Національний Банк Серверу | SiYa Network</title>
-  
-  <!-- Fonts & Vector Icons (FontAwesome ONLY, NO Emojis) -->
+
+  <link rel="icon" href="../favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Main NBU CSS -->
-  <link rel="stylesheet" href="nbu.css">
 
+  <link rel="stylesheet" href="nbu.css">
 </head>
 <body>
 
-  <div class="app-shell">
-    
-    <!-- Strict Header Bar -->
-    <header class="header-bar">
-      <div class="brand-title">
-        <i class="fa-solid fa-building-columns"></i>
-        <span>НБС</span>
-      </div>
+<div class="app-shell">
 
-      <div class="header-user-profile" id="headerUserProfile">
-        <!-- Injected via nbu.js -->
+  <!-- ══ Header ══════════════════════════════════════════════════════════ -->
+  <header class="header-bar">
+    <div class="header-user-profile" id="headerUserProfile" onclick="switchTab('more')">
+      <div class="sk circle" style="width:36px;height:36px"></div>
+      <div class="header-user-meta">
+        <div class="sk line" style="width:96px"></div>
       </div>
+    </div>
 
-      <div class="header-actions">
-        <div class="header-icon-btn" id="adminToggleBtn" onclick="toggleAdminPanel()" style="display: none;">
-          <i class="fa-solid fa-user-shield"></i>
-        </div>
+    <div class="header-actions">
+      <div class="header-icon-btn hidden" id="adminToggleBtn" onclick="openAdmin()" title="Модерація">
+        <i class="fa-solid fa-user-shield"></i>
+        <span class="dot-badge hidden" id="adminBadgeCount">0</span>
       </div>
-    </header>
+      <div class="header-icon-btn" onclick="openModal('modalRequisites')" title="Реквізити">
+        <i class="fa-solid fa-qrcode"></i>
+      </div>
+    </div>
+  </header>
 
-    <!-- Balance Section -->
-    <section class="balance-section">
-      <div class="balance-label">Баланс НБС</div>
-      <div class="balance-val-uc">
-        <span id="valUC">0</span>
-        <span class="unit">UC</span>
-      </div>
-      <div class="balance-val-eur">
-        <i class="fa-solid fa-euro-sign"></i> Еквівалент: <span id="valEUR">0.00</span> €
-      </div>
-    </section>
+  <!-- ══ Screen: Картки ══════════════════════════════════════════════════ -->
+  <section class="screen active" id="screen-home">
 
-    <!-- 3D Interactive Card Stage -->
-    <section class="cards-stage">
-      <div class="card-scene" onclick="flipCard()">
+    <div class="carousel" id="cardsCarousel">
+      <!-- Main card -->
+      <div class="card-scene" id="mainCardScene" onclick="flipCard()">
         <div class="card-object" id="cardObject">
-          <!-- Front Face -->
+
           <div class="card-face card-front">
+            <div class="card-frozen-tag"><i class="fa-solid fa-snowflake"></i> Заморожено</div>
+
             <div class="card-top">
-              <div class="card-chip"></div>
-              <div class="card-brand">НБС BANK</div>
+              <div class="card-balance">
+                <span class="cb-label">Баланс</span>
+                <span class="cb-value"><span id="cardBalanceVal">0</span><span class="cur">€</span></span>
+              </div>
+              <div class="card-brand">НБС</div>
             </div>
-            <div class="card-number" id="cardNumberDisplay">•••• •••• •••• ••••</div>
+
+            <div class="card-mid">
+              <div class="card-chip"></div>
+              <div class="card-number" id="cardNumberDisplay">•••• •••• •••• ••••</div>
+            </div>
+
             <div class="card-bottom">
-              <div class="card-holder" id="cardHolder">ЗАВАНТАЖЕННЯ...</div>
-              <div class="card-expiry">12/28</div>
+              <div>
+                <div class="card-holder" id="cardHolder">ЗАВАНТАЖЕННЯ…</div>
+                <div class="card-expiry" id="cardExpiry">12/28</div>
+              </div>
+              <div class="paysys"><i></i><i></i></div>
             </div>
           </div>
-          <!-- Back Face -->
+
           <div class="card-face card-back">
             <div class="magnetic-bar"></div>
-            <div class="signature-bar" id="cardCvvDisplay">CVV ***</div>
+            <div class="signature-bar" id="cardCvvDisplay">CVV •••</div>
+            <div class="card-back-full" id="cardBackNumber">•••• •••• •••• ••••</div>
             <div class="card-back-text">
-              Ця картка є власністю НБС (Національний Банк Серверу Ukraine RP). Захищено протоколом Сіа.Підпис.
+              Ця картка є власністю НБС (Національний Банк Серверу Ukraine RP).
+              Операції захищено протоколом Сіа.Підпис. Натисніть, щоб перевернути.
             </div>
           </div>
+
         </div>
       </div>
-    </section>
 
-    <!-- Monobank Style Round Quick Actions -->
-    <section class="quick-actions-row">
+      <!-- Jars + add tile injected here -->
+      <div id="carouselJars" style="display:contents"></div>
+
+      <div class="add-tile" onclick="openModal('modalJarNew')">
+        <i class="fa-solid fa-plus"></i>
+        <span>Нова банка</span>
+      </div>
+    </div>
+
+    <div class="carousel-dots" id="carouselDots"></div>
+
+    <div class="total-strip">
+      <span class="ts-label">Разом на рахунках</span>
+      <span class="ts-value" id="totalBalanceVal">0 €</span>
+    </div>
+
+    <div class="quick-actions-row">
       <div class="action-item" onclick="openModal('modalDeposit')">
         <div class="action-circle-btn"><i class="fa-solid fa-arrow-down"></i></div>
         <span class="action-text">Внесок</span>
       </div>
-
-      <div class="action-item" onclick="openModal('modalWithdraw')">
-        <div class="action-circle-btn"><i class="fa-solid fa-arrow-up"></i></div>
-        <span class="action-text">Вивід</span>
-      </div>
-
       <div class="action-item" onclick="openModal('modalTransfer')">
         <div class="action-circle-btn"><i class="fa-solid fa-paper-plane"></i></div>
         <span class="action-text">Переказ</span>
       </div>
-
-      <div class="action-item" onclick="openModal('modalExchange')">
-        <div class="action-circle-btn"><i class="fa-solid fa-arrows-rotate"></i></div>
-        <span class="action-text">Курси</span>
+      <div class="action-item" onclick="openModal('modalWithdraw')">
+        <div class="action-circle-btn"><i class="fa-solid fa-arrow-up"></i></div>
+        <span class="action-text">Вивід</span>
       </div>
-    </section>
-
-    <!-- Operations Sheet (Bottom Drawer) -->
-    <section class="operations-sheet">
-      <div class="sheet-handle-bar"></div>
-
-      <!-- Admin Panel Section (Visible if Admin) -->
-      <div class="admin-badge-bar" id="adminBadgeBar">
-        <span><i class="fa-solid fa-shield"></i> Панель Модерації НБС</span>
-        <span style="font-size:10px; cursor:pointer;" onclick="loadAdminRequests()">Оновити <i class="fa-solid fa-rotate-right"></i></span>
+      <div class="action-item" onclick="openModal('modalRequisites')">
+        <div class="action-circle-btn"><i class="fa-solid fa-receipt"></i></div>
+        <span class="action-text">Реквізити</span>
       </div>
-      <div class="transactions-list" id="adminRequestsList" style="display:none; margin-bottom:12px;"></div>
+    </div>
 
+    <div class="sheet-block">
       <div class="sheet-header">
         <h2 class="sheet-title">Операції</h2>
-        <i class="fa-solid fa-magnifying-glass" style="color: var(--text-sub); cursor:pointer;"></i>
+        <div class="sheet-link" onclick="switchTab('history')">
+          Усі <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
+        </div>
       </div>
+      <div class="transactions-list" id="recentList"></div>
+    </div>
+  </section>
 
-      <div class="transactions-list" id="transactionsList">
-        <!-- Dynamic Transactions loaded via JS -->
-        <div style="font-size:13px; color:var(--text-sub); text-align:center; padding:10px;">Завантаження...</div>
-      </div>
-    </section>
+  <!-- ══ Screen: Банки ═══════════════════════════════════════════════════ -->
+  <section class="screen" id="screen-jars">
+    <h1 class="screen-title">Банки</h1>
 
-    <!-- Monobank Style Bottom Navbar -->
-    <nav class="bottom-navbar">
-      <div class="nav-item active" onclick="switchTab('home')">
-        <i class="fa-solid fa-credit-card"></i>
-        <span>Картки</span>
+    <div class="stats-card" id="jarsSummary">
+      <div class="stats-head">
+        <div class="stats-hero">
+          <span class="sh-label">Накопичено в банках</span>
+          <span class="sh-value" id="jarsTotal">0 €</span>
+        </div>
+        <div class="lr-icon amber" style="width:44px;height:44px;border-radius:12px;font-size:16px">
+          <i class="fa-solid fa-piggy-bank"></i>
+        </div>
       </div>
-      <div class="nav-item" onclick="openModal('modalTransfer')">
-        <i class="fa-solid fa-money-bill-transfer"></i>
-        <span>Переказ</span>
-      </div>
-      <div class="nav-item" onclick="openModal('modalExchange')">
-        <i class="fa-solid fa-chart-pie"></i>
-        <span>Курси</span>
-      </div>
-    </nav>
+      <button class="btn-secondary" onclick="openModal('modalJarNew')">
+        <i class="fa-solid fa-plus"></i> Створити банку
+      </button>
+    </div>
 
-  </div>
+    <div class="card-block" id="jarsList"></div>
+  </section>
 
-  <!-- Modal: Deposit (Внесок з модерацією) -->
-  <div class="modal-backdrop" id="modalDeposit">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3>Внесок на рахунок</h3>
-        <button class="close-modal-btn" onclick="closeModal('modalDeposit')">&times;</button>
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">Сума поповнення (UC)</label>
-        <input type="number" id="depAmount" class="form-input" placeholder="Наприклад: 1500">
-      </div>
+  <!-- ══ Screen: Історія ═════════════════════════════════════════════════ -->
+  <section class="screen" id="screen-history">
+    <h1 class="screen-title">Історія</h1>
 
-      <div class="form-group">
-        <label class="form-label">Скріншот транзакції (Обов'язково)</label>
-        <input type="file" id="depScreenshot" accept="image/*" class="form-input" onchange="handleScreenshotSelect(event)">
-        <div id="depPreviewBox" style="display:none; margin-top:8px; border-radius:10px; overflow:hidden; max-height:120px;">
-          <img id="depPreviewImg" src="" style="width:100%; object-fit:cover;">
+    <div class="search-wrap">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" class="search-input" id="historySearch" placeholder="Пошук за назвою чи сумою"
+             autocomplete="off" oninput="onHistorySearch(this.value)">
+      <button class="search-clear" id="historySearchClear" onclick="clearHistorySearch()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="segmented" id="historyFilter">
+      <button class="on" data-f="all"      onclick="setHistoryFilter('all', this)">Усі</button>
+      <button           data-f="in"       onclick="setHistoryFilter('in', this)">Надходження</button>
+      <button           data-f="out"      onclick="setHistoryFilter('out', this)">Витрати</button>
+      <button           data-f="pending"  onclick="setHistoryFilter('pending', this)">Очікують</button>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-card" id="statsCard">
+      <div class="stats-head">
+        <div class="stats-hero">
+          <span class="sh-label">Витрати за місяць</span>
+          <span class="sh-value" id="statSpent">0 €</span>
+        </div>
+        <div class="month-nav">
+          <button onclick="shiftMonth(-1)" aria-label="Попередній місяць"><i class="fa-solid fa-chevron-left"></i></button>
+          <span class="m-label" id="statMonthLabel">—</span>
+          <button id="statMonthNext" onclick="shiftMonth(1)" aria-label="Наступний місяць"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
       </div>
 
-      <button class="btn-submit-main" onclick="submitDepositRequest()">
-        <i class="fa-solid fa-paper-plane"></i> Відправити на модерацію
-      </button>
+      <div class="stat-tiles">
+        <div class="stat-tile">
+          <span class="st-label"><i class="fa-solid fa-arrow-down" style="color:var(--green)"></i> Надходження</span>
+          <span class="st-value" id="statIn">0 €</span>
+        </div>
+        <div class="stat-tile">
+          <span class="st-label"><i class="fa-solid fa-arrow-up" style="color:var(--red)"></i> Витрати</span>
+          <span class="st-value" id="statOut">0 €</span>
+        </div>
+      </div>
+
+      <div class="cat-list" id="catList"></div>
     </div>
-  </div>
 
-  <!-- Modal: Withdraw (Вивід через Сіа.Підпис) -->
-  <div class="modal-backdrop" id="modalWithdraw">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3>Виведення коштів</h3>
-        <button class="close-modal-btn" onclick="closeModal('modalWithdraw')">&times;</button>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Сума для виведення (UC)</label>
-        <input type="number" id="witAmount" class="form-input" placeholder="1000">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Реквізити одержувача</label>
-        <input type="text" id="witTarget" class="form-input" placeholder="Картка Monobank або Roblox Username">
-      </div>
-
-      <button class="btn-submit-main" onclick="redirectToSiYaSignature('withdraw')">
-        <i class="fa-solid fa-signature"></i> Підписати через Сіа.Підпис
-      </button>
+    <div class="card-block">
+      <div class="transactions-list" id="historyList"></div>
     </div>
-  </div>
+  </section>
 
-  <!-- Modal: P2P Transfer (Переказ) -->
-  <div class="modal-backdrop" id="modalTransfer">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3>Переказ іншому гравцю</h3>
-        <button class="close-modal-btn" onclick="closeModal('modalTransfer')">&times;</button>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Номер картки одержувача або Нікнейм</label>
-        <input type="text" id="trfTarget" class="form-input" placeholder="4441 •••• •••• 9012">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Сума переказу (UC)</label>
-        <input type="number" id="trfAmount" class="form-input" placeholder="500">
-      </div>
-
-      <button class="btn-submit-main" onclick="redirectToSiYaSignature('transfer')">
-        <i class="fa-solid fa-signature"></i> Підтвердити Сіа.Підписом
-      </button>
-    </div>
-  </div>
-
-  <!-- Modal: Exchange / Rates -->
-  <div class="modal-backdrop" id="modalExchange">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3>Курс валют НБС</h3>
-        <button class="close-modal-btn" onclick="closeModal('modalExchange')">&times;</button>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Ігрові Євро (€)</label>
-        <input type="number" id="calcEur" class="form-input" value="100" oninput="runExchangeCalc()">
-      </div>
-
-      <div style="text-align:center; color: var(--accent-mint); font-size: 18px;">
-        <i class="fa-solid fa-arrow-down-up-lock"></i>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">UkraineCoin (UC)</label>
-        <input type="text" id="calcUc" class="form-input" readonly value="4,585">
+  <!-- ══ Screen: Ще ══════════════════════════════════════════════════════ -->
+  <section class="screen" id="screen-more">
+    <div class="profile-head">
+      <img class="profile-avatar" id="profileAvatar" src="../png/ciyablack.png" alt="">
+      <div class="profile-name" id="profileName">—</div>
+      <div class="profile-badge" id="profileBadge">
+        <i class="fa-solid fa-shield-halved"></i> Верифіковано Сіа.Підписом
       </div>
     </div>
-  </div>
 
-  <!-- Toast Notification -->
-  <div class="toast-popup" id="toastPopup">
-    <i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Успішно!</span>
-  </div>
+    <div class="block-title">Картка</div>
+    <div class="card-block">
+      <div class="list-row static">
+        <div class="lr-icon blue"><i class="fa-solid fa-snowflake"></i></div>
+        <div class="lr-body">
+          <div class="lr-title">Заморозити картку</div>
+          <div class="lr-sub">Блокує всі списання та перекази</div>
+        </div>
+        <div class="switch" id="freezeSwitch" onclick="toggleFreeze()"></div>
+      </div>
 
-  <!-- Firebase ESM SDKs -->
-  <script type="module" src="nbu.js"></script>
+      <div class="list-row" onclick="openModal('modalLimits')">
+        <div class="lr-icon"><i class="fa-solid fa-gauge-high"></i></div>
+        <div class="lr-body">
+          <div class="lr-title">Ліміт на операцію</div>
+          <div class="lr-sub">Максимальна сума одного переказу</div>
+        </div>
+        <span class="lr-value" id="limitValue">—</span>
+        <i class="fa-solid fa-chevron-right lr-chev"></i>
+      </div>
+
+      <div class="list-row" onclick="regenerateCvv()">
+        <div class="lr-icon amber"><i class="fa-solid fa-key"></i></div>
+        <div class="lr-body">
+          <div class="lr-title">Перевипустити CVV</div>
+          <div class="lr-sub">Старий код перестане працювати</div>
+        </div>
+        <i class="fa-solid fa-chevron-right lr-chev"></i>
+      </div>
+
+      <div class="list-row" onclick="openModal('modalRequisites')">
+        <div class="lr-icon green"><i class="fa-solid fa-receipt"></i></div>
+        <div class="lr-body">
+          <div class="lr-title">Реквізити картки</div>
+          <div class="lr-sub">Номер, власник, копіювання</div>
+        </div>
+        <i class="fa-solid fa-chevron-right lr-chev"></i>
+      </div>
+    </div>
+
+    <div class="block-title">Сервіс</div>
+    <div class="card-block">
+      <div class="list-row" onclick="switchTab('history')">
+        <div class="lr-icon"><i class="fa-solid fa-chart-pie"></i></div>
+        <div class="lr-body">
+          <div class="lr-title">Статистика та виписка</div>
+          <div class="lr-sub">Витрати за категоріями</div>
+        </div>
+        <i class="fa-solid fa-chevron-right lr-chev"></i>
+      </div>
+
+      <div class="list-row" onclick="exportStatement()">
+        <div class="lr-icon"><i class="fa-solid fa-file-arrow-down"></i></div>
+        <div class="lr-body">
+          <div class="lr-title">Завантажити виписку</div>
+          <div class="lr-sub">CSV з усіма операціями</div>
+        </div>
+        <i class="fa-solid fa-chevron-right lr-chev"></i>
+      </div>
+
+      <div class="list-row hidden" id="moreAdminRow" onclick="openAdmin()">
+        <div class="lr-icon blue"><i class="fa-solid fa-user-shield"></i></div>
+        <div class="lr-body">
+          <div class="lr-title">Панель модерації</div>
+          <div class="lr-sub">Заявки на поповнення</div>
+        </div>
+        <span class="lr-value" id="moreAdminCount">0</span>
+        <i class="fa-solid fa-chevron-right lr-chev"></i>
+      </div>
+
+      <div class="list-row" onclick="location.href='../index.html'">
+        <div class="lr-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
+        <div class="lr-body">
+          <div class="lr-title">Повернутись у SiYa</div>
+          <div class="lr-sub">Головний портал екосистеми</div>
+        </div>
+        <i class="fa-solid fa-chevron-right lr-chev"></i>
+      </div>
+    </div>
+
+    <div class="block-title">Акаунт</div>
+    <div class="card-block">
+      <div class="list-row danger" onclick="logout()">
+        <div class="lr-icon red"><i class="fa-solid fa-right-from-bracket"></i></div>
+        <div class="lr-body"><div class="lr-title">Вийти з акаунта</div></div>
+      </div>
+    </div>
+
+    <div style="text-align:center; padding:16px; font-size:11px; color:var(--text-4)">
+      НБС · Національний Банк Серверу<br>SiYa Network · Ukraine RP
+    </div>
+  </section>
+
+  <!-- ══ Bottom nav ══════════════════════════════════════════════════════ -->
+  <nav class="bottom-navbar">
+    <div class="nav-item active" data-tab="home" onclick="switchTab('home')">
+      <i class="fa-solid fa-credit-card"></i><span>Картки</span>
+    </div>
+    <div class="nav-item" data-tab="jars" onclick="switchTab('jars')">
+      <i class="fa-solid fa-piggy-bank"></i><span>Банки</span>
+    </div>
+    <div class="nav-fab">
+      <button onclick="openModal('modalActions')" aria-label="Дії"><i class="fa-solid fa-plus"></i></button>
+    </div>
+    <div class="nav-item" data-tab="history" onclick="switchTab('history')">
+      <i class="fa-solid fa-clock-rotate-left"></i><span>Історія</span>
+    </div>
+    <div class="nav-item" data-tab="more" onclick="switchTab('more')">
+      <i class="fa-solid fa-bars"></i><span>Ще</span>
+    </div>
+  </nav>
+</div>
+
+<!-- ══ Modal: Action sheet ═══════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalActions">
+  <div class="modal-sheet">
+    <div class="sheet-grabber"></div>
+    <div class="modal-header">
+      <h3>Що зробимо?</h3>
+      <button class="close-modal-btn" onclick="closeModal('modalActions')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="action-sheet-list">
+      <div class="list-row" onclick="closeModal('modalActions'); openModal('modalDeposit')">
+        <div class="lr-icon green"><i class="fa-solid fa-arrow-down"></i></div>
+        <div class="lr-body"><div class="lr-title">Поповнити рахунок</div><div class="lr-sub">Заявка з підтвердженням</div></div>
+        <i class="fa-solid fa-chevron-right lr-chev"></i>
+      </div>
+      <div class="list-row" onclick="closeModal('modalActions'); openModal('modalTransfer')">
+        <div class="lr-icon blue"><i class="fa-solid fa-paper-plane"></i></div>
+        <div class="lr-body"><div class="lr-title">Переказ гравцю</div><div class="lr-sub">За номером картки чи ніком</div></div>
+        <i class="fa-solid fa-chevron-right lr-chev"></i>
+      </div>
+      <div class="list-row" onclick="closeModal('modalActions'); openModal('modalWithdraw')">
+        <div class="lr-icon red"><i class="fa-solid fa-arrow-up"></i></div>
+        <div class="lr-body"><div class="lr-title">Вивести кошти</div><div class="lr-sub">Підпис через Сіа.Підпис</div></div>
+        <i class="fa-solid fa-chevron-right lr-chev"></i>
+      </div>
+      <div class="list-row" onclick="closeModal('modalActions'); openModal('modalJarNew')">
+        <div class="lr-icon amber"><i class="fa-solid fa-piggy-bank"></i></div>
+        <div class="lr-body"><div class="lr-title">Створити банку</div><div class="lr-sub">Накопичення на ціль</div></div>
+        <i class="fa-solid fa-chevron-right lr-chev"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal: Deposit ════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalDeposit">
+  <div class="modal-sheet">
+    <div class="sheet-grabber"></div>
+    <div class="modal-header">
+      <h3>Внесок на рахунок</h3>
+      <button class="close-modal-btn" onclick="closeModal('modalDeposit')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="amount-input-wrap">
+      <input type="number" id="depAmount" class="amount-input" placeholder="0 €" inputmode="decimal">
+    </div>
+    <div class="chips-row">
+      <button class="chip" onclick="setAmount('depAmount',500)">500</button>
+      <button class="chip" onclick="setAmount('depAmount',1000)">1 000</button>
+      <button class="chip" onclick="setAmount('depAmount',5000)">5 000</button>
+      <button class="chip" onclick="setAmount('depAmount',10000)">10 000</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Скріншот транзакції</label>
+      <div class="upload-zone" id="depUploadZone" onclick="document.getElementById('depScreenshot').click()">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <span id="depUploadText">Натисніть, щоб обрати файл (до 1 МБ)</span>
+      </div>
+      <input type="file" id="depScreenshot" accept="image/*" class="hidden" onchange="handleScreenshotSelect(event)">
+      <div class="upload-preview hidden" id="depPreviewBox">
+        <img id="depPreviewImg" src="" alt="">
+      </div>
+      <div class="form-hint">Заявку перевірить модератор НБС. Кошти зарахуються після схвалення.</div>
+    </div>
+
+    <button class="btn-submit-main" id="depSubmitBtn" onclick="submitDepositRequest()">
+      <i class="fa-solid fa-paper-plane"></i> Відправити на модерацію
+    </button>
+  </div>
+</div>
+
+<!-- ══ Modal: Withdraw ═══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalWithdraw">
+  <div class="modal-sheet">
+    <div class="sheet-grabber"></div>
+    <div class="modal-header">
+      <h3>Виведення коштів</h3>
+      <button class="close-modal-btn" onclick="closeModal('modalWithdraw')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="amount-input-wrap">
+      <input type="number" id="witAmount" class="amount-input" placeholder="0 €" inputmode="decimal">
+    </div>
+    <div class="amount-avail">Доступно: <span id="witAvail">0 €</span></div>
+    <div class="chips-row">
+      <button class="chip" onclick="setAmount('witAmount',1000)">1 000</button>
+      <button class="chip" onclick="setAmount('witAmount',5000)">5 000</button>
+      <button class="chip" onclick="setAmountAll('witAmount')">Усе</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Реквізити одержувача</label>
+      <input type="text" id="witTarget" class="form-input" placeholder="Roblox Username або інші реквізити" autocomplete="off">
+    </div>
+
+    <button class="btn-submit-main" id="witSubmitBtn" onclick="redirectToSiYaSignature('withdraw')">
+      <i class="fa-solid fa-signature"></i> Підписати через Сіа.Підпис
+    </button>
+  </div>
+</div>
+
+<!-- ══ Modal: Transfer ═══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalTransfer">
+  <div class="modal-sheet">
+    <div class="sheet-grabber"></div>
+    <div class="modal-header">
+      <h3>Переказ гравцю</h3>
+      <button class="close-modal-btn" onclick="closeModal('modalTransfer')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Нікнейм або номер картки</label>
+      <input type="text" id="trfTarget" class="form-input" placeholder="Нік гравця або 4441 …" autocomplete="off"
+             oninput="onTransferTargetInput(this.value)">
+      <div class="form-hint" id="trfTargetHint">Отримувач має бути зареєстрований у НБС.</div>
+    </div>
+
+    <div class="amount-input-wrap">
+      <input type="number" id="trfAmount" class="amount-input" placeholder="0 €" inputmode="decimal">
+    </div>
+    <div class="amount-avail">Доступно: <span id="trfAvail">0 €</span></div>
+    <div class="chips-row">
+      <button class="chip" onclick="setAmount('trfAmount',100)">100</button>
+      <button class="chip" onclick="setAmount('trfAmount',500)">500</button>
+      <button class="chip" onclick="setAmount('trfAmount',1000)">1 000</button>
+      <button class="chip" onclick="setAmountAll('trfAmount')">Усе</button>
+    </div>
+
+    <button class="btn-submit-main" id="trfSubmitBtn" onclick="redirectToSiYaSignature('transfer')">
+      <i class="fa-solid fa-signature"></i> Підтвердити Сіа.Підписом
+    </button>
+  </div>
+</div>
+
+<!-- ══ Modal: New jar ════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalJarNew">
+  <div class="modal-sheet">
+    <div class="sheet-grabber"></div>
+    <div class="modal-header">
+      <h3>Нова банка</h3>
+      <button class="close-modal-btn" onclick="closeModal('modalJarNew')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Назва</label>
+      <input type="text" id="jarName" class="form-input" placeholder="Наприклад: На авто" maxlength="40" autocomplete="off">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Ціль (необовʼязково)</label>
+      <input type="number" id="jarGoal" class="form-input" placeholder="50000" inputmode="decimal">
+      <div class="form-hint">Без цілі банка працює як безлімітне накопичення.</div>
+    </div>
+
+    <button class="btn-submit-main" id="jarCreateBtn" onclick="createJar()">
+      <i class="fa-solid fa-piggy-bank"></i> Створити
+    </button>
+  </div>
+</div>
+
+<!-- ══ Modal: Jar detail ═════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalJar">
+  <div class="modal-sheet" id="modalJarBody"></div>
+</div>
+
+<!-- ══ Modal: Transaction receipt ════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalTx">
+  <div class="modal-sheet" id="modalTxBody"></div>
+</div>
+
+<!-- ══ Modal: Requisites ═════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalRequisites">
+  <div class="modal-sheet">
+    <div class="sheet-grabber"></div>
+    <div class="modal-header">
+      <h3>Реквізити картки</h3>
+      <button class="close-modal-btn" onclick="closeModal('modalRequisites')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="kv-list">
+      <div class="kv-row"><span class="k">Власник</span><span class="v" id="reqHolder">—</span></div>
+      <div class="kv-row"><span class="k">Номер картки</span><span class="v mono" id="reqNumber">—</span></div>
+      <div class="kv-row"><span class="k">Термін дії</span><span class="v mono" id="reqExpiry">—</span></div>
+      <div class="kv-row"><span class="k">Банк</span><span class="v">НБС · Ukraine RP</span></div>
+    </div>
+
+    <button class="btn-submit-main" onclick="copyRequisites()">
+      <i class="fa-solid fa-copy"></i> Копіювати реквізити
+    </button>
+    <button class="btn-secondary" onclick="copyText(NBS_STATE.cardNumber, 'Номер картки скопійовано')">
+      <i class="fa-regular fa-credit-card"></i> Копіювати лише номер
+    </button>
+  </div>
+</div>
+
+<!-- ══ Modal: Limits ═════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalLimits">
+  <div class="modal-sheet">
+    <div class="sheet-grabber"></div>
+    <div class="modal-header">
+      <h3>Ліміт на операцію</h3>
+      <button class="close-modal-btn" onclick="closeModal('modalLimits')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Максимальна сума одного переказу (€)</label>
+      <input type="number" id="limitInput" class="form-input" placeholder="0 — без ліміту" inputmode="decimal">
+      <div class="form-hint">Ліміт застосовується до переказів і виведення. 0 вимикає обмеження.</div>
+    </div>
+
+    <button class="btn-submit-main" onclick="saveLimit()"><i class="fa-solid fa-check"></i> Зберегти</button>
+  </div>
+</div>
+
+<!-- ══ Modal: Admin ══════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalAdmin">
+  <div class="modal-sheet">
+    <div class="sheet-grabber"></div>
+    <div class="modal-header">
+      <h3>Панель модерації</h3>
+      <button class="close-modal-btn" onclick="closeModal('modalAdmin')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="admin-badge-bar">
+      <span><i class="fa-solid fa-shield"></i> Заявки на поповнення</span>
+      <span id="adminPendingLabel">0 очікує</span>
+    </div>
+
+    <div class="segmented" id="adminFilter" style="margin:0 0 6px">
+      <button class="on" onclick="setAdminFilter('pending', this)">Очікують</button>
+      <button onclick="setAdminFilter('history', this)">Оброблені</button>
+    </div>
+
+    <div id="adminRequestsList"></div>
+  </div>
+</div>
+
+<!-- ══ Lightbox ══════════════════════════════════════════════════════════ -->
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<!-- ══ Toast ═════════════════════════════════════════════════════════════ -->
+<div class="toast-popup" id="toastPopup">
+  <i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Успішно!</span>
+</div>
+
+<script type="module" src="nbu.js"></script>
 
 </body>
 </html>
