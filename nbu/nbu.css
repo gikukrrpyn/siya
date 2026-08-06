@@ -98,7 +98,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   display: none;
   flex-direction: column;
   flex: 1 1 auto;
-  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 16px);
+  padding-bottom: calc(var(--nav-h) + var(--safe-b));
   animation: screenIn 0.28s var(--ease);
 }
 .screen.active { display: flex; }
