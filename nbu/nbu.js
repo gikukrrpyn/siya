@@ -19,6 +19,10 @@ const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 const auth = getAuth(app);
 
+/* Діапазон сум для внеску та виводу (€) */
+const MIN_AMT = 1000;
+const MAX_AMT = 8000;
+
 /* ============================================================================
    Categories — fixed slot order, never cycled. Past slot 6 → "Інше".
    Colors are the validated dark-mode categorical steps (see nbu.css).
@@ -406,22 +410,25 @@ function initFirestoreListeners() {
 }
 
 /* ============================================================================
-   Combined feed: real transactions + own pending/rejected deposit requests
+   Combined feed: real transactions + own pending/rejected deposit/withdraw requests
    ========================================================================== */
 function feed() {
   const items = S.transactions.map(t => ({ ...t, _kind: 'tx' }));
 
   S.myRequests.forEach(r => {
     if (r.status === 'completed') return; // already mirrored as a real transaction
+    const isWithdraw = r.type === 'withdraw';
     items.push({
       id: r.id,
       _kind: 'req',
       userId: r.userId,
-      type: 'deposit',
-      category: 'other',
-      title: 'Поповнення рахунку',
-      sub: r.status === 'rejected' ? 'Відхилено модератором' : 'Очікує перевірки НБС',
-      amount: r.amount || 0,
+      type: isWithdraw ? 'withdraw' : 'deposit',
+      category: isWithdraw ? 'withdraw' : 'other',
+      title: isWithdraw ? 'Виведення коштів' : 'Поповнення рахунку',
+      sub: r.status === 'rejected'
+        ? (isWithdraw ? 'Відхилено · кошти повернуто' : 'Відхилено модератором')
+        : 'Очікує перевірки НБС',
+      amount: isWithdraw ? -r.amount : r.amount,
       status: r.status || 'pending',
       img: r.img || null,
       timestamp: r.timestamp
@@ -916,7 +923,7 @@ window.submitDepositRequest = async function () {
   const amount = parseFloat(document.getElementById('depAmount').value);
 
   if (!(amount > 0)) return fail('Вкажіть суму поповнення');
-  if (amount > 10000000) return fail('Сума завелика');
+  if (amount < MIN_AMT || amount > MAX_AMT) return fail(`Сума має бути від ${money(MIN_AMT)} до ${money(MAX_AMT)}`);
   if (!S.screenshotBase64) return fail('Додайте скріншот транзакції');
 
   busy(btn, true);
@@ -989,7 +996,7 @@ window.onTransferTargetInput = function (v) {
 };
 
 /* ============================================================================
-   Sign & send (withdraw / transfer) via Сіа.Підпис
+   Sign & send (withdraw / transfer) via Сія.Підпис
    ========================================================================== */
 window.redirectToSiYaSignature = async function (actionType) {
   const isWithdraw = actionType === 'withdraw';
@@ -999,6 +1006,7 @@ window.redirectToSiYaSignature = async function (actionType) {
 
   if (S.frozen) return fail('Картку заморожено. Розморозьте її в розділі «Ще»');
   if (!(amount > 0)) return fail('Вкажіть суму операції');
+  if (isWithdraw && (amount < MIN_AMT || amount > MAX_AMT)) return fail(`Сума виводу має бути від ${money(MIN_AMT)} до ${money(MAX_AMT)}`);
   if (S.limit > 0 && amount > S.limit) return fail(`Ліміт на операцію — ${money(S.limit)}`);
   if (amount > available()) {
     return fail(reserved() > 0
@@ -1037,8 +1045,8 @@ window.redirectToSiYaSignature = async function (actionType) {
     fail('Помилка сервера. Спробуйте пізніше');
   } finally {
     busy(btn, false, isWithdraw
-      ? '<i class="fa-solid fa-signature"></i> Підписати через Сіа.Підпис'
-      : '<i class="fa-solid fa-signature"></i> Підтвердити Сіа.Підписом');
+      ? '<i class="fa-solid fa-signature"></i> Підписати через Сія.Підпис'
+      : '<i class="fa-solid fa-signature"></i> Підтвердити Сія.Підписом');
   }
 };
 
@@ -1060,46 +1068,63 @@ async function checkSiYaReturn() {
 
     const { amount, type, target } = t;
 
-    if (type === 'transfer' && target) {
+    if (type === 'withdraw') {
+      // Вивід → створити заявку адміну, резервувати кошти одразу
+      const batch = writeBatch(db);
+      batch.delete(pendingRef);
+      batch.update(doc(db, 'cards', S.user.username), { balanceUC: increment(-amount) });
+      batch.set(doc(collection(db, 'requests')), {
+        userId: S.user.username,
+        type: 'withdraw',
+        amount: amount,
+        target: target || '',
+        status: 'pending',
+        ownerUid: auth.currentUser.uid,
+        timestamp: serverTimestamp(),
+        sig: sig
+      });
+      await batch.commit();
+      showToast('Заявку на вивід відправлено на модерацію');
+      document.getElementById('witAmount').value = '';
+      document.getElementById('witTarget').value = '';
+    } else if (type === 'transfer') {
+      // Переказ → виконати одразу
+      if (!target) throw new Error('Одержувача не вказано');
       const tSnap = await getDoc(doc(db, 'cards', target));
       if (!tSnap.exists()) throw new Error('Картку одержувача не знайдено');
-    }
 
-    const batch = writeBatch(db);
-    batch.delete(pendingRef);
-    batch.update(doc(db, 'cards', S.user.username), { balanceUC: increment(-amount) });
+      const batch = writeBatch(db);
+      batch.delete(pendingRef);
+      batch.update(doc(db, 'cards', S.user.username), { balanceUC: increment(-amount) });
 
-    batch.set(doc(collection(db, 'transactions')), {
-      userId: S.user.username,
-      type,
-      category: type === 'withdraw' ? 'withdraw' : 'transfer',
-      title: type === 'withdraw' ? 'Виведення коштів' : `Переказ · ${target}`,
-      sub: 'Сіа.Підпис ' + String(sig).substring(0, 8),
-      amount: -amount,
-      status: 'completed',
-      timestamp: serverTimestamp()
-    });
+      batch.set(doc(collection(db, 'transactions')), {
+        userId: S.user.username,
+        type: 'transfer',
+        category: 'transfer',
+        title: `Переказ · ${target}`,
+        sub: 'Сія.Підпис ' + String(sig).substring(0, 8),
+        amount: -amount,
+        status: 'completed',
+        timestamp: serverTimestamp()
+      });
 
-    if (type === 'transfer' && target) {
       batch.set(doc(db, 'cards', target), { balanceUC: increment(amount) }, { merge: true });
       batch.set(doc(collection(db, 'transactions')), {
         userId: target,
         type: 'deposit',
         category: 'transfer',
         title: `Переказ від ${S.user.username}`,
-        sub: 'Зарахування · Сіа.Підпис',
+        sub: 'Зарахування · Сія.Підпис',
         amount: amount,
         status: 'completed',
         timestamp: serverTimestamp()
       });
-    }
 
-    await batch.commit();
-    showToast('Транзакція успішна');
-    document.getElementById('witAmount').value = '';
-    document.getElementById('trfAmount').value = '';
-    document.getElementById('witTarget').value = '';
-    document.getElementById('trfTarget').value = '';
+      await batch.commit();
+      showToast('Переказ успішний');
+      document.getElementById('trfAmount').value = '';
+      document.getElementById('trfTarget').value = '';
+    }
   } catch (e) {
     console.error(e);
     fail(e.message || 'Помилка транзакції');
@@ -1379,13 +1404,14 @@ window.loadAdminRequests = function () {
 
   if (!items.length) {
     list.innerHTML = emptyHtml('fa-inbox', pending ? 'Нових заявок немає' : 'Історія порожня',
-      pending ? 'Усі заявки на поповнення оброблено.' : 'Оброблені заявки зʼявляться тут.');
+      pending ? 'Усі заявки оброблено.' : 'Оброблені заявки зʼявляться тут.');
     return;
   }
 
   list.innerHTML = items.map(t => {
     const d = toDate(t.timestamp);
     const done = toDate(t.processedAt);
+    const isWithdraw = t.type === 'withdraw';
     return `
       <div class="admin-req-card" id="req-${esc(t.id)}">
         <div class="admin-req-head">
@@ -1393,10 +1419,15 @@ window.loadAdminRequests = function () {
             <div class="admin-req-user">${esc(t.userId)}</div>
             <div class="admin-req-time">${d ? esc(dfFull.format(d)) : 'зараз'}</div>
           </div>
-          <div class="admin-req-amt">+${esc(money(t.amount || 0))}</div>
+          <div class="admin-req-amt" style="color:${isWithdraw ? 'var(--red)' : 'var(--green)'}">${isWithdraw ? '−' : '+'}${esc(money(t.amount || 0))}</div>
         </div>
 
-        ${t.img ? `<img class="admin-req-img" src="${esc(t.img)}" onclick="showLightbox('${esc(t.img)}')" alt="">` : ''}
+        ${isWithdraw ? `
+          <div class="kv-list" style="margin:12px 0 0 0;">
+            <div class="kv-row"><span class="k">Тип</span><span class="v">Виведення коштів</span></div>
+            <div class="kv-row"><span class="k">Реквізити</span><span class="v">${esc(t.target || '—')}</span></div>
+          </div>`
+        : (t.img ? `<img class="admin-req-img" src="${esc(t.img)}" onclick="showLightbox('${esc(t.img)}')" alt="">` : '')}
 
         ${pending ? `
           <div class="admin-req-actions">
@@ -1424,6 +1455,7 @@ window.approveReq = async function (id) {
 
   lockReqCard(id, true);
   const adminName = S.user.exactAdminName || S.user.username;
+  const isWithdraw = req.type === 'withdraw';
 
   try {
     await updateDoc(doc(db, 'requests', id), {
@@ -1432,21 +1464,40 @@ window.approveReq = async function (id) {
       processedAt: serverTimestamp()
     });
 
-    await updateDoc(doc(db, 'cards', req.userId), { balanceUC: increment(req.amount) });
-
-    await addDoc(collection(db, 'transactions'), {
-      userId: req.userId,
-      type: 'deposit',
-      category: 'other',
-      title: 'Поповнення рахунку',
-      sub: 'Схвалено модератором ' + adminName,
-      amount: req.amount,
-      status: 'completed',
-      timestamp: serverTimestamp()
-    });
-
-    showToast(`Схвалено ${money(req.amount)} для ${req.userId}`);
+    if (isWithdraw) {
+      // Вивід: кошти вже зарезервовано, лише транзакція
+      await addDoc(collection(db, 'transactions'), {
+        userId: req.userId,
+        type: 'withdraw',
+        category: 'withdraw',
+        title: 'Виведення коштів',
+        sub: 'Схвалено модератором ' + adminName,
+        amount: -req.amount,
+        status: 'completed',
+        timestamp: serverTimestamp()
+      });
+      showToast(`Вивід ${money(req.amount)} схвалено для ${req.userId}`);
+    } else {
+      // Депозит: зарахування балансу + транзакція
+      await updateDoc(doc(db, 'cards', req.userId), { balanceUC: increment(req.amount) });
+      await addDoc(collection(db, 'transactions'), {
+        userId: req.userId,
+        type: 'deposit',
+        category: 'other',
+        title: 'Поповнення рахунку',
+        sub: 'Схвалено модератором ' + adminName,
+        amount: req.amount,
+        status: 'completed',
+        timestamp: serverTimestamp()
+      });
+      showToast(`Схвалено ${money(req.amount)} для ${req.userId}`);
+    }
   } catch (e) {
+    console.error(e);
+    lockReqCard(id, false);
+    fail(e.code === 'permission-denied' ? 'Немає прав модератора (config/admins_uids)' : 'Помилка бази даних');
+  }
+};
     console.error(e);
     lockReqCard(id, false);
     fail(e.code === 'permission-denied' ? 'Немає прав модератора (config/admins_uids)' : 'Помилка бази даних');
@@ -1454,15 +1505,25 @@ window.approveReq = async function (id) {
 };
 
 window.rejectReq = async function (id) {
+  const req = S.requests.find(r => r.id === id);
   lockReqCard(id, true);
   const adminName = S.user.exactAdminName || S.user.username;
+  const isWithdraw = req && req.type === 'withdraw';
+
   try {
     await updateDoc(doc(db, 'requests', id), {
       status: 'rejected',
       processedBy: adminName,
       processedAt: serverTimestamp()
     });
-    showToast('Заявку відхилено');
+
+    if (isWithdraw && req) {
+      // Вивід відхилено → повернути зарезервовані кошти
+      await updateDoc(doc(db, 'cards', req.userId), { balanceUC: increment(req.amount) });
+      showToast(`Заявку відхилено, ${money(req.amount)} повернуто ${req.userId}`);
+    } else {
+      showToast('Заявку відхилено');
+    }
   } catch (e) {
     console.error(e);
     lockReqCard(id, false);
