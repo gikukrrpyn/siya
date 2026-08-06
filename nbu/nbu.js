@@ -1498,11 +1498,6 @@ window.approveReq = async function (id) {
     fail(e.code === 'permission-denied' ? 'Немає прав модератора (config/admins_uids)' : 'Помилка бази даних');
   }
 };
-    console.error(e);
-    lockReqCard(id, false);
-    fail(e.code === 'permission-denied' ? 'Немає прав модератора (config/admins_uids)' : 'Помилка бази даних');
-  }
-};
 
 window.rejectReq = async function (id) {
   const req = S.requests.find(r => r.id === id);
