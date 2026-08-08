@@ -1459,16 +1459,29 @@ window.checkEditPermissions = function() {
   function initials(str) { return (str || '?')[0].toUpperCase(); }
   function buildItems() {
     const items = [];
+    const isXpRole = (s) => { if (s == null) return false; const t = String(s).replace(/[\s\u00A0]/g, ''); return /^\d+$/.test(t); };
     if (typeof players !== 'undefined') {
       Object.entries(players).forEach(([frac, arr]) => {
         if (Array.isArray(arr)) {
           arr.forEach(p => {
             if (p && p.username) {
+              let lbl = p.role || '';
+              let ext = null;
+              if (frac === 'НПС') {
+                if (typeof window.getPoliceRank === 'function' && lbl) {
+                  lbl = window.getPoliceRank(lbl);
+                } else if (isXpRole(lbl)) {
+                  lbl = 'Рядовий';
+                }
+                if (isXpRole(p.role)) {
+                  ext = 'XP: ' + p.role;
+                }
+              }
               items.push({
                 nick: p.username, avatar: p.avatar || null,
-                label: p.role || '', sublabel: frac || '',
+                label: lbl, sublabel: frac || '',
                 tag: frac || '', source: 'players',
-                telegram: p.telegram || null, extra: null, cans: null,
+                telegram: p.telegram || null, extra: ext, cans: null,
                 suspended: p.suspended || null
               });
             }
@@ -1955,11 +1968,9 @@ window.checkEditPermissions = function() {
       username: document.getElementById('role-username').value.trim(),
       role: document.getElementById('role-role').value.trim(),
       telegram: document.getElementById('role-telegram').value.trim(),
-      avatar: document.getElementById('role-avatar').value.trim()
+      avatar: document.getElementById('role-avatar').value.trim(),
+      suspended: document.getElementById('role-suspended').value.trim()
     };
-    
-    const susp = document.getElementById('role-suspended').value.trim();
-    if (susp) data.suspended = susp;
     
     if (!data.username) return alert('Нікнейм обов\'язковий!');
     
@@ -2243,18 +2254,12 @@ window.checkEditPermissions = function() {
     
     data.username = u;
     
-    const r = document.getElementById('lic-role').value.trim();
-    if (r) data.role = r;
-    const s = document.getElementById('lic-status').value.trim();
-    if (s) data.status = s;
-    const e = document.getElementById('lic-expiry').value.trim();
-    if (e) data.expiry = e;
-    const c = document.getElementById('lic-cans').value.trim();
-    if (c) data.cans = c;
-    const t = document.getElementById('lic-telegram').value.trim();
-    if (t) data.telegram = t;
-    const susp = document.getElementById('lic-suspended').value.trim();
-    if (susp) data.suspended = susp;
+    data.role = document.getElementById('lic-role').value.trim();
+    data.status = document.getElementById('lic-status').value.trim();
+    data.expiry = document.getElementById('lic-expiry').value.trim();
+    data.cans = document.getElementById('lic-cans').value.trim();
+    data.telegram = document.getElementById('lic-telegram').value.trim();
+    data.suspended = document.getElementById('lic-suspended').value.trim();
     
     const tg = window.Telegram && window.Telegram.WebApp;
     const initData = tg ? tg.initData : '';
