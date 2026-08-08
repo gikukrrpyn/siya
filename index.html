@@ -802,6 +802,8 @@ base-uri 'none';">
         <button class="cat-chip" onclick="setChip(this)">НПС</button>
         <button class="cat-chip" onclick="setChip(this)">СБС</button>
         <button class="cat-chip" onclick="setChip(this)">Суд</button>
+        <button class="cat-chip" onclick="setChip(this)">МВС</button>
+        <button class="cat-chip" onclick="setChip(this)">Прокуратура</button>
         <button class="cat-chip" onclick="setChip(this)">Адм</button>
         <button class="cat-chip" onclick="setChip(this)">ДБР</button>
         <button class="cat-chip" onclick="setChip(this)">Зброя</button>
@@ -1398,7 +1400,7 @@ window.checkEditPermissions = function() {
     const callerId = String(tgUser.id || "");
     const callerTgUsername = String(tgUser.username || "").toLowerCase();
 
-    const PRIORITY = ['Адміністрація', 'Суд', 'Мерія', 'СБС', 'ДБР', 'ДАРШ', 'НПС', 'Інше'];
+    const PRIORITY = ['Адміністрація', 'Суд', 'Прокуратура', 'МВС', 'Мерія', 'СБС', 'ДБР', 'ДАРШ', 'НПС', 'Інше'];
     let myFraction = null;
     let myRole = "";
     let foundMe = false;
@@ -1440,7 +1442,7 @@ window.checkEditPermissions = function() {
     if (!foundMe) return {isAdmin:false, isHead:false, myFraction:null};
 
     const isAdmin = myFraction === "Адміністрація";
-    const isHead = /директор|начальник|голова|керівник|заступник|генерал|мер/i.test(myRole);
+    const isHead = /директор|начальник|голова|керівник|заступник|генерал|мер|міністр|прокурор/i.test(myRole);
 
     return { isAdmin, isHead, myFraction };
 };
@@ -1497,7 +1499,7 @@ window.checkEditPermissions = function() {
     }
     return items;
   }
-  const chipFilter = { 'Всі': null, 'НПС': ['Поліція', 'police', 'НПС'], 'СБС': ['СБС', 'sbs'], 'Суд': ['Суд'], 'Адм': ['Адміністрація'], 'ДБР': ['ДБР', 'dbr'], 'Мерія': ['Мерія'], 'ДАРШ': ['ДАРШ'], 'Зброя': ['weapon'], 'Адвокат': ['advocat'], 'Таксі': ['taxi'], 'Преса': ['presslicense'], 'ЗМІ': ['press'], 'Бізнес': ['business'], 'ОЗУ': ['mafia'], 'Інше': ['Інше'] };
+  const chipFilter = { 'Всі': null, 'НПС': ['Поліція', 'police', 'НПС'], 'СБС': ['СБС', 'sbs'], 'Суд': ['Суд'], 'МВС': ['МВС'], 'Прокуратура': ['Прокуратура'], 'Адм': ['Адміністрація'], 'ДБР': ['ДБР', 'dbr'], 'Мерія': ['Мерія'], 'ДАРШ': ['ДАРШ'], 'Зброя': ['weapon'], 'Адвокат': ['advocat'], 'Таксі': ['taxi'], 'Преса': ['presslicense'], 'ЗМІ': ['press'], 'Бізнес': ['business'], 'ОЗУ': ['mafia'], 'Інше': ['Інше'] };
   let activeTags = null, searchQuery = '', allItems = [];
   function statusColor(item) {
     if (item.cans) return '#ff4d4d';
@@ -1517,7 +1519,7 @@ window.checkEditPermissions = function() {
     const perms = typeof checkEditPermissions === 'function' ? checkEditPermissions() : {isAdmin:false, isHead:false, myFraction:null};
     
     if (activeTags && activeTags.length >= 1) {
-      const playerTagsInActive = activeTags.filter(t => ['НПС', 'СБС', 'Суд', 'Адміністрація', 'ДБР', 'Мерія', 'ДАРШ', 'Інше'].includes(t));
+      const playerTagsInActive = activeTags.filter(t => ['НПС', 'СБС', 'Суд', 'МВС', 'Прокуратура', 'Адміністрація', 'ДБР', 'Мерія', 'ДАРШ', 'Інше'].includes(t));
       const licTagsInActive = activeTags.filter(t => ['weapon', 'advocat', 'taxi', 'presslicense', 'press', 'business', 'mafia', 'police', 'sbs', 'dbr'].includes(t));
 
       playerTagsInActive.forEach(pTag => {
@@ -1534,7 +1536,7 @@ window.checkEditPermissions = function() {
 
       licTagsInActive.forEach(lTag => {
         let canAddLic = false;
-        if (perms.isAdmin || (perms.myFraction === 'Суд' && lTag !== 'mafia' && lTag !== 'ozu')) canAddLic = true;
+        if (perms.isAdmin || (['Суд', 'МВС', 'Прокуратура'].includes(perms.myFraction) && lTag !== 'mafia' && lTag !== 'ozu')) canAddLic = true;
         else if (perms.isHead) {
           if (lTag === 'weapon' && (perms.myFraction === 'ДБР' || perms.myFraction === 'СБС')) canAddLic = true;
           if (lTag === 'police' && perms.myFraction === 'НПС') canAddLic = true;
@@ -1589,9 +1591,9 @@ window.checkEditPermissions = function() {
       
       let canEdit = false;
       if (isPlayersSource) {
-        canEdit = (perms.isAdmin || (perms.isHead && perms.myFraction === item.tag) || (perms.myFraction === 'Суд' && ['НПС', 'ДБР', 'СБС'].includes(item.tag)));
+        canEdit = (perms.isAdmin || (perms.isHead && perms.myFraction === item.tag) || (['Суд', 'МВС', 'Прокуратура'].includes(perms.myFraction) && ['НПС', 'ДБР', 'СБС'].includes(item.tag)));
       } else if (isLicensesSource) {
-        if (perms.isAdmin || (perms.myFraction === 'Суд' && item.tag !== 'mafia' && item.tag !== 'ozu')) canEdit = true;
+        if (perms.isAdmin || (['Суд', 'МВС', 'Прокуратура'].includes(perms.myFraction) && item.tag !== 'mafia' && item.tag !== 'ozu')) canEdit = true;
         else if (perms.isHead) {
           if (item.tag === 'weapon' && (perms.myFraction === 'ДБР' || perms.myFraction === 'СБС')) canEdit = true;
           if (item.tag === 'police' && perms.myFraction === 'НПС') canEdit = true;
@@ -2024,7 +2026,7 @@ window.checkEditPermissions = function() {
 
   async function deletePlayerRole(fraction, username) {
     const perms = typeof checkEditPermissions === 'function' ? checkEditPermissions() : {isAdmin:false, isHead:false, myFraction:null};
-    if (perms.myFraction === 'Суд' && !perms.isAdmin) {
+    if (['Суд', 'МВС', 'Прокуратура'].includes(perms.myFraction) && !perms.isAdmin) {
       alert('Суд не має прав на повне видалення. Використовуйте відсторонення.');
       return;
     }
@@ -2299,7 +2301,7 @@ window.checkEditPermissions = function() {
 
   async function deleteLicense(category, username) {
     const perms = typeof checkEditPermissions === 'function' ? checkEditPermissions() : {isAdmin:false, isHead:false, myFraction:null};
-    if (perms.myFraction === 'Суд' && !perms.isAdmin) {
+    if (['Суд', 'МВС', 'Прокуратура'].includes(perms.myFraction) && !perms.isAdmin) {
       alert('Суд не має прав на повне скасування/видалення. Використовуйте відсторонення/призупинення.');
       return;
     }
@@ -2350,7 +2352,7 @@ window.checkEditPermissions = function() {
     const P = typeof players !== 'undefined' ? players : (window.state && window.state.players);
     if (!P) return { isAdmin: false, isHead: false, myFraction: null };
 
-    const PRIORITY = ['Адміністрація', 'Суд', 'Мерія', 'СБС', 'ДБР', 'ДАРШ', 'НПС', 'Інше'];
+    const PRIORITY = ['Адміністрація', 'Суд', 'Прокуратура', 'МВС', 'Мерія', 'СБС', 'ДБР', 'ДАРШ', 'НПС', 'Інше'];
     let myFraction = "";
     let myRole = "";
     let foundMe = false;
@@ -2379,7 +2381,7 @@ window.checkEditPermissions = function() {
     }
     
     const isAdmin = myFraction === "Адміністрація";
-    const isHead = /директор|начальник|голова|керівник|заступник|мер|суддя/i.test(myRole);
+    const isHead = /директор|начальник|голова|керівник|заступник|мер|суддя|міністр|прокурор|генерал/i.test(myRole);
     
     return { isAdmin, isHead, myFraction };
   }
