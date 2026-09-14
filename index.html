@@ -225,25 +225,14 @@ base-uri 'none';">
 .update-card{
   position:relative;
   overflow:hidden;
-  background:#fff;
-  border-radius:26px;
-  padding:18px;
-  border:1px solid rgba(0,0,0,.06);
-  box-shadow:
-    0 2px 10px rgba(0,0,0,.03),
-    0 12px 40px rgba(0,0,0,.05);
-  transform:translateZ(0);
+  background:#f4f4f4;
+  border-radius:18px;
+  padding:16px;
+  border:0;
 }
 
 .update-card::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(circle at top right,
-    rgba(255,255,255,.7),
-    transparent 40%);
-  pointer-events:none;
+  display:none;
 }
 
 .update-top{
@@ -254,25 +243,25 @@ base-uri 'none';">
 }
 
 .update-badge{
-  height:24px;
-  padding:0 10px;
-  border-radius:999px;
-  background:#000;
-  color:#fff;
+  height:auto;
+  padding:0;
+  border-radius:0;
+  background:transparent;
+  color:#737373;
   font-size:11px;
-  font-weight:800;
-  letter-spacing:.5px;
+  font-weight:700;
+  letter-spacing:.35px;
   display:flex;
   align-items:center;
 }
 
 .update-badge.dark{
-  background:#171717;
+  background:transparent;
 }
 
 .update-badge.gray{
-  background:#e5e5e5;
-  color:#111;
+  background:transparent;
+  color:#737373;
 }
 
 .update-date{
@@ -292,7 +281,7 @@ base-uri 'none';">
 
 .update-text{
   font-size:14px;
-  line-height:1.65;
+  line-height:1.5;
   color:#666;
 }
 
@@ -330,7 +319,7 @@ base-uri 'none';">
 }
 
 .update-card:first-child{
-  animation:updatesFloat 5s ease-in-out infinite;
+  animation:none;
 }
   .apple-pay-success {
     display: flex;
@@ -1249,8 +1238,7 @@ base-uri 'none';">
     "js/roblox/gen.js",
     "js/player/fines.js",
     "js/player/contracts.js",
-    "js/main/main.js",
-    "js/other/chat.js"
+    "js/main/main.js"
   ];
   a.forEach(function(s){
     var t=document.createElement("script");
