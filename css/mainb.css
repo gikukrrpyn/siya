@@ -1,11 +1,24 @@
 body.viewer-mode #splash { display: none !important; }
+body.viewer-mode #onboarding-overlay { display: none !important; }
 body.viewer-mode .bottom-nav { display: none !important; }
 body.viewer-mode .screen:not(#screen-docpage) { display: none !important; }
 body.viewer-mode #screen-docpage .header-back { display: none !important; }
 body.viewer-mode #screen-docpage { padding-bottom: 24px; }
+body.viewer-mode #app { max-width: 760px; margin-inline: auto; box-shadow: 0 10px 40px #00000010; }
+#viewer-loading {
+  position: fixed; inset: 0; z-index: 9998; display: flex;
+  flex-direction: column; justify-content: center; align-items: center; gap: 18px;
+  padding: 24px; box-sizing: border-box; background: var(--white, #fff);
+  color: var(--black, #111); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+#viewer-loading .viewer-loading-mark { font-size: 25px; font-weight: 800; letter-spacing: -.05em; }
+#viewer-loading .viewer-loading-title { font-size: 14px; color: var(--gray-400, #777); }
+#viewer-loading .viewer-loading-bar { width: 148px; height: 3px; border-radius: 4px; background: var(--gray-200, #ddd); overflow: hidden; }
+#viewer-loading .viewer-loading-bar::before { content: ""; display: block; width: 42%; height: 100%; background: var(--black, #111); border-radius: inherit; animation: viewer-load 1.1s ease-in-out infinite alternate; }
+@keyframes viewer-load { from { transform: translateX(-100%); } to { transform: translateX(350%); } }
 #viewer-error {
   position: fixed; inset: 0; display: flex; align-items: center;
-  justify-content: center; background: #fff; z-index: 9999;
+  justify-content: center; background: var(--white, #fff); z-index: 9999;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   padding: 24px; text-align: center;
 }
@@ -16,10 +29,10 @@ body.viewer-mode #screen-docpage { padding-bottom: 24px; }
   font-size: 56px; line-height: 1; margin-bottom: 16px;
 }
 #viewer-error .viewer-error-title {
-  font-size: 18px; font-weight: 700; color: #111; margin-bottom: 8px;
+  font-size: 18px; font-weight: 700; color: var(--black, #111); margin-bottom: 8px;
 }
 #viewer-error .viewer-error-sub {
-  font-size: 14px; color: #888;
+  font-size: 14px; color: var(--gray-400, #888);
 }
 .license-row .license-row-body {
   flex: 1;
@@ -27,10 +40,11 @@ body.viewer-mode #screen-docpage { padding-bottom: 24px; }
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 2px 0;
+  padding: 0;
 }
+.license-row { min-height: 90px; }
 .license-row .license-row-extra {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--gray-400);
   line-height: 1.35;
   white-space: pre-line;
@@ -38,7 +52,7 @@ body.viewer-mode #screen-docpage { padding-bottom: 24px; }
 .license-row .license-row-code {
   font-size: 13px;
   color: var(--gray-400);
-  margin-top: 2px;
+  margin-top: 1px;
 }
 .license-row .license-row-code span {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
@@ -517,25 +531,46 @@ body.theme-dark textarea::placeholder { color: #555; }
 }
 body.theme-dark .services-cats::-webkit-scrollbar-thumb { background: #444; }
 body.theme-dark .services-cats::-webkit-scrollbar-track { background: #0e0e0e; }
+
+/* Use the platform scroll physics and safe areas for the app shell. */
+.siya-property-image { display: block; width: calc(100% - 32px); max-height: 320px; object-fit: cover; margin: 16px auto; border-radius: 16px; }
+html { -webkit-tap-highlight-color: transparent; }
+.scroll-area, .ob-terms-body {
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+button, a, [role="button"], .nav-item { touch-action: manipulation; }
+button, .nav-item { -webkit-user-select: none; user-select: none; }
+@media (pointer: coarse) {
+  input, textarea, select { font-size: max(16px, 1rem); }
+  .bottom-nav { padding-bottom: env(safe-area-inset-bottom); height: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
+  .scroll-area { padding-bottom: env(safe-area-inset-bottom); }
+  .services-cats::-webkit-scrollbar { display: none; }
+  .services-cats { scrollbar-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .anim-left, .anim-down, .animate-in { animation: none !important; transition: none !important; }
+}
 body.theme-dark .update-card {
   background: #1a1a1a;
-  border-color: #262626;
-  box-shadow: var(--shadow-xl);
+  border-color: transparent;
+  box-shadow: none;
 }
 body.theme-dark .update-card::before {
   background: radial-gradient(circle at top right, rgba(255,255,255,0.05), transparent 40%);
 }
 body.theme-dark .update-badge {
-  background: #ededed;
-  color: #0e0e0e;
+  background: transparent;
+  color: #999;
 }
 body.theme-dark .update-badge.dark {
-  background: #262626;
-  color: #ededed;
+  background: transparent;
+  color: #999;
 }
 body.theme-dark .update-badge.gray {
-  background: #333;
-  color: #ededed;
+  background: transparent;
+  color: #999;
 }
 body.theme-dark .update-date {
   color: #888;
@@ -592,6 +627,245 @@ body.theme-dark .btn-danger { background: rgba(255, 69, 58, 0.12); color: #ff453
 
 @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modalPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+body.theme-dark #onboarding-overlay{
+  background:#0e0e0e;
+  color:#ededed;
+}
+
+body.theme-dark #ob-splash{
+  background:#0e0e0e;
+}
+
+body.theme-dark .ob-terms-tag{
+  background:#1a1a1a;
+  color:#aaa;
+}
+
+body.theme-dark .ob-terms-title,
+body.theme-dark .ob-section-title,
+body.theme-dark .ob-feat-title,
+body.theme-dark .ob-login-title{
+  color:#ededed;
+}
+
+body.theme-dark .ob-terms-meta,
+body.theme-dark .ob-terms-text,
+body.theme-dark .ob-terms-ul li,
+body.theme-dark .ob-login-sub,
+body.theme-dark .ob-feat-desc,
+body.theme-dark .ob-btn-note{
+  color:#999;
+}
+
+body.theme-dark .ob-divider{
+  background:#ededed;
+}
+
+body.theme-dark .ob-highlight{
+  background:#1a1a1a;
+  border-left-color:#ededed;
+}
+
+body.theme-dark .ob-highlight p{
+  color:#ededed;
+}
+
+body.theme-dark .ob-terms-text a,
+body.theme-dark .ob-agree-label a{
+  color:#ededed;
+}
+
+body.theme-dark .ob-bottom{
+  background:#0e0e0e;
+  box-shadow:0 -1px 0 #1f1f1f;
+}
+
+body.theme-dark .ob-checkbox{
+  border-color:#3a3a3a;
+  background:#0e0e0e;
+}
+
+body.theme-dark .ob-checkbox.checked{
+  background:#ededed;
+  border-color:#ededed;
+}
+
+body.theme-dark .ob-checkbox.checked svg{
+  stroke:#0e0e0e;
+}
+
+body.theme-dark .ob-agree-label{
+  color:#aaa;
+}
+
+body.theme-dark .ob-btn-primary{
+  background:#ededed;
+  color:#0e0e0e;
+}
+
+body.theme-dark .ob-btn-ghost{
+  background:#1a1a1a;
+  color:#ededed;
+}
+
+body.theme-dark .ob-btn-ghost:active{
+  background:#262626;
+}
+
+body.theme-dark .ob-feat-row{
+  background:#1a1a1a;
+}
+
+body.theme-dark .ob-feat-dot{
+  background:#ededed;
+}
+
+body.theme-dark .ob-login-hero::before,
+body.theme-dark .ob-login-hero::after{
+  border-color:#262626;
+}
+
+body.theme-dark .modal-overlay{
+  background:rgba(0,0,0,.72);
+}
+
+body.theme-dark .modal-sheet{
+  background:#141414;
+  color:#ededed;
+  border-top:1px solid #262626;
+}
+
+body.theme-dark .modal-handle{
+  background:#333;
+}
+
+body.theme-dark .modal-title{
+  color:#ededed;
+}
+
+body.theme-dark .modal-subtitle{
+  color:#999;
+}
+
+body.theme-dark .modal-timer{
+  color:#999;
+}
+
+body.theme-dark .modal-timer span{
+  color:#ededed;
+}
+
+body.theme-dark .toast{
+  background:#1a1a1a;
+  color:#ededed;
+  border:1px solid #262626;
+}
+
+body.theme-dark .services-list .service-row{
+  border-bottom-color:#262626;
+}
+
+body.theme-dark .service-row-icon{
+  background:#1a1a1a;
+}
+
+body.theme-dark .search-icon{
+  color:#777;
+}
+
+body.theme-dark .cat-chip{
+  background:#1a1a1a;
+  color:#aaa;
+}
+
+body.theme-dark .cat-chip.active{
+  background:#ededed;
+  color:#0e0e0e;
+}
+
+body.theme-dark .bg-btn { background: #333 !important; color: #fff !important; }
+body.theme-dark .bg-input { background: rgba(255,255,255,0.1) !important; color: #fff !important; }
+
+body.has-custom-bg,
+body.has-custom-bg #app,
+body.has-custom-bg .screen,
+body.has-custom-bg .scroll-area {
+    background: transparent !important;
+}
+
+/* Profile: compact, flat layout matching the document-card visual language. */
+#screen-profile > .header {
+  display: none;
+}
+
+#screen-profile .scroll-area {
+  padding-bottom: 20px;
+}
+
+#screen-profile .profile-hero {
+  min-height: 122px;
+}
+
+#screen-profile .profile-avatar {
+  background: var(--gray-100);
+  color: var(--black);
+  font-size: 20px;
+  font-weight: 700;
+  cursor: default;
+}
+
+#screen-profile .profile-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#screen-profile .profile-info {
+  min-width: 0;
+}
+
+#screen-profile .profile-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#screen-profile .profile-verified {
+  margin-top: 5px;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+#screen-profile .profile-rows {
+  box-shadow: none;
+}
+
+#screen-profile .profile-row-icon {
+  color: var(--black);
+}
+
+#screen-profile .license-row {
+  align-items: center !important;
+}
+
+#screen-profile .profile-Oauth,
+#screen-profile .profile-logout {
+  box-shadow: none;
+}
+
+body.theme-dark #screen-profile .profile-id {
+  color: #888;
+}
+
+body.theme-dark #screen-profile .profile-avatar,
+body.theme-dark #screen-profile .profile-row-icon {
+  background: #262626;
+  color: #ededed;
+}
+
+/* Chat styles retained from the published app. */
 #chat-fab{position:fixed;right:18px;bottom:calc(88px + env(safe-area-inset-bottom, 0px));width:54px;height:54px;border:none;border-radius:50%;background:var(--accent,#111);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:900;box-shadow:var(--shadow-lg);transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
 #chat-fab:hover{transform:translateY(-2px) scale(1.04)}
 #chat-fab:active{transform:scale(var(--press-sm))}
@@ -1405,3 +1679,4 @@ body.has-custom-bg .scroll-area {
 }
 
 .chat-header-av img, .chat-modal-av img, .chat-avatar img, .chat-av img { border-radius: 50%; }
+body.viewer-mode #chat-fab, body.viewer-mode #chat-overlay { display: none !important; }
