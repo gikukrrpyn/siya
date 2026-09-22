@@ -4,22 +4,25 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="
 default-src 'self';
-img-src 'self' https: data: blob: https://uarpeh.xyz https://*.ukrainerpeh.com https://*.uarpeh.xyz https://res.cloudinary.com;
+img-src 'self' https: data: blob: https://ukrainerpeh.com https://*.ukrainerpeh.com https://uarpeh.xyz https://*.uarpeh.xyz https://res.cloudinary.com;
 media-src 'self' blob: https://res.cloudinary.com;
-style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://uarpeh.xyz https://*.ukrainerpeh.com https://*.uarpeh.xyz;
-font-src https://fonts.gstatic.com https://uarpeh.xyz https://*.ukrainerpeh.com https://*.uarpeh.xyz;
-script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net https://uarpeh.xyz https://*.ukrainerpeh.com https://*.uarpeh.xyz https://www.gstatic.com https://cdnjs.cloudflare.com;
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com https://uarpeh.xyz https://*.uarpeh.xyz;
+font-src https://fonts.gstatic.com https://ukrainerpeh.com https://*.ukrainerpeh.com https://uarpeh.xyz https://*.uarpeh.xyz;
+script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net https://ukrainerpeh.com https://*.ukrainerpeh.com https://uarpeh.xyz https://*.uarpeh.xyz https://www.gstatic.com https://cdnjs.cloudflare.com;
 connect-src 'self' https://cdnjs.cloudflare.com https://xqcgezcoywcnrmigjdyi.supabase.co https://api.allorigins.win https://apis.roblox.com https://thumbnails.roblox.com https://firestore.googleapis.com https://firebase.googleapis.com https://*.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://ukrainerpeh.com https://*.ukrainerpeh.com https://uarpeh.xyz https://*.uarpeh.xyz https://www.gstatic.com https://api.imgbb.com https://api.cloudinary.com;
 object-src 'none';
 base-uri 'none';">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
 <title>СіЯ</title> 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://uarpeh.xyz/players.js"></script>
 <script src="https://uarpeh.xyz/licenses.js"></script>
+<script src="https://uarpeh.xyz/properties.js"></script>
+<script src="https://uarpeh.xyz/roblox-avatars.js"></script>
 <link rel="stylesheet" href="css/main.css">
-<link rel="stylesheet" href="css/mainb.css">
+<link rel="stylesheet" href="css/mainb.css?v=20260923e">
 <style>
 
   html, body {
@@ -225,25 +228,14 @@ base-uri 'none';">
 .update-card{
   position:relative;
   overflow:hidden;
-  background:#fff;
-  border-radius:26px;
-  padding:18px;
-  border:1px solid rgba(0,0,0,.06);
-  box-shadow:
-    0 2px 10px rgba(0,0,0,.03),
-    0 12px 40px rgba(0,0,0,.05);
-  transform:translateZ(0);
+  background:#f4f4f4;
+  border-radius:18px;
+  padding:16px;
+  border:0;
 }
 
 .update-card::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(circle at top right,
-    rgba(255,255,255,.7),
-    transparent 40%);
-  pointer-events:none;
+  display:none;
 }
 
 .update-top{
@@ -254,25 +246,25 @@ base-uri 'none';">
 }
 
 .update-badge{
-  height:24px;
-  padding:0 10px;
-  border-radius:999px;
-  background:#000;
-  color:#fff;
+  height:auto;
+  padding:0;
+  border-radius:0;
+  background:transparent;
+  color:#737373;
   font-size:11px;
-  font-weight:800;
-  letter-spacing:.5px;
+  font-weight:700;
+  letter-spacing:.35px;
   display:flex;
   align-items:center;
 }
 
 .update-badge.dark{
-  background:#171717;
+  background:transparent;
 }
 
 .update-badge.gray{
-  background:#e5e5e5;
-  color:#111;
+  background:transparent;
+  color:#737373;
 }
 
 .update-date{
@@ -292,7 +284,7 @@ base-uri 'none';">
 
 .update-text{
   font-size:14px;
-  line-height:1.65;
+  line-height:1.5;
   color:#666;
 }
 
@@ -330,7 +322,7 @@ base-uri 'none';">
 }
 
 .update-card:first-child{
-  animation:updatesFloat 5s ease-in-out infinite;
+  animation:none;
 }
   .apple-pay-success {
     display: flex;
@@ -1243,8 +1235,29 @@ base-uri 'none';">
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script type="module" src="js/firebase/firebase.js?v=1784483208272"></script>
 <script>
+window.siyaViewerParams = function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('doc')) return params;
+  var hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  var tg = window.Telegram && window.Telegram.WebApp;
+  var start = params.get('tgWebAppStartParam') || hashParams.get('tgWebAppStartParam') ||
+    (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || params.get('startapp') || '';
+  if (!/^d_[A-Za-z0-9_-]{1,512}$/.test(start)) return params;
+  try {
+    var encoded = start.slice(2).replace(/-/g, '+').replace(/_/g, '/');
+    var binary = atob(encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '='));
+    var data = JSON.parse(new TextDecoder().decode(Uint8Array.from(binary, function(c) { return c.charCodeAt(0); })));
+    if (/^[a-z][a-z0-9_-]{0,48}$/i.test(data.doc) && /^[A-Za-z0-9_]{3,20}$/.test(data.u)) {
+      params.set('doc', data.doc);
+      params.set('u', data.u);
+    }
+  } catch (e) { }
+  return params;
+};
+</script>
+<script>
 (function(){
-  var v=Date.now();
+    var v="20260923e";
   var a=[
     "js/roblox/gen.js",
     "js/player/fines.js",
@@ -1276,6 +1289,7 @@ base-uri 'none';">
 
   function isOnboarded() {
     if (window.location.search.indexOf('code=') !== -1) return true;
+    if (window.siyaViewerParams().has('doc')) return true;
     return localStorage.getItem(ONBOARD_KEY) === '1';
   }
 
