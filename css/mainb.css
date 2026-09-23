@@ -532,7 +532,6 @@ body.theme-dark textarea::placeholder { color: #555; }
 body.theme-dark .services-cats::-webkit-scrollbar-thumb { background: #444; }
 body.theme-dark .services-cats::-webkit-scrollbar-track { background: #0e0e0e; }
 
-/* Use the platform scroll physics and safe areas for the app shell. */
 .siya-property-image { display: block; width: calc(100% - 32px); max-height: 320px; object-fit: cover; margin: 16px auto; border-radius: 16px; }
 html { -webkit-tap-highlight-color: transparent; }
 .scroll-area, .ob-terms-body {
@@ -793,7 +792,6 @@ body.has-custom-bg .scroll-area {
     background: transparent !important;
 }
 
-/* Profile: compact, flat layout matching the document-card visual language. */
 #screen-profile > .header {
   display: none;
 }
@@ -865,7 +863,6 @@ body.theme-dark #screen-profile .profile-row-icon {
   color: #ededed;
 }
 
-/* Chat styles retained from the published app. */
 #chat-fab{position:fixed;right:18px;bottom:calc(88px + env(safe-area-inset-bottom, 0px));width:54px;height:54px;border:none;border-radius:50%;background:var(--accent,#111);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:900;box-shadow:var(--shadow-lg);transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
 #chat-fab:hover{transform:translateY(-2px) scale(1.04)}
 #chat-fab:active{transform:scale(var(--press-sm))}
